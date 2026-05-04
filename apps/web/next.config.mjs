@@ -1,3 +1,11 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const require = createRequire(import.meta.url)
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -7,6 +15,13 @@ const nextConfig = {
     // Limit worker processes — prevents EAGAIN on shared hosting
     workerThreads: false,
     cpus: 1,
+    // Copy Prisma engine binary from monorepo root into build traces
+    outputFileTracingRoot: path.join(__dirname, '../../'),
+    outputFileTracingIncludes: {
+      '/api/**': [
+        './node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/*.node',
+      ],
+    },
   },
 
   images: {
