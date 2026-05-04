@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@aumveda/db'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { supabase, supabaseConfigured } from '@/lib/supabase'
+import { supabaseAdmin, supabaseAdminConfigured } from '@/lib/supabase'
 
 const schema = z.object({
   name: z.string().min(1).max(100),
@@ -19,21 +19,22 @@ export async function POST(req: NextRequest) {
 
   const { name, email, password } = parsed.data
 
-  const existing = await prisma.user.findUnique({ where: { email } })
-  if (existing) {
-    return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 })
-  }
-
   try {
-    if (!supabaseConfigured) {
+    const existing = await prisma.user.findUnique({ where: { email } })
+    if (existing) {
+      return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 })
+    }
+
+    if (!supabaseAdminConfigured) {
       return NextResponse.json({ error: 'Auth service is not configured. Please contact support.' }, { status: 503 })
     }
 
     // Create user in Supabase Auth
     console.log('Creating Supabase user for:', email)
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
+      email_confirm: true,
     })
 
     if (authError) {

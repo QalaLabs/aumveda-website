@@ -39,7 +39,7 @@ const nextConfig = {
               "img-src 'self' data: blob: *.r2.cloudflarestorage.com assets.aumveda.com lh3.googleusercontent.com images.unsplash.com *.unsplash.com",
               "media-src 'self' *.r2.cloudflarestorage.com assets.aumveda.com",
               "frame-src 'self' *.youtube.com *.youtube-nocookie.com",
-              "connect-src 'self' *.aumveda.com *.google-analytics.com",
+              "connect-src 'self' *.aumveda.com *.google-analytics.com *.supabase.co wss://*.supabase.co",
             ].join('; '),
           },
         ],
