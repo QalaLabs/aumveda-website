@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
 
   const { name, email, password } = parsed.data
 
+  console.log('[register] DB_URL prefix:', process.env.DATABASE_URL?.slice(0, 60))
+
   try {
     const existing = await prisma.user.findUnique({ where: { email } })
     if (existing) {
