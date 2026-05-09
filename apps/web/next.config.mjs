@@ -15,14 +15,7 @@ const nextConfig = {
     // Limit worker processes — prevents EAGAIN on shared hosting
     workerThreads: false,
     cpus: 1,
-    // Copy Prisma engine binary from monorepo root into build traces
     outputFileTracingRoot: path.join(__dirname, '../../'),
-    outputFileTracingIncludes: {
-      '/**': [
-        '../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/query-engine-debian-openssl-1.1.x',
-        '../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x',
-      ],
-    },
   },
 
   images: {
