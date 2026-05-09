@@ -18,8 +18,9 @@ const nextConfig = {
     // Copy Prisma engine binary from monorepo root into build traces
     outputFileTracingRoot: path.join(__dirname, '../../'),
     outputFileTracingIncludes: {
-      '/api/**': [
-        './node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/*.node',
+      '/**': [
+        '../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/query-engine-debian-openssl-1.1.x',
+        '../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/query-engine-debian-openssl-3.0.x',
       ],
     },
   },
