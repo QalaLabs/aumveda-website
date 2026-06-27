@@ -230,7 +230,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <Button asChild className="h-14 px-10 rounded-2xl bg-white text-slate-900 hover:bg-slate-100 font-bold">
-                  <Link href="/auth/register">Begin Your Journey <ArrowRight className="ml-2 w-5 h-5" /></Link>
+                  <Link href="/step-1">Begin Your Journey <ArrowRight className="ml-2 w-5 h-5" /></Link>
                 </Button>
                 <Button asChild variant="ghost" className="h-14 px-8 rounded-2xl border border-white/20 text-white hover:bg-white/10 font-bold">
                   <Link href="/dashboard">
@@ -340,10 +340,10 @@ export default function HomePage() {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Button asChild className="h-16 px-14 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold text-lg shadow-2xl">
-              <Link href="/contact">Book a Free Assessment</Link>
+              <Link href="/step-1">Take the Healing Assessment</Link>
             </Button>
             <Button asChild variant="outline" className="h-16 px-10 rounded-2xl border-slate-200 font-bold text-lg">
-              <Link href="/programs">View Programs <ArrowRight className="ml-2 w-5 h-5" /></Link>
+              <Link href="/contact">Book a Free Assessment <ArrowRight className="ml-2 w-5 h-5" /></Link>
             </Button>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-slate-400">

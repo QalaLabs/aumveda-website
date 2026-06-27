@@ -1,10 +1,9 @@
-// ─── Event Envelope ───────────────────────────────────────────────────────────
 export interface EventEnvelope {
   event_id: string
   event_name: EventName
   user_id?: string
   source: 'client' | 'server'
-  timestamp: string // ISO 8601
+  timestamp: string
   payload: Record<string, unknown>
 }
 
@@ -28,8 +27,11 @@ export type EventName =
   | 'refund.issued'
   | 'course.enrolled'
   | 'course.module.completed'
+  | 'portal.step_completed'
+  | 'portal.completed'
+  | 'email_captured'
+  | 'discovery_call.booked'
 
-// ─── API Response wrapper ─────────────────────────────────────────────────────
 export interface ApiSuccess<T> {
   ok: true
   data: T
@@ -43,7 +45,6 @@ export interface ApiError {
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
-// ─── Achievement keys ─────────────────────────────────────────────────────────
 export type AchievementKey =
   | 'FIRST_JOURNAL'
   | '7_DAY_STREAK'
@@ -65,10 +66,8 @@ export const ACHIEVEMENT_META: Record<AchievementKey, { label: string; descripti
   COURSE_COMPLETE:  { label: 'Course Graduate',    description: 'Completed all modules in a course.',            emoji: '🎓' },
 }
 
-// ─── Consent keys ─────────────────────────────────────────────────────────────
 export type ConsentKey = 'tracking' | 'health_sync' | 'marketing' | 'ai_personalization'
 
-// ─── Order status ─────────────────────────────────────────────────────────────
 export type OrderStatus =
   | 'PENDING'
   | 'PAID'
@@ -78,25 +77,79 @@ export type OrderStatus =
   | 'CANCELLED'
   | 'REFUNDED'
 
-// ─── NextAuth session extension ───────────────────────────────────────────────
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string
-      name?: string | null
-      email?: string | null
-      image?: string | null
-      role: 'user' | 'admin'
-    }
-  }
-  interface User {
-    role: 'user' | 'admin'
-  }
+// ─── Portal Types (Phase 0) ─────────────────────────────────
+
+export type PortalStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+
+export type ChakraType = 'root' | 'sacral' | 'solar_plexus' | 'heart' | 'throat' | 'third_eye' | 'crown'
+
+export type ArchetypeType = 'warrior' | 'lover' | 'sage' | 'innocent' | 'caregiver' | 'creator'
+
+export type TarotThemeType =
+  | 'transformation'
+  | 'awakening'
+  | 'inner_work'
+  | 'power_will'
+  | 'love_relationships'
+  | 'surrender'
+  | 'purpose_path'
+
+export type ProfileResult =
+  | 'anxious_achiever'
+  | 'frozen_heart'
+  | 'wounded_warrior'
+  | 'silent_sufferer'
+  | 'lost_soul'
+  | 'awakening_one'
+
+export interface PortalState {
+  step: PortalStep
+  chakraSelected: ChakraType | null
+  archetypeSelected: ArchetypeType | null
+  tarotCard: string | null
+  tarotTheme: TarotThemeType | null
+  intentionText: string | null
+  dob: string | null
+  timeOfBirth: string | null
+  placeOfBirth: string | null
+  birthLat: number | null
+  birthLng: number | null
+  email: string | null
+  q1Answer: string | null
+  q2Answer: string | null
+  q3Answer: string | null
+  q4Answer: string | null
+  q5Answer: string | null
+  q6Answer: string | null
+  q7Answer: string | null
+  nervousSystemScore: string | null
+  relationshipScore: string | null
+  childhoodScore: string | null
+  financialScore: string | null
+  profileResult: ProfileResult | null
+  sunSign: string | null
+  moonSign: string | null
+  risingSign: string | null
 }
 
-declare module 'next-auth/jwt' {
-  interface JWT {
-    id: string
-    role: 'user' | 'admin'
-  }
-}
+// ─── Booking Types (Phase 1) ─────────────────────────────────
+
+export type Practitioner = 'archana' | 'sejal'
+
+export type ServiceType =
+  | 'discovery_call'
+  | 'astrology_reading'
+  | 'vastu_home'
+  | 'vastu_office'
+  | 'healing_session'
+  | 'somatic'
+  | 'trauma_release'
+
+export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+
+export type SubscriptionPlan = 'community_monthly'
+
+export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'past_due'
+
+export type CommunityTier = 'free' | 'paid'
+

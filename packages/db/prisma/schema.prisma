@@ -63,6 +63,17 @@ model User {
   passwordHash  String?   @db.Text
   googleId      String?   @unique
   role          String    @default("user") // "user" | "admin"
+  
+  // Birth chart / Astrology data
+  dob           DateTime?
+  birthLat      Float?
+  birthLng      Float?
+  placeOfBirth  String?
+  timeOfBirth   String?
+  risingSign    String?
+  sunSign       String?
+  moonSign      String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -83,6 +94,18 @@ model User {
   enrolments  Enrolment[]
   courseProgress CourseProgress[]
   events      Event[]
+
+  // Portal & Programs relations
+  dailyDoseOverrides    DailyDoseOverride[]
+  dailyDoseDeliveries   DailyDoseDelivery[]
+  portalData            UserPortalData?
+  bookings              Booking[]
+  therapySessions       TherapySession[]
+  packages              Package[]
+  communityMember       CommunityMember?
+  subscription          Subscription?
+  challengeParticipations ChallengeParticipation[]
+  contentViews          ContentView[]
 }
 
 model Profile {
@@ -357,4 +380,257 @@ model Event {
   source    String   @default("server") // "client" | "server"
   forwarded Boolean  @default(false)    // true once relayed to GTM/ad platforms
   createdAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────
+// Portal & Astrological Models
+// ─────────────────────────────────────────────────────────────
+
+model DailyDoseOverride {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  practiceType    String
+  instructionText String   @db.Text
+  startsAt        DateTime
+  durationDays    Int
+  source          String?
+  createdAt       DateTime @default(now())
+}
+
+model DailyDoseDelivery {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date           DateTime  @db.Date
+  contentJson    String    @db.Text
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  completedAt    DateTime?
+  channel        String    @default("whatsapp")
+  deliveryStatus String    @default("pending")
+  failureReason  String?
+  overrideSource String?
+
+  @@unique([userId, date])
+}
+
+model UserPortalData {
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chakraSelected     String?
+  archetypeSelected  String?
+  tarotCard          String?
+  tarotTheme         String?
+  intentionText      String?   @db.Text
+  q1Answer           String?
+  q2Answer           String?
+  q3Answer           String?
+  q4Answer           String?
+  q5Answer           String?
+  q6Answer           String?
+  q7Answer           String?
+  nervousSystemScore String?
+  relationshipScore  String?
+  childhoodScore     String?
+  financialScore     String?
+  profileResult      String?
+  portalCompletedAt  DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+model Booking {
+  id                String          @id @default(cuid())
+  userId            String
+  user              User            @relation(fields: [userId], references: [id])
+  practitioner      String
+  serviceType       String
+  bookingDatetime   DateTime
+  durationMinutes   Int
+  status            String          @default("pending")
+  amountPaid        Decimal         @default(0) @db.Decimal(10, 2)
+  razorpayPaymentId String?
+  zoomLink          String?
+  calendlyEventId   String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  therapySession    TherapySession?
+}
+
+model TherapySession {
+  id                        String    @id @default(cuid())
+  bookingId                 String?   @unique
+  booking                   Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId                    String
+  user                      User      @relation(fields: [userId], references: [id])
+  practitioner              String
+  sessionDate               DateTime
+  keyThemes                 String[]
+  practicesAssigned         String[]
+  nextSessionRecommendation String?   @db.Text
+  distressFlag              Boolean   @default(false)
+  recordingUrl              String?
+  notesSubmittedAt          DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+}
+
+model Package {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  packageType   String
+  sessionsTotal Int
+  sessionsUsed  Int       @default(0)
+  amountPaid    Decimal   @db.Decimal(10, 2)
+  purchasedAt   DateTime  @default(now())
+  expiresAt     DateTime?
+}
+
+model CommunityMember {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier                String   @default("free")
+  joinedAt            DateTime @default(now())
+  lastActiveAt        DateTime @default(now())
+  circlesAttended     Int      @default(0)
+  challengesCompleted Int      @default(0)
+}
+
+model Subscription {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id])
+  plan                   String
+  amount                 Decimal  @db.Decimal(10, 2)
+  startDate              DateTime @default(now())
+  nextBillingDate        DateTime
+  razorpaySubscriptionId String?
+  status                 String   @default("active")
+}
+
+model LiveCircle {
+  id                   String    @id @default(cuid())
+  host                 String
+  topic                String
+  scheduledAt          DateTime
+  zoomLink             String
+  attendeeCount        Int       @default(0)
+  recordingUrl         String?
+  recordingAvailableAt DateTime?
+  createdAt            DateTime  @default(now())
+}
+
+model Challenge {
+  id             String                   @id @default(cuid())
+  title          String
+  durationDays   Int
+  profileTargets String[]
+  chakraTargets  String[]
+  startDate      DateTime
+  createdAt      DateTime                 @default(now())
+  participations ChallengeParticipation[]
+}
+
+model ChallengeParticipation {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  challengeId   String
+  challenge     Challenge @relation(fields: [challengeId], references: [id])
+  enrolledAt    DateTime  @default(now())
+  daysCompleted Int       @default(0)
+  completedAt   DateTime?
+
+  @@unique([userId, challengeId])
+}
+
+model ChakraReveal {
+  id          String @id @default(cuid())
+  chakraName  String @unique
+  heading     String
+  sub         String
+  blockedText String @db.Text
+  showsUpAs   String @db.Text
+}
+
+model ArchetypeReveal {
+  id        String @id @default(cuid())
+  name      String @unique
+  icon      String
+  gift      String @db.Text
+  wound     String @db.Text
+  showsUpAs String @db.Text
+}
+
+model TarotTheme {
+  id        String   @id @default(cuid())
+  themeName String   @unique
+  message   String   @db.Text
+  cardNames String[]
+}
+
+model ChartPrediction {
+  id             String @id @default(cuid())
+  placementType  String
+  sign           String
+  predictionText String @db.Text
+
+  @@unique([placementType, sign])
+}
+
+model PatternQuestion {
+  id           String @id @default(cuid())
+  questionId   String @unique
+  questionText String @db.Text
+  dimension    String
+  options      Json
+}
+
+model PatternScoring {
+  id             String @id @default(cuid())
+  questionId     String
+  answer         String
+  dimension      String
+  dimensionValue String
+
+  @@unique([questionId, answer])
+}
+
+model PatternProfile {
+  id             String @id @default(cuid())
+  profileName    String @unique
+  nsMatch        String
+  relMatch       String
+  childhoodMatch String
+  profileText    String @db.Text
+}
+
+model Reel {
+  id              String    @id @default(cuid())
+  title           String
+  creatorName     String
+  creatorHandle   String?
+  muxAssetId      String
+  healingModality String
+  profileTags     String[]
+  chakraTag       String?
+  durationSeconds Int
+  isPublished     Boolean   @default(false)
+  publishedAt     DateTime?
+  approvedBy      String?
+  createdAt       DateTime  @default(now())
+}
+
+model ContentView {
+  id                String   @id @default(cuid())
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  contentType       String
+  contentId         String
+  viewedAt          DateTime @default(now())
+  completionPercent Float?
 }

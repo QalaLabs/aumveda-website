@@ -29,7 +29,7 @@ const Hero = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 pt-12 animate-slide-up">
           <Button asChild className="h-16 px-12 rounded-2xl bg-white text-slate-900 hover:bg-slate-100 font-sans font-bold text-lg border-none">
-            <Link href="/contact">Begin Your Synthesis</Link>
+            <Link href="/step-1">Begin Your Journey</Link>
           </Button>
           <Button asChild variant="ghost" className="text-white hover:bg-white/10 h-16 px-10 font-sans font-bold border border-white/20 rounded-2xl">
             <Link href="/services">Explore the Pillars <ArrowRight className="ml-2 w-5 h-5" /></Link>
