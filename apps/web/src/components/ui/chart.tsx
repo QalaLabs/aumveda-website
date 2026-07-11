@@ -102,14 +102,14 @@ const ChartTooltip = RechartsPrimitive.Tooltip;
 
 type ChartTooltipProps = React.ComponentProps<"div"> & {
   active?: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // (linter cleanup: shadcn chart uses `any` intentionally for Recharts prop bridging)
   payload?: any[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // (linter cleanup: shadcn chart uses `any` intentionally for Recharts prop bridging)
   label?: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // (linter cleanup: shadcn chart uses `any` intentionally for Recharts prop bridging)
   labelFormatter?: (label: any, payload: any[]) => React.ReactNode
   labelClassName?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // (linter cleanup: shadcn chart uses `any` intentionally for Recharts prop bridging)
   formatter?: (value: any, name: string, item: any, index: number) => React.ReactNode
   color?: string
   hideLabel?: boolean
@@ -266,7 +266,7 @@ ChartTooltipContent.displayName = "ChartTooltip";
 const ChartLegend = RechartsPrimitive.Legend;
 
 type ChartLegendProps = React.ComponentProps<"div"> & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // (linter cleanup: shadcn chart uses `any` intentionally for Recharts prop bridging)
   payload?: any[]
   verticalAlign?: "top" | "bottom" | "middle"
   hideIcon?: boolean

@@ -1,78 +1,33 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabasePublishableKey =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-const supabaseServiceRoleKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-
-// --------------------------------------------------
-// Environment Validation
-// --------------------------------------------------
-
-if (!supabaseUrl) {
-  console.error(
-    'Missing NEXT_PUBLIC_SUPABASE_URL'
-  )
+// One-time warning in dev only; production must silently degrade (Supabase is
+// currently used only by the auth-adjacent flows — the Portal itself no longer
+// touches Supabase directly; see SessionPersistence.ts).
+if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+  const w = window as unknown as { __aumvedaSupabaseWarned?: boolean }
+  if (!w.__aumvedaSupabaseWarned) {
+    if (!supabaseUrl) console.warn('[supabase] NEXT_PUBLIC_SUPABASE_URL not configured — client disabled')
+    if (!supabasePublishableKey) console.warn('[supabase] NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY not configured — client disabled')
+    if (!supabaseServiceRoleKey) console.warn('[supabase] SUPABASE_SERVICE_ROLE_KEY not configured — admin client disabled')
+    w.__aumvedaSupabaseWarned = true
+  }
 }
 
-if (!supabasePublishableKey) {
-  console.error(
-    'Missing NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'
-  )
-}
+export const supabase = supabaseUrl && supabasePublishableKey
+  ? createClient(supabaseUrl, supabasePublishableKey, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    })
+  : null
 
-if (!supabaseServiceRoleKey) {
-  console.warn(
-    'Missing SUPABASE_SERVICE_ROLE_KEY'
-  )
-}
+export const supabaseAdmin = supabaseUrl && supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : null
 
-// --------------------------------------------------
-// Public Client (Browser Safe)
-// --------------------------------------------------
-
-export const supabase =
-  supabaseUrl && supabasePublishableKey
-    ? createClient(
-        supabaseUrl,
-        supabasePublishableKey,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true,
-          },
-        }
-      )
-    : null
-
-// --------------------------------------------------
-// Admin Client (Server Only)
-// --------------------------------------------------
-
-export const supabaseAdmin =
-  supabaseUrl && supabaseServiceRoleKey
-    ? createClient(
-        supabaseUrl,
-        supabaseServiceRoleKey,
-        {
-          auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-          },
-        }
-      )
-    : null
-
-// --------------------------------------------------
-// Status Flags
-// --------------------------------------------------
-
-export const supabaseConfigured = Boolean(
-  supabase
-)
-
-export const supabaseAdminConfigured =
-  Boolean(supabaseAdmin)
+export const supabaseConfigured = Boolean(supabase)
+export const supabaseAdminConfigured = Boolean(supabaseAdmin)

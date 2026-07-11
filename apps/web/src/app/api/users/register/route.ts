@@ -28,8 +28,6 @@ export async function POST(req: NextRequest) {
 
     const { name, email, password } = parsed.data
 
-    console.log('[REGISTER ATTEMPT]', email)
-
     // Check existing user
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -91,8 +89,6 @@ export async function POST(req: NextRequest) {
         eventError
       )
     }
-
-    console.log('[REGISTER SUCCESS]', user.email)
 
     return NextResponse.json(
       {

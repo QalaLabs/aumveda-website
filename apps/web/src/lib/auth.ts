@@ -57,8 +57,6 @@ export const authOptions: NextAuthOptions = {
 
       async authorize(credentials) {
         try {
-          console.log('LOGIN ATTEMPT:', credentials?.email)
-
           if (!credentials?.email || !credentials?.password) {
             throw new Error('Missing email or password')
           }

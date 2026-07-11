@@ -42,13 +42,16 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googletagmanager.com *.google-analytics.com",
-              "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
-              "font-src 'self' fonts.gstatic.com",
-              "img-src 'self' data: blob: *.r2.cloudflarestorage.com assets.aumveda.com lh3.googleusercontent.com images.unsplash.com *.unsplash.com",
+              // Google Places, Calendly widget, GTM/GA — needed by Portal Steps 6 & 8.
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googletagmanager.com *.google-analytics.com maps.googleapis.com *.gstatic.com assets.calendly.com",
+              "style-src 'self' 'unsafe-inline' fonts.googleapis.com assets.calendly.com",
+              "font-src 'self' fonts.gstatic.com assets.calendly.com",
+              "img-src 'self' data: blob: *.r2.cloudflarestorage.com assets.aumveda.com lh3.googleusercontent.com images.unsplash.com *.unsplash.com *.googleusercontent.com maps.gstatic.com *.gstatic.com",
               "media-src 'self' *.r2.cloudflarestorage.com assets.aumveda.com",
-              "frame-src 'self' *.youtube.com *.youtube-nocookie.com",
-              "connect-src 'self' *.aumveda.com *.google-analytics.com *.supabase.co wss://*.supabase.co",
+              // Calendly booking embed lives in an iframe from calendly.com.
+              "frame-src 'self' *.youtube.com *.youtube-nocookie.com calendly.com *.calendly.com",
+              // Places autocomplete uses fetch to maps.googleapis.com; Calendly widget posts to calendly.com.
+              "connect-src 'self' *.aumveda.com *.google-analytics.com *.supabase.co wss://*.supabase.co maps.googleapis.com *.googleapis.com calendly.com *.calendly.com",
             ].join('; '),
           },
         ],
