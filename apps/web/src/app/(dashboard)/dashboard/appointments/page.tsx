@@ -2,6 +2,7 @@ import { requireSession } from '@/lib/session'
 import { prisma } from '@aumveda/db'
 import Link from 'next/link'
 import Topbar from '../../_components/Topbar'
+import { SessionActions } from './_components/SessionActions'
 
 export const metadata = { title: 'Appointments & Sessions | AUMVEDA' }
 
@@ -149,6 +150,11 @@ export default async function AppointmentsPage() {
                               Meeting link appears 15 minutes before.
                             </p>
                           )}
+
+                          <SessionActions
+                            bookingId={b.id}
+                            bookingDatetimeIso={b.bookingDatetime.toISOString()}
+                          />
                         </li>
                       )
                     })}
@@ -264,8 +270,8 @@ export default async function AppointmentsPage() {
           {/* Trust footer */}
           <footer className="border-t border-[hsl(var(--av-stone))] pt-8 space-y-2">
             <p className="font-body text-sm text-[hsl(var(--av-mute))] leading-relaxed max-w-[55ch]">
-              Need to reschedule? Reply to your confirmation email or message your practitioner at
-              least 24 hours ahead when possible.
+              Need to reschedule or cancel? Use the actions on an upcoming session — we email you
+              and update your calendar invite. Prefer 24 hours&apos; notice when you can.
             </p>
             <p className="font-body text-sm text-[hsl(var(--av-mute))] leading-relaxed max-w-[55ch]">
               Sessions are confidential. What you share stays between you and your practitioner.

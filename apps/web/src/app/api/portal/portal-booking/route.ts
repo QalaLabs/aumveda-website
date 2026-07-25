@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@aumveda/db'
 import { z } from 'zod'
 import { sendBookingConfirmationEmail } from '@/lib/booking-confirm'
+import { notifyStaffOfBooking } from '@/lib/booking-comms'
+import {
+  BookingLifecycleEvent,
+  recordLifecycleEvent,
+} from '@/lib/booking-lifecycle'
 
 const schema = z.object({
   email: z.string().email(),
@@ -198,6 +203,36 @@ export async function POST(req: NextRequest) {
       } catch (emailErr) {
         console.error('BOOKING CONFIRM EMAIL FAILED:', emailErr)
         emailSent = false
+      }
+
+      try {
+        const staff = await notifyStaffOfBooking({
+          kind: 'confirmed',
+          bookingId: result.booking.id,
+          practitioner,
+          serviceType,
+          clientName: user.name || 'Client',
+          clientEmail: user.email,
+          bookingDatetime: when,
+        })
+        if (staff.practitioner) {
+          await recordLifecycleEvent({
+            userId,
+            eventName: BookingLifecycleEvent.PRACTITIONER_NOTIFIED,
+            bookingId: result.booking.id,
+            payload: { kind: 'confirmed' },
+          })
+        }
+        if (staff.admin) {
+          await recordLifecycleEvent({
+            userId,
+            eventName: BookingLifecycleEvent.ADMIN_NOTIFIED,
+            bookingId: result.booking.id,
+            payload: { kind: 'confirmed' },
+          })
+        }
+      } catch (staffErr) {
+        console.error('BOOKING STAFF NOTIFY FAILED:', staffErr)
       }
     }
 

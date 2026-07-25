@@ -110,6 +110,8 @@ export async function sendBookingConfirmationEmail(opts: {
     durationMinutes: opts.durationMinutes,
     attendeeEmail: opts.to,
     attendeeName: opts.clientName,
+    sequence: 0,
+    method: 'REQUEST',
   })
 
   const result = await sendEmail({

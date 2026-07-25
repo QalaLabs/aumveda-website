@@ -1,5 +1,7 @@
 /** Build a VEVENT ICS for Discovery Call / session booking */
 
+export type IcsMethod = 'REQUEST' | 'CANCEL'
+
 export function buildBookingIcs(opts: {
   uid: string
   title: string
@@ -9,7 +11,15 @@ export function buildBookingIcs(opts: {
   organizerEmail?: string
   attendeeEmail: string
   attendeeName?: string
+  /** Bump on every reschedule / cancel so calendars replace the event */
+  sequence?: number
+  method?: IcsMethod
+  status?: 'CONFIRMED' | 'CANCELLED' | 'TENTATIVE'
 }): string {
+  const method = opts.method ?? 'REQUEST'
+  const status =
+    opts.status ?? (method === 'CANCEL' ? 'CANCELLED' : 'CONFIRMED')
+  const sequence = Math.max(0, opts.sequence ?? 0)
   const end = new Date(opts.start.getTime() + opts.durationMinutes * 60_000)
   const stamp = formatIcsUtc(new Date())
   const dtStart = formatIcsUtc(opts.start)
@@ -23,7 +33,7 @@ export function buildBookingIcs(opts: {
     'VERSION:2.0',
     'PRODID:-//AUMVEDA//Discovery Call//EN',
     'CALSCALE:GREGORIAN',
-    'METHOD:REQUEST',
+    `METHOD:${method}`,
     'BEGIN:VEVENT',
     `UID:${opts.uid}@aumveda.com`,
     `DTSTAMP:${stamp}`,
@@ -33,8 +43,8 @@ export function buildBookingIcs(opts: {
     `DESCRIPTION:${desc}`,
     `ORGANIZER;CN=AUMVEDA:mailto:${org}`,
     `ATTENDEE;CN=${escapeIcs(opts.attendeeName || 'Guest')};RSVP=TRUE:mailto:${opts.attendeeEmail}`,
-    'STATUS:CONFIRMED',
-    'SEQUENCE:0',
+    `STATUS:${status}`,
+    `SEQUENCE:${sequence}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ].join('\r\n')
