@@ -12,34 +12,27 @@ export default function Topbar({ title }: TopbarProps) {
   const hour = new Date().getHours()
   const greeting =
     hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const first = session?.user?.name?.split(' ')[0] ?? 'friend'
 
   return (
-    <header className="sticky top-0 z-20 bg-cream/80 backdrop-blur-sm border-b border-stone-100 px-4 lg:px-8 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-20 bg-[hsl(var(--av-parchment)/0.92)] backdrop-blur-md border-b border-[hsl(var(--av-stone))] px-6 h-14 md:h-16 flex items-center justify-between">
       <div>
         {title ? (
-          <h1 className="text-base font-semibold text-stone-800">{title}</h1>
+          <h1 className="font-serif text-lg text-[hsl(var(--av-night))]">{title}</h1>
         ) : (
-          <p className="text-sm text-stone-600">
+          <p className="font-body text-sm text-[hsl(var(--av-mute))]">
             {greeting},{' '}
-            <span className="font-medium text-stone-800">
-              {session?.user?.name?.split(' ')[0] ?? 'friend'}
-            </span>
+            <span className="text-[hsl(var(--av-night))]">{first}</span>
           </p>
         )}
       </div>
-      <div className="flex items-center gap-3">
-        <Link
-          href="/shop"
-          className="text-xs font-medium text-brand-600 border border-brand-200 rounded-lg px-3 py-1.5 hover:bg-brand-50 transition hidden sm:block"
-        >
-          Shop
-        </Link>
-        <Link href="/dashboard/settings">
-          <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 text-sm font-semibold">
-            {session?.user?.name?.[0]?.toUpperCase() ?? 'U'}
-          </div>
-        </Link>
-      </div>
+      <Link
+        href="/dashboard/settings"
+        aria-label="Settings"
+        className="w-9 h-9 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] flex items-center justify-center font-body text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))]"
+      >
+        {session?.user?.name?.[0]?.toUpperCase() ?? 'U'}
+      </Link>
     </header>
   )
 }

@@ -1,24 +1,74 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
-const AUTH_PROTECTED = ['/dashboard', '/onboarding', '/learn', '/checkout']
-const ADMIN_PROTECTED = ['/practitioner']
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const needsAuth = AUTH_PROTECTED.some(p => pathname.startsWith(p))
-  const needsAdmin = ADMIN_PROTECTED.some(p => pathname.startsWith(p))
+  // 1. Get NextAuth token to decode session information
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  })
 
-  if (needsAdmin || needsAuth) {
-    const token =
-      request.cookies.get('next-auth.session-token')?.value ??
-      request.cookies.get('__Secure-next-auth.session-token')?.value
+  // 2. Define route scopes
+  const isDashboardRoute =
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/onboarding') ||
+    pathname.startsWith('/checkout') ||
+    pathname.startsWith('/learn')
+
+  const isPractitionerRoute = pathname.startsWith('/practitioner')
+  const isAdminRoute = pathname.startsWith('/admin')
+
+  // 3. RBAC validation
+  if (isDashboardRoute || isPractitionerRoute || isAdminRoute) {
+    // Local preview: skip auth gate when DEV_BYPASS=true (pages use requireSession mock)
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.DEV_BYPASS === 'true' &&
+      isDashboardRoute
+    ) {
+      return NextResponse.next()
+    }
 
     if (!token) {
+      // Not logged in -> redirect to login
       const loginUrl = new URL('/auth/login', request.url)
       loginUrl.searchParams.set('callbackUrl', pathname)
       return NextResponse.redirect(loginUrl)
+    }
+
+    const role = token.role || 'client'
+
+    // Admin Route Protection: Admin & Super Admin only
+    if (isAdminRoute && role !== 'admin' && role !== 'super_admin') {
+      return NextResponse.redirect(new URL('/auth/error?error=AccessDenied', request.url))
+    }
+
+    // Practitioner Route Protection: Practitioner, Admin, & Super Admin only
+    if (
+      isPractitionerRoute &&
+      role !== 'practitioner' &&
+      role !== 'admin' &&
+      role !== 'super_admin'
+    ) {
+      return NextResponse.redirect(new URL('/auth/error?error=AccessDenied', request.url))
+    }
+
+    // Client Route Protection: client/user (schema default), Admin, & Super Admin
+    if (
+      isDashboardRoute &&
+      role !== 'client' &&
+      role !== 'user' &&
+      role !== 'admin' &&
+      role !== 'super_admin'
+    ) {
+      // Practitioner attempting to visit client dashboard -> redirect to practitioner portal
+      if (role === 'practitioner') {
+        return NextResponse.redirect(new URL('/practitioner', request.url))
+      }
+      return NextResponse.redirect(new URL('/auth/error?error=AccessDenied', request.url))
     }
   }
 
@@ -32,5 +82,6 @@ export const config = {
     '/learn/:path*',
     '/checkout/:path*',
     '/practitioner/:path*',
+    '/admin/:path*',
   ],
 }

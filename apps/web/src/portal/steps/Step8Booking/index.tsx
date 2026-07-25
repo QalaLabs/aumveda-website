@@ -1,21 +1,25 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { StepRegistry } from '../../engine/StepRegistry'
 import { BackgroundEngine } from '../../background/BackgroundEngine'
 import { AudioProvider } from '../../audio'
 import { getTheme } from '../../theme/themes'
-import { PortalContent, PortalCard, PortalButton } from '../../design-system'
-import { staggerContainer, staggerItem } from '../../animation/variants'
+import { PortalContent } from '../../design-system'
+import { fadeUpVariants } from '../../animation/variants'
 import { usePortal } from '../../engine/PortalContext'
 import type { StepProps, PortalData } from '../../engine/types'
-import { PROFILE_NAMES } from '@/lib/portal/constants'
+import { CalendarSelector } from './CalendarSelector'
+import { PaymentForm } from './PaymentForm'
+import { TrustInvite } from './TrustInvite'
 
 export function registerStep8() {
   StepRegistry.register({
     id: 8,
-    title: 'Book Discovery Call',
+    title: 'Your Healing Blueprint',
     component: Step8Wrapper,
     validationSchema: undefined,
     enterAnimation: { type: 'fade', duration: 0.5 },
@@ -23,142 +27,645 @@ export function registerStep8() {
   })
 }
 
-async function notifyN8n(state: ReturnType<typeof usePortal>['state'], bookingEvent: string | null) {
-  try {
-    await fetch('/api/n8n/portal-completed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionId: state.sessionId,
-        email: state.portalData.email,
-        chakraSelected: state.portalData.chakraSelected,
-        archetypeSelected: state.portalData.archetypeSelected,
-        tarotCard: state.portalData.tarotCard,
-        tarotTheme: state.portalData.tarotTheme,
-        intention: state.portalData.intention,
-        dob: state.portalData.dob,
-        timeOfBirth: state.portalData.timeOfBirth,
-        placeOfBirth: state.portalData.placeOfBirth,
-        sunSign: state.portalData.sunSign,
-        moonSign: state.portalData.moonSign,
-        risingSign: state.portalData.risingSign,
-        profileResult: state.portalData.profileResult,
-        nervousSystemScore: state.portalData.nervousSystemScore,
-        relationshipScore: state.portalData.relationshipScore,
-        childhoodScore: state.portalData.childhoodScore,
-        financialScore: state.portalData.financialScore,
-        bookingScheduledEvent: bookingEvent,
-      }),
-    })
-  } catch (err) {
-    // Never block the completed-portal experience on a notification failure.
-    console.error('[Step8Booking] n8n dispatch failed:', err)
-  }
+type SubState =
+  | 'decoding'
+  | 'report'
+  | 'invite'
+  | 'path'
+  | 'booking'
+  | 'payment'
+  | 'register'
+  | 'success'
+
+interface PackageOption {
+  id: 'free' | 'single' | '3_session' | '12_session'
+  name: string
+  price: number
+  duration: number
+  description: string
 }
 
+const PACKAGES: PackageOption[] = [
+  {
+    id: 'free',
+    name: 'Free Discovery Call',
+    price: 0,
+    duration: 15,
+    description: '15 minutes to review your blueprint and align on what comes next.',
+  },
+  {
+    id: 'single',
+    name: 'Deep Dive Session',
+    price: 1500,
+    duration: 60,
+    description: '60-minute somatic or Vedic deep dive with your matched practitioner.',
+  },
+  {
+    id: '3_session',
+    name: '3-Session Reset',
+    price: 3999,
+    duration: 180,
+    description: 'Three guided sessions for nervous-system regulation and integration.',
+  },
+  {
+    id: '12_session',
+    name: '12-Session Transformation',
+    price: 12999,
+    duration: 720,
+    description: 'Full pathway with personalised Daily Dose and ongoing support.',
+  },
+]
+
 function Step8Booking({ data }: StepProps<PortalData>) {
-  const { state, completePortal } = usePortal()
-  const [booked, setBooked] = useState(Boolean(data.portalCompletedAt))
-  const [dispatching, setDispatching] = useState(false)
-  const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL
+  const router = useRouter()
+  const { completePortal } = usePortal()
 
-  const finish = useCallback(
-    async (bookingEvent: string | null) => {
-      if (dispatching) return
-      setDispatching(true)
-      await completePortal()
-      await notifyN8n(state, bookingEvent)
-      setBooked(true)
-      setDispatching(false)
-    },
-    [completePortal, state, dispatching],
-  )
+  const [subState, setSubState] = useState<SubState>('decoding')
+  const [loadingProgress, setLoadingProgress] = useState(0)
+  const [selectedPackage, setSelectedPackage] = useState<PackageOption>(PACKAGES[0])
+  const [bookingTime, setBookingTime] = useState<string | null>(null)
+  const [paymentId, setPaymentId] = useState<string | null>(null)
+  const [showDeeper, setShowDeeper] = useState(false)
 
-  // Calendly posts window messages when the embedded widget schedules an event.
+  const [name, setName] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [regError, setRegError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
   useEffect(() => {
-    if (!calendlyUrl || booked) return
-    function handleMessage(e: MessageEvent) {
-      if (typeof e.data !== 'object' || !e.data?.event) return
-      if (e.data.event === 'calendly.event_scheduled') {
-        finish(e.data.event)
+    if (subState !== 'decoding') return
+    const interval = setInterval(() => {
+      setLoadingProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          setTimeout(() => setSubState('report'), 350)
+          return 100
+        }
+        return prev + 2
+      })
+    }, 40)
+    return () => clearInterval(interval)
+  }, [subState])
+
+  const getChakraAnalysis = () => {
+    switch (data.chakraSelected) {
+      case 'root':
+        return 'Your Root centre asks for grounding — safety, steadiness, and a body that can rest.'
+      case 'sacral':
+        return 'Your Sacral centre asks for creative flow and emotional honesty in relationship.'
+      case 'solar_plexus':
+        return 'Your Solar Plexus asks for clearer boundaries and kinder power.'
+      case 'heart':
+        return 'Your Heart centre asks for trust, thawing, and room to feel without armour.'
+      case 'throat':
+        return 'Your Throat centre asks for truth spoken at a pace your nervous system can hold.'
+      case 'third_eye':
+        return 'Your Third Eye asks for quiet mind and intuition without overthinking.'
+      case 'crown':
+        return 'Your Crown asks for meaning, belonging, and reconnection to purpose.'
+      default:
+        return 'Your primary centre is asking for gentle, consistent attention.'
+    }
+  }
+
+  const getProfileDescription = () => {
+    switch (data.profileResult) {
+      case 'anxious_achiever':
+        return 'You often convert unease into productivity. Healing here begins with slowing safely.'
+      case 'wounded_warrior':
+        return 'Your body still braces. Somatic release and paced care are the right door.'
+      case 'frozen_heart':
+        return 'Feeling stays guarded. Warmth and trust rebuild capacity over time.'
+      case 'lost_soul':
+        return 'Direction feels foggy. Grounding and cosmic context help you reorient.'
+      case 'silent_sufferer':
+        return 'You carry much inwardly. Voice, boundaries, and being heard matter here.'
+      case 'awakening_one':
+        return 'You are in transition. Integration and steady companionship serve you best.'
+      default:
+        return 'You are ready for targeted, human-guided healing.'
+    }
+  }
+
+  const getRecommendedTherapist = () => {
+    const isSomatic =
+      data.profileResult === 'wounded_warrior' ||
+      data.profileResult === 'anxious_achiever' ||
+      data.profileResult === 'frozen_heart'
+
+    if (isSomatic) {
+      return {
+        id: 'sejal' as const,
+        name: 'Sejal Jain',
+        role: 'Healing Facilitator · Somatic & nervous-system work · Mumbai',
+        bio: 'Sejal holds CBT-informed coaching, breathwork, and somatic practices — evidence meeting presence, never clinical coldness.',
       }
     }
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [calendlyUrl, booked, finish])
+    return {
+      id: 'archana' as const,
+      name: 'Archana Jain',
+      role: 'Vedic Practitioner · Astrology, Vastu, ritual · Jaipur',
+      bio: 'Archana brings 25+ years of Vedic lineage — chart, space, and ritual as a map for how you heal in daily life.',
+    }
+  }
 
-  if (booked) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center px-4 py-20">
-        <PortalContent maxWidth="max-w-lg">
-          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6 text-center">
-            <motion.div variants={staggerItem} className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#C9A84C]/20">
-              <span className="text-3xl">✨</span>
-            </motion.div>
-            <motion.h2 variants={staggerItem} className="font-display text-2xl text-[#C9A84C]">Your portal is complete</motion.h2>
-            <motion.p variants={staggerItem} className="text-white/60">Sejal will reach out to you shortly to confirm your Discovery Call.</motion.p>
-            <motion.p variants={staggerItem} className="text-sm text-white/30">Keep an eye on your email and WhatsApp for the calendar invite.</motion.p>
-            <motion.div variants={staggerItem}>
-              <PortalCard variant="glass" padding="md" className="space-y-2 text-left text-sm">
-                <p className="text-xs uppercase tracking-widest text-[#C9A84C]">Your Portal Summary</p>
-                <p className="text-white/60">Profile: <span className="text-white">{PROFILE_NAMES[data.profileResult || ''] || data.profileResult}</span></p>
-                <p className="text-white/60">Chakra: <span className="text-white">{data.chakraSelected}</span></p>
-                <p className="text-white/60">Archetype: <span className="text-white">{data.archetypeSelected}</span></p>
-                {data.sunSign && <p className="text-white/60">Sun Sign: <span className="text-white">{data.sunSign}</span></p>}
-                {data.intention && <p className="text-white/60">Intention: <span className="italic text-white">&ldquo;{data.intention}&rdquo;</span></p>}
-              </PortalCard>
-            </motion.div>
-            <motion.p variants={staggerItem} className="text-sm text-white/40">AUMVEDA &mdash; Decode. Dissolve. Return.</motion.p>
-          </motion.div>
-        </PortalContent>
-      </div>
-    )
+  const therapist = getRecommendedTherapist()
+
+  const handleRegisterClient = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setRegError('')
+
+    if (password.length < 8) {
+      setRegError('Password must be at least 8 characters.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setRegError('Passwords do not match.')
+      return
+    }
+
+    setSubmitting(true)
+
+    try {
+      const regRes = await fetch('/api/auth/register-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, name, password }),
+      })
+      const regData = await regRes.json()
+      if (!regRes.ok) throw new Error(regData.error || 'Failed to create account')
+
+      const bookRes = await fetch('/api/portal/portal-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          practitioner: therapist.id,
+          serviceType: selectedPackage.id === 'free' ? 'discovery_call' : selectedPackage.name,
+          bookingDatetime: bookingTime,
+          durationMinutes: selectedPackage.duration,
+          amountPaid: selectedPackage.price,
+          packageType: selectedPackage.id,
+          razorpayPaymentId: paymentId,
+        }),
+      })
+      const bookData = await bookRes.json()
+      if (!bookRes.ok) throw new Error(bookData.error || 'Failed to save booking')
+
+      await completePortal()
+
+      const signInResult = await signIn('credentials', {
+        email: data.email,
+        password,
+        action: 'password',
+        redirect: false,
+      })
+
+      if (signInResult?.error) {
+        setRegError('Account created. Please sign in to continue.')
+        setTimeout(() => router.push('/auth/login'), 2000)
+      } else {
+        setSubState('success')
+        setTimeout(() => router.push('/dashboard'), 2800)
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      setRegError(message)
+      setSubmitting(false)
+    }
+  }
+
+  const formatBooking = () => {
+    if (!bookingTime) return ''
+    return new Date(bookingTime).toLocaleString('en-IN', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    })
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-16">
-      <PortalContent maxWidth="max-w-lg">
-        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6 text-center">
-          <motion.div variants={staggerItem} className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#C9A84C]/20">
-            <span className="text-3xl">🕊️</span>
+    <div className="min-h-screen flex flex-col justify-center py-8">
+      <AnimatePresence mode="wait">
+        {subState === 'decoding' && (
+          <motion.div
+            key="decoding"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="px-4 text-center space-y-6"
+            role="status"
+            aria-live="polite"
+          >
+            <PortalContent maxWidth="max-w-sm">
+              <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+                Preparing
+              </p>
+              <h2 className="font-serif text-2xl text-[hsl(var(--av-parchment))] mt-3">
+                Gathering your blueprint
+              </h2>
+              <div className="w-full h-px bg-[hsl(var(--av-parchment)/0.15)] mt-8 overflow-hidden">
+                <motion.div
+                  className="h-full bg-[hsl(var(--av-gold))]"
+                  animate={{ width: `${loadingProgress}%` }}
+                  transition={{ duration: 0.1 }}
+                />
+              </div>
+            </PortalContent>
           </motion.div>
-          <motion.h2 variants={staggerItem} className="font-display text-2xl text-[#C9A84C]">You&apos;ve completed the portal</motion.h2>
-          <motion.p variants={staggerItem} className="text-white/70">Your healing profile has been read.</motion.p>
-          <motion.p variants={staggerItem} className="text-sm text-white/40">
-            Now take the next step — book a free Discovery Call with Sejal. She&apos;ll walk through your results and guide you to the right path.
-          </motion.p>
+        )}
 
-          <motion.div variants={staggerItem}>
-            <PortalCard variant="glass" padding="md" className="space-y-2 text-left text-sm">
-              <p className="mb-1 font-semibold text-[#C9A84C]">On your Discovery Call, Sejal will:</p>
-              <ul className="space-y-1.5 text-white/60">
-                <li>✦ Review your portal results with you</li>
-                <li>✦ Identify the primary area of healing</li>
-                <li>✦ Recommend the right session or package</li>
-                <li>✦ Answer any questions you have</li>
-              </ul>
-            </PortalCard>
+        {subState === 'report' && (
+          <motion.div
+            key="report"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-xl">
+              <div className="space-y-10 text-center">
+                <div className="space-y-3">
+                  <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+                    Your blueprint
+                  </p>
+                  <h1 className="font-serif text-3xl text-[hsl(var(--av-parchment))] text-balance">
+                    We see where you are
+                  </h1>
+                </div>
+
+                <div className="text-left space-y-6 border-y border-[hsl(var(--av-parchment)/0.1)] py-8">
+                  <div className="space-y-2">
+                    <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-gold))]">
+                      Energy
+                    </p>
+                    <p className="font-body text-base text-[hsl(var(--av-parchment)/0.75)] leading-relaxed capitalize">
+                      {data.chakraSelected?.replace(/_/g, ' ')} — {getChakraAnalysis()}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-gold))]">
+                      Pattern
+                    </p>
+                    <p className="font-body text-base text-[hsl(var(--av-parchment)/0.75)] leading-relaxed">
+                      {getProfileDescription()}
+                    </p>
+                  </div>
+                  {(data.sunSign || data.tarotCard) && (
+                    <div className="space-y-2">
+                      <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-gold))]">
+                        Context
+                      </p>
+                      <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)]">
+                        {[
+                          data.sunSign && `Sun ${data.sunSign}`,
+                          data.moonSign && `Moon ${data.moonSign}`,
+                          data.tarotCard && data.tarotCard.replace(/_/g, ' '),
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSubState('invite')}
+                  className="min-h-[52px] px-10 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium active:scale-[0.97] transition-transform"
+                >
+                  Meet your practitioner
+                </button>
+              </div>
+            </PortalContent>
           </motion.div>
+        )}
 
-          {calendlyUrl ? (
-            <motion.div variants={staggerItem}>
-              <iframe
-                src={`${calendlyUrl}?embed_domain=aumveda.com&embed_type=Inline&hide_gdpr_banner=1&email=${encodeURIComponent(data.email ?? '')}`}
-                title="Book your Discovery Call"
-                className="h-[640px] w-full rounded-2xl border border-white/10"
+        {subState === 'invite' && (
+          <motion.div
+            key="invite"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-xl">
+              <TrustInvite
+                therapistName={therapist.name}
+                therapistRole={therapist.role}
+                therapistBio={therapist.bio}
+                onContinue={() => {
+                  setSelectedPackage(PACKAGES[0])
+                  setSubState('path')
+                }}
+                onBack={() => setSubState('report')}
               />
-              <p className="mt-3 text-xs text-white/20">30 min · Free · Zoom</p>
-            </motion.div>
-          ) : (
-            <motion.div variants={staggerItem} className="space-y-3">
-              <PortalButton onClick={() => finish(null)} disabled={dispatching} size="lg">
-                {dispatching ? 'Booking...' : 'Book My Free Discovery Call'}
-              </PortalButton>
-              <p className="text-xs text-white/20">30 min · Free · Zoom</p>
-            </motion.div>
-          )}
-        </motion.div>
-      </PortalContent>
+            </PortalContent>
+          </motion.div>
+        )}
+
+        {subState === 'path' && (
+          <motion.div
+            key="path"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-lg">
+              <div className="space-y-10 text-center">
+                <div className="space-y-3">
+                  <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+                    How would you like to begin?
+                  </p>
+                  <h2 className="font-serif text-3xl text-[hsl(var(--av-parchment))] text-balance">
+                    Start with a Discovery Call
+                  </h2>
+                  <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)] leading-relaxed max-w-[42ch] mx-auto">
+                    Free · 15 minutes · with {therapist.name}. No obligation.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPackage(PACKAGES[0])
+                    setSubState('booking')
+                  }}
+                  className="w-full min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium active:scale-[0.97] transition-transform"
+                >
+                  Book free Discovery Call
+                </button>
+
+                <div className="border-t border-[hsl(var(--av-parchment)/0.1)] pt-8">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeeper(!showDeeper)}
+                    className="font-body text-sm text-[hsl(var(--av-parchment)/0.5)] underline underline-offset-4"
+                    aria-expanded={showDeeper}
+                  >
+                    {showDeeper ? 'Hide programmes' : 'Prefer a structured programme?'}
+                  </button>
+
+                  {showDeeper && (
+                    <ul className="mt-6 space-y-3 text-left">
+                      {PACKAGES.filter((p) => p.id !== 'free').map((pkg) => (
+                        <li key={pkg.id}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedPackage(pkg)
+                              setSubState('booking')
+                            }}
+                            className="w-full rounded-2xl border border-[hsl(var(--av-parchment)/0.12)] p-5 text-left hover:border-[hsl(var(--av-gold)/0.4)] transition-colors"
+                          >
+                            <div className="flex justify-between gap-3">
+                              <span className="font-serif text-lg text-[hsl(var(--av-parchment))]">
+                                {pkg.name}
+                              </span>
+                              <span className="font-mono text-sm tabular text-[hsl(var(--av-gold-soft))]">
+                                ₹{pkg.price.toLocaleString('en-IN')}
+                              </span>
+                            </div>
+                            <p className="mt-2 font-body text-sm text-[hsl(var(--av-parchment)/0.5)]">
+                              {pkg.description}
+                            </p>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSubState('invite')}
+                  className="font-body text-sm text-[hsl(var(--av-parchment)/0.35)]"
+                >
+                  Back
+                </button>
+              </div>
+            </PortalContent>
+          </motion.div>
+        )}
+
+        {subState === 'booking' && (
+          <motion.div
+            key="booking"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-xl">
+              <div className="space-y-8">
+                <div className="text-center space-y-2">
+                  <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+                    {selectedPackage.name}
+                  </p>
+                  <h2 className="font-serif text-2xl text-[hsl(var(--av-parchment))]">
+                    Pick a moment that feels calm
+                  </h2>
+                </div>
+
+                <div className="rounded-2xl border border-[hsl(var(--av-parchment)/0.12)] p-6">
+                  <CalendarSelector
+                    practitionerName={therapist.name}
+                    onChange={(datetime) => setBookingTime(datetime)}
+                  />
+                </div>
+
+                <div className="flex flex-col items-center gap-3">
+                  <button
+                    type="button"
+                    disabled={!bookingTime}
+                    onClick={() => {
+                      if (selectedPackage.id === 'free') setSubState('register')
+                      else setSubState('payment')
+                    }}
+                    className="w-full max-w-sm min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium disabled:opacity-40 active:scale-[0.97] transition-transform"
+                  >
+                    {selectedPackage.id === 'free' ? 'Continue' : 'Continue to payment'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSubState('path')}
+                    className="font-body text-sm text-[hsl(var(--av-parchment)/0.4)]"
+                  >
+                    Back
+                  </button>
+                </div>
+              </div>
+            </PortalContent>
+          </motion.div>
+        )}
+
+        {subState === 'payment' && (
+          <motion.div
+            key="payment"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-md">
+              <PaymentForm
+                basePrice={selectedPackage.price}
+                packageName={selectedPackage.name}
+                onPaymentSuccess={(payId) => {
+                  setPaymentId(payId)
+                  setTimeout(() => setSubState('register'), 800)
+                }}
+                onCancel={() => setSubState('booking')}
+              />
+            </PortalContent>
+          </motion.div>
+        )}
+
+        {subState === 'register' && (
+          <motion.div
+            key="register"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-md">
+              <div className="space-y-8">
+                <div className="text-center space-y-2">
+                  <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+                    Almost there
+                  </p>
+                  <h2 className="font-serif text-2xl text-[hsl(var(--av-parchment))]">
+                    Secure your place
+                  </h2>
+                  {bookingTime && (
+                    <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)] pt-2">
+                      {selectedPackage.name} · {formatBooking()} · {therapist.name}
+                    </p>
+                  )}
+                </div>
+
+                {regError && (
+                  <p
+                    className="font-body text-sm text-[hsl(var(--av-rose))] border border-[hsl(var(--av-rose)/0.3)] rounded-xl px-4 py-3"
+                    role="alert"
+                  >
+                    {regError}
+                  </p>
+                )}
+
+                <form onSubmit={handleRegisterClient} className="space-y-5">
+                  <div>
+                    <label htmlFor="reg-name" className="font-body text-xs text-[hsl(var(--av-parchment)/0.5)]">
+                      Full name
+                    </label>
+                    <input
+                      id="reg-name"
+                      type="text"
+                      required
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="mt-1.5 w-full min-h-[48px] rounded-xl border border-[hsl(var(--av-parchment)/0.15)] bg-transparent px-4 font-body text-[hsl(var(--av-parchment))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--av-gold))]"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="reg-email" className="font-body text-xs text-[hsl(var(--av-parchment)/0.5)]">
+                      Email
+                    </label>
+                    <input
+                      id="reg-email"
+                      type="email"
+                      disabled
+                      value={data.email || ''}
+                      className="mt-1.5 w-full min-h-[48px] rounded-xl border border-[hsl(var(--av-parchment)/0.08)] bg-transparent px-4 font-body text-[hsl(var(--av-parchment)/0.4)]"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="reg-pwd" className="font-body text-xs text-[hsl(var(--av-parchment)/0.5)]">
+                      Password (min 8 characters)
+                    </label>
+                    <input
+                      id="reg-pwd"
+                      type="password"
+                      required
+                      autoComplete="new-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="mt-1.5 w-full min-h-[48px] rounded-xl border border-[hsl(var(--av-parchment)/0.15)] bg-transparent px-4 font-body text-[hsl(var(--av-parchment))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--av-gold))]"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="reg-repwd" className="font-body text-xs text-[hsl(var(--av-parchment)/0.5)]">
+                      Confirm password
+                    </label>
+                    <input
+                      id="reg-repwd"
+                      type="password"
+                      required
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="mt-1.5 w-full min-h-[48px] rounded-xl border border-[hsl(var(--av-parchment)/0.15)] bg-transparent px-4 font-body text-[hsl(var(--av-parchment))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--av-gold))]"
+                    />
+                  </div>
+
+                  <p className="font-body text-xs text-[hsl(var(--av-parchment)/0.4)] leading-relaxed">
+                    By continuing you create a private account for your practices and sessions.
+                    You can cancel or reschedule up to 24 hours before.
+                  </p>
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium disabled:opacity-50 active:scale-[0.97] transition-transform"
+                  >
+                    {submitting ? 'Confirming…' : 'Confirm booking'}
+                  </button>
+                </form>
+              </div>
+            </PortalContent>
+          </motion.div>
+        )}
+
+        {subState === 'success' && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="px-4 py-20 text-center space-y-6"
+            role="status"
+            aria-live="polite"
+          >
+            <PortalContent maxWidth="max-w-md">
+              <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+                Confirmed
+              </p>
+              <h2 className="font-serif text-3xl text-[hsl(var(--av-parchment))] mt-3 text-balance">
+                You made the right decision
+              </h2>
+              <p className="font-body text-base text-[hsl(var(--av-parchment)/0.6)] leading-relaxed mt-4">
+                A confirmation email is on its way. Your practice home is ready — we will meet you
+                {bookingTime ? ` on ${formatBooking()}` : ' soon'}.
+              </p>
+              <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.4)] mt-6">
+                Opening your dashboard…
+              </p>
+            </PortalContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

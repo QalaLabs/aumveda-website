@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { usePortal } from './PortalContext'
-import { isStepAccessible } from './PortalStateMachine'
 import type { PortalStep } from './types'
-import { TOTAL_PORTAL_STEPS } from './types'
 
 const STEP_ROUTES: Record<number, string> = {
   1: '/step-1',
@@ -38,10 +36,9 @@ export function getStepFromRoute(path: string): PortalStep | null {
 }
 
 export function RedirectGuard({ children }: { children: React.ReactNode }) {
-  const { state, isStepAccessible } = usePortal()
+  const { state, isStepAccessible, goToStep } = usePortal()
   const pathname = usePathname()
   const router = useRouter()
-  const redirectedRef = useRef(false)
 
   useEffect(() => {
     if (!state.isHydrated) return
@@ -62,15 +59,21 @@ export function RedirectGuard({ children }: { children: React.ReactNode }) {
     }
 
     if (currentRouteStep !== state.currentStep) {
+      // Block skip-ahead: URL step > engine step → bounce back
       if (currentRouteStep > state.currentStep) {
-        const targetRoute = getRouteForStep(state.currentStep)
-        router.replace(targetRoute)
-      } else if (!isStepAccessible(currentRouteStep)) {
-        const targetRoute = getRouteForStep(state.currentStep)
-        router.replace(targetRoute)
+        router.replace(getRouteForStep(state.currentStep))
+        return
       }
+      // Block inaccessible earlier steps
+      if (!isStepAccessible(currentRouteStep)) {
+        router.replace(getRouteForStep(state.currentStep))
+        return
+      }
+      // URL is an earlier completed step — sync engine so StepRenderer
+      // matches the registered page component (avoids "Step N not registered")
+      goToStep(currentRouteStep)
     }
-  }, [state.currentStep, state.isHydrated, state.phase, pathname, router, isStepAccessible])
+  }, [state.currentStep, state.isHydrated, state.phase, pathname, router, isStepAccessible, goToStep])
 
   if (!state.isHydrated) {
     return (

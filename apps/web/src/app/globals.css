@@ -4,51 +4,171 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 174 71% 21%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 38 54% 51%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 174 71% 97%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 174 71% 21%;
-    --radius: 2rem;
+    /* Sacred Luxury × Clinical Confidence — see DESIGN.md */
+    --av-night: 255 56% 15%;
+    --av-ink: 255 64% 8%;
+    --av-gold: 43 54% 54%;
+    --av-gold-soft: 43 55% 77%;
+    --av-parchment: 40 43% 94%;
+    --av-stone: 40 20% 88%;
+    --av-ink-text: 24 10% 10%;
+    --av-mute: 25 5% 45%;
+    --av-sage: 152 18% 35%;
+    --av-rose: 0 21% 45%;
+
+    --background: var(--av-parchment);
+    --foreground: var(--av-ink-text);
+    --card: 40 40% 97%;
+    --card-foreground: var(--av-ink-text);
+    --popover: 40 40% 97%;
+    --popover-foreground: var(--av-ink-text);
+    --primary: var(--av-night);
+    --primary-foreground: var(--av-gold-soft);
+    --secondary: var(--av-gold);
+    --secondary-foreground: var(--av-ink);
+    --muted: 40 20% 90%;
+    --muted-foreground: var(--av-mute);
+    --accent: 40 30% 92%;
+    --accent-foreground: var(--av-night);
+    --destructive: var(--av-rose);
+    --destructive-foreground: 40 43% 94%;
+    --border: var(--av-stone);
+    --input: var(--av-stone);
+    --ring: var(--av-gold);
+    --radius: 0.75rem;
+
+    --ease-out-av: cubic-bezier(0.23, 1, 0.32, 1);
+    --duration-micro: 100ms;
+    --duration-ui: 220ms;
+    --duration-ritual: 500ms;
   }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply font-body text-[16px] leading-relaxed;
+    @apply font-body text-base leading-relaxed bg-background text-foreground;
   }
+
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif normal-case;
+    @apply font-serif font-normal;
+    text-wrap: balance;
+  }
+
+  p, li, dd, blockquote {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 
-@keyframes breathing {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.01); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
-@keyframes cosmic-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+
+@keyframes breath-glow {
+  0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(0.92); }
+  50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.05); }
 }
-.animate-breathing { animation: breathing 10s ease-in-out infinite; }
-.animate-cosmic {
-  background: linear-gradient(-45deg, #0F172A, #0F5B56, #1E293B, #0F172A);
-  background-size: 400% 400%;
-  animation: cosmic-flow 30s ease infinite;
+
+@keyframes ken-burns {
+  0% { transform: scale(1.02) translate3d(0, 0, 0); }
+  100% { transform: scale(1.10) translate3d(-1%, -1%, 0); }
 }
-.neural-mesh {
-  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0);
-  background-size: 60px 60px;
+
+@keyframes av-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes av-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes av-veil {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .surface-night {
+    background-color: hsl(var(--av-night));
+    color: hsl(var(--av-parchment));
+  }
+  .surface-ink {
+    background-color: hsl(var(--av-ink));
+    color: hsl(var(--av-parchment));
+  }
+  .surface-parchment {
+    background-color: hsl(var(--av-parchment));
+    color: hsl(var(--av-ink-text));
+  }
+  .texture-paper {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* Marketing homepage (Lovable port) */
+  .av-eyebrow {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: hsl(var(--av-parchment) / 0.45);
+    font-weight: 500;
+  }
+  .av-grain {
+    position: relative;
+  }
+  .av-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .av-vignette {
+    position: relative;
+  }
+  .av-vignette::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--av-ink) / 0.65) 100%);
+  }
+  .av-glow-gold {
+    box-shadow: 0 30px 120px -40px hsl(var(--av-gold) / 0.35);
+  }
+  .animate-ken-burns {
+    animation: ken-burns 24s ease-in-out infinite alternate;
+  }
+  .animate-av-breathe {
+    animation: av-breathe 6s ease-in-out infinite;
+  }
+  .animate-av-rise {
+    animation: av-rise 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .animate-av-veil {
+    animation: av-veil 1.6s cubic-bezier(0.7, 0, 0.2, 1) both;
+  }
 }

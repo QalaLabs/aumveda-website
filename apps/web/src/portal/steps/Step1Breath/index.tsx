@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { StepRegistry } from '../../engine/StepRegistry'
 import type { StepProps } from '../../engine/types'

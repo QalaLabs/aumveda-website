@@ -52,6 +52,17 @@ export function usePortalAnalytics(): AnalyticsTracker {
         }
       } catch {
       }
+
+      // Persist event in database via local analytics route
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventName,
+          payload: event.properties,
+          source: 'client',
+        }),
+      }).catch((err) => console.error('Database event tracking failed:', err))
     }
 
     if (process.env.NODE_ENV !== 'production') {

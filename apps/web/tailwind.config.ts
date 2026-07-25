@@ -6,9 +6,10 @@ export default {
     container: { center: true, padding: "2rem", screens: { "2xl": "1400px" } },
     extend: {
       fontFamily: {
-        serif: ['"Playfair Display"', "serif"],
-        sans: ['"Montserrat"', "sans-serif"],
-        body: ['"Lato"', "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,25 +24,29 @@ export default {
         accent: { DEFAULT: "hsl(var(--accent))", foreground: "hsl(var(--accent-foreground))" },
         popover: { DEFAULT: "hsl(var(--popover))", foreground: "hsl(var(--popover-foreground))" },
         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
-        // keep existing brand aliases for backward compat
-        brand: {
-          50: "hsl(174 71% 97%)",
-          100: "hsl(174 60% 90%)",
-          300: "hsl(174 55% 60%)",
-          400: "hsl(174 60% 40%)",
-          500: "hsl(174 71% 21%)",
-          600: "hsl(174 75% 17%)",
+        night: "hsl(var(--av-night))",
+        ink: "hsl(var(--av-ink))",
+        gold: {
+          DEFAULT: "hsl(var(--av-gold))",
+          soft: "hsl(var(--av-gold-soft))",
         },
-        parchment: "hsl(40 30% 97%)",
-        cream: "hsl(40 30% 97%)",
-        sage: {
-          500: "hsl(120 20% 50%)",
+        parchment: "hsl(var(--av-parchment))",
+        cream: "hsl(var(--av-parchment))",
+        stone: "hsl(var(--av-stone))",
+        sage: { DEFAULT: "hsl(var(--av-sage))", 500: "hsl(var(--av-sage))" },
+        brand: {
+          50: "hsl(var(--av-parchment))",
+          100: "hsl(40 30% 92%)",
+          300: "hsl(var(--av-gold-soft))",
+          400: "hsl(var(--av-gold))",
+          500: "hsl(var(--av-night))",
+          600: "hsl(var(--av-ink))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
       },
       keyframes: {
         "fade-in": { "0%": { opacity: "0" }, "100%": { opacity: "1" } },

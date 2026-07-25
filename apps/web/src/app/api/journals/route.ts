@@ -45,16 +45,32 @@ const createSchema = z.object({
   body: z.string().min(1).max(10000),
   mood: z.number().int().min(1).max(5).nullable().optional(),
   tags: z.array(z.string().max(30)).max(5).optional(),
+  voiceNoteUrl: z.string().nullable().optional(),
+  aiReflection: z.string().nullable().optional(),
+  practitionerVisible: z.boolean().optional(),
 })
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const { searchParams } = new URL(req.url)
+  const search = searchParams.get('search')
+
   const journals = await prisma.journal.findMany({
-    where: { userId: session.user.id },
+    where: {
+      userId: session.user.id,
+      isDeleted: false,
+      ...(search && {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { body: { contains: search, mode: 'insensitive' } },
+          { tags: { has: search.toLowerCase().replace(/\s+/g, '-') } }
+        ]
+      })
+    },
     orderBy: { createdAt: 'desc' },
-    select: { id: true, title: true, mood: true, createdAt: true },
+    select: { id: true, title: true, mood: true, createdAt: true, body: true, tags: true },
   })
 
   return NextResponse.json({ ok: true, data: journals })
@@ -77,6 +93,9 @@ export async function POST(req: NextRequest) {
       body: parsed.data.body,
       mood: parsed.data.mood ?? null,
       tags: parsed.data.tags ?? [],
+      voiceNoteUrl: parsed.data.voiceNoteUrl ?? null,
+      aiReflection: parsed.data.aiReflection ?? null,
+      practitionerVisible: parsed.data.practitionerVisible ?? true,
     },
     select: { id: true, title: true, createdAt: true },
   })

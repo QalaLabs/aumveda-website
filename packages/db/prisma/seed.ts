@@ -122,6 +122,26 @@ async function main() {
     await prisma.patternProfile.upsert({ where: { profileName: p.profileName }, update: p, create: p })
   }
 
+  // Sample Cosmic Note (Phase 1 dashboard)
+  const weekStart = new Date()
+  weekStart.setHours(0, 0, 0, 0)
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay()) // Sunday start
+
+  const existingNote = await prisma.cosmicNote.findFirst({
+    where: { title: 'This week: soft landings' },
+  })
+  if (!existingNote) {
+    await prisma.cosmicNote.create({
+      data: {
+        title: 'This week: soft landings',
+        body: 'The cosmos asks for gentleness, not force. Notice where you grip — jaw, shoulders, breath — and loosen one place at a time. Your practice this week is permission to arrive unfinished.',
+        weekOf: weekStart,
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+    })
+  }
+
   console.log('Seed complete: all reference tables populated.')
 }
 

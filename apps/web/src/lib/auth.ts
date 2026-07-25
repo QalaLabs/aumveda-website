@@ -5,6 +5,9 @@ import EmailProvider from 'next-auth/providers/email'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '@aumveda/db'
 import bcrypt from 'bcryptjs'
+import { headers } from 'next/headers'
+import crypto from 'crypto'
+import type { UserRole } from '@aumveda/types'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -45,26 +48,73 @@ export const authOptions: NextAuthOptions = {
       name: 'Credentials',
 
       credentials: {
-        email: {
-          label: 'Email',
-          type: 'email',
-        },
-        password: {
-          label: 'Password',
-          type: 'password',
-        },
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+        otpCode: { label: 'OTP Code', type: 'text' },
+        action: { label: 'Action', type: 'text' }, // 'password' or 'otp'
       },
 
       async authorize(credentials) {
         try {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error('Missing email or password')
+          if (!credentials?.email) {
+            throw new Error('Missing email')
+          }
+
+          const email = credentials.email.toLowerCase().trim()
+
+          // ─── OTP ACTION ───────────────────────────────────────────
+          if (credentials.action === 'otp') {
+            if (!credentials.otpCode) {
+              throw new Error('Missing OTP code')
+            }
+
+            const user = await prisma.user.findUnique({
+              where: { email },
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                image: true,
+                role: true,
+                otpCode: true,
+                otpExpires: true,
+              },
+            })
+
+            if (!user || !user.otpCode || !user.otpExpires) {
+              throw new Error('OTP not requested or invalid')
+            }
+
+            if (new Date() > user.otpExpires) {
+              throw new Error('OTP has expired')
+            }
+
+            if (user.otpCode !== credentials.otpCode.trim()) {
+              throw new Error('Invalid OTP code')
+            }
+
+            // Clear OTP to prevent reuse
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { otpCode: null, otpExpires: null },
+            })
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              role: (user.role === 'user' ? 'client' : user.role) as UserRole,
+            }
+          }
+
+          // ─── PASSWORD ACTION ──────────────────────────────────────
+          if (!credentials.password) {
+            throw new Error('Missing password')
           }
 
           const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email.toLowerCase(),
-            },
+            where: { email },
             select: {
               id: true,
               email: true,
@@ -72,6 +122,7 @@ export const authOptions: NextAuthOptions = {
               image: true,
               role: true,
               passwordHash: true,
+              emailVerified: true,
             },
           })
 
@@ -80,9 +131,12 @@ export const authOptions: NextAuthOptions = {
           }
 
           if (!user.passwordHash) {
-            throw new Error(
-              'This account uses Google or magic link sign-in'
-            )
+            throw new Error('This account uses Google or magic link sign-in')
+          }
+
+          // Enforce email verification for credentials provider signup
+          if (!user.emailVerified) {
+            throw new Error('email_not_verified')
           }
 
           const validPassword = await bcrypt.compare(
@@ -99,30 +153,78 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: user.name,
             image: user.image,
-            role: user.role as "user" | "admin",
+            role: (user.role === 'user' ? 'client' : user.role) as UserRole,
           }
-        } catch (error) {
-          console.error('AUTH ERROR:', error)
-          return null
+        } catch (error: any) {
+          console.error('AUTH AUTHORIZE ERROR:', error)
+          // Rethrow to pass the specific error message (e.g. 'email_not_verified') to the frontend
+          throw new Error(error.message || 'Authentication failed')
         }
       },
     }),
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      // Runs on initial sign-in only
       if (user) {
         token.id = user.id
-        token.role = (user as any).role || 'user'
+        const rawRole = (user as any).role || 'client'
+        token.role = (rawRole === 'user' ? 'client' : rawRole) as UserRole
+
+        // Capture request metadata
+        let userAgent = 'Unknown'
+        let ipAddress = '127.0.0.1'
+        try {
+          const headersList = headers()
+          userAgent = headersList.get('user-agent') || 'Unknown'
+          ipAddress =
+            headersList.get('x-forwarded-for')?.split(',')[0] ||
+            headersList.get('x-real-ip') ||
+            '127.0.0.1'
+        } catch (e) {
+          // Ignore headers() errors when out of request scope
+        }
+
+        // Generate a new session row in the database
+        const sessionToken = crypto.randomUUID()
+        try {
+          await prisma.session.create({
+            data: {
+              sessionToken,
+              userId: user.id,
+              expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+              userAgent,
+              ipAddress,
+            },
+          })
+          token.sessionToken = sessionToken
+        } catch (dbError) {
+          console.error('FAILED TO CREATE SESSION RECORD:', dbError)
+        }
       }
 
       return token
     },
 
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user && token.sessionToken) {
+        // Enforce session database check for device management & revocation
+        try {
+          const dbSession = await prisma.session.findUnique({
+            where: { sessionToken: token.sessionToken as string },
+          })
+
+          if (!dbSession) {
+            // Revoked session! Return null to force NextAuth logout
+            return null as any
+          }
+        } catch (dbError) {
+          console.error('FAILED TO VALIDATE SESSION IN DB:', dbError)
+        }
+
         session.user.id = token.id as string
-        session.user.role = ((token.role as string) || 'user') as "user" | "admin"
+        session.user.role = token.role as UserRole
       }
 
       return session
@@ -130,26 +232,17 @@ export const authOptions: NextAuthOptions = {
 
     async signIn({ user, account }) {
       try {
-        if (
-          account?.type === 'oauth' ||
-          account?.type === 'email'
-        ) {
-          const existingProfile =
-            await prisma.profile.findUnique({
-              where: {
-                userId: user.id,
-              },
-            })
+        if (account?.type === 'oauth' || account?.type === 'email') {
+          const existingProfile = await prisma.profile.findUnique({
+            where: { userId: user.id },
+          })
 
           if (!existingProfile) {
             await prisma.profile.create({
-              data: {
-                userId: user.id,
-              },
+              data: { userId: user.id },
             })
           }
         }
-
         return true
       } catch (error) {
         console.error('SIGNIN CALLBACK ERROR:', error)
@@ -165,9 +258,7 @@ export const authOptions: NextAuthOptions = {
           data: {
             userId: user.id,
             eventName: 'sign_up',
-            payload: {
-              email: user.email,
-            },
+            payload: { email: user.email },
             source: 'server',
           },
         })

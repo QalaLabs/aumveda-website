@@ -153,3 +153,5 @@ export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'past_due'
 
 export type CommunityTier = 'free' | 'paid'
 
+export type UserRole = 'client' | 'practitioner' | 'admin' | 'super_admin'
+

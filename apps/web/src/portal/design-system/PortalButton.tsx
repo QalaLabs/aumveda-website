@@ -16,7 +16,7 @@ interface PortalButtonProps extends Omit<MotionButtonProps, 'whileHover' | 'whil
 
 const variants: Record<string, string> = {
   primary:
-    'bg-gradient-to-r from-[#C9A84C] to-[#A88A3A] text-[#0B0720] font-semibold hover:from-[#D4B85C] hover:to-[#B89A4A] shadow-lg shadow-[#C9A84C]/20',
+    'bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-medium hover:bg-[hsl(var(--av-gold-soft))]',
   secondary:
     'bg-white/10 text-white hover:bg-white/20 border border-white/10',
   ghost:

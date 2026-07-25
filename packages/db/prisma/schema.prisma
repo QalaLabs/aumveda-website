@@ -39,6 +39,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  userAgent    String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -62,7 +65,15 @@ model User {
   image         String?
   passwordHash  String?   @db.Text
   googleId      String?   @unique
-  role          String    @default("user") // "user" | "admin"
+  role          String    @default("user") // "client" | "practitioner" | "admin" | "super_admin"
+  
+  // Auth Extensions
+  otpCode                  String?
+  otpExpires               DateTime?
+  resetToken               String?
+  resetTokenExpires        DateTime?
+  verificationToken        String?
+  verificationTokenExpires DateTime?
   
   // Birth chart / Astrology data
   dob           DateTime?
@@ -106,6 +117,8 @@ model User {
   subscription          Subscription?
   challengeParticipations ChallengeParticipation[]
   contentViews          ContentView[]
+  dailyCheckIns         DailyCheckIn[]
+  clientHomework        ClientHomework[]
 }
 
 model Profile {
@@ -144,17 +157,20 @@ model Consent {
 // ─────────────────────────────────────────────────────────────
 
 model Journal {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String?
-  body      String   @db.Text
-  images    String[] // array of R2 image URLs
-  mood      Int?     // 1–5 (1=difficult, 5=great)
-  tags      String[] // user-defined tags
-  isDeleted Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title               String?
+  body                String   @db.Text
+  images              String[] // array of R2 image URLs
+  voiceNoteUrl        String?  // R2 voice note url
+  aiReflection        String?  @db.Text
+  practitionerVisible Boolean  @default(true)
+  mood                Int?     // 1–5 (1=difficult, 5=great)
+  tags                String[] // user-defined tags
+  isDeleted           Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -213,7 +229,7 @@ model Achievement {
   id       Int      @id @default(autoincrement())
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  key      String   // "FIRST_JOURNAL" | "7_DAY_STREAK" | "SLEEP_IMPROVED" | "PROGRESS_50" | "PROGRESS_75"
+  key      String   // "FIRST_JOURNAL" | "DAY_7" | "DAY_21" | "DAY_30" | "DAY_90" | "7_DAY_STREAK" | "SLEEP_IMPROVED" | "PROGRESS_50" | "PROGRESS_75"
   metadata Json?    // optional extra context
   earnedAt DateTime @default(now())
 
@@ -633,4 +649,65 @@ model ContentView {
   contentId         String
   viewedAt          DateTime @default(now())
   completionPercent Float?
+}
+
+// ─────────────────────────────────────────────────────────────
+// Client Transformation Dashboard (Phase 1)
+// ─────────────────────────────────────────────────────────────
+
+/// Weekly cosmic guidance card shown at top of client dashboard
+model CosmicNote {
+  id          String    @id @default(cuid())
+  title       String
+  body        String    @db.Text
+  weekOf      DateTime  @db.Date
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+/// Daily ritual check-in (under 5 min) — unique per user per calendar day
+model DailyCheckIn {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date              DateTime  @db.Date
+  consciousThoughts String?   @db.Text
+  gratitude         String?   @db.Text
+  affirmationsDone  Boolean   @default(false)
+  routinesDone      Boolean   @default(false)
+  habitNote         String?   @db.Text
+  beliefNote        String?   @db.Text
+  journalNote       String?   @db.Text
+  emotions          String[]  // e.g. ["calm", "hopeful"]
+  oneChange         String?   @db.Text
+  appreciation      String?   @db.Text
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+/// Practitioner-assigned homework with client submission + review
+model ClientHomework {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?   @db.Text
+  status         String    @default("assigned") // assigned | submitted | reviewed
+  assignedAt     DateTime  @default(now())
+  dueAt          DateTime?
+  submissionText String?   @db.Text
+  submissionUrl  String?
+  submittedAt    DateTime?
+  reviewNote     String?   @db.Text
+  reviewedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId, status])
 }

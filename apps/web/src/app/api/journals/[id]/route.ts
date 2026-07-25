@@ -26,6 +26,9 @@ const patchSchema = z.object({
   body: z.string().min(1).max(10000).optional(),
   mood: z.number().int().min(1).max(5).nullable().optional(),
   tags: z.array(z.string().max(30)).max(5).optional(),
+  voiceNoteUrl: z.string().nullable().optional(),
+  aiReflection: z.string().nullable().optional(),
+  practitionerVisible: z.boolean().optional(),
 })
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
@@ -51,6 +54,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       ...(parsed.data.body !== undefined && { body: parsed.data.body }),
       ...(parsed.data.mood !== undefined && { mood: parsed.data.mood }),
       ...(parsed.data.tags !== undefined && { tags: parsed.data.tags }),
+      ...(parsed.data.voiceNoteUrl !== undefined && { voiceNoteUrl: parsed.data.voiceNoteUrl }),
+      ...(parsed.data.aiReflection !== undefined && { aiReflection: parsed.data.aiReflection }),
+      ...(parsed.data.practitionerVisible !== undefined && { practitionerVisible: parsed.data.practitionerVisible }),
     },
     select: { id: true, title: true, updatedAt: true },
   })

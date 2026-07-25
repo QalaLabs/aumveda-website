@@ -13,6 +13,7 @@ import { getRouteForStep } from './PortalRouter'
 import type { PortalStep, PortalData } from './types'
 import { TOTAL_PORTAL_STEPS } from './types'
 import { useRouter } from 'next/navigation'
+import { getFeatureFlags } from '@/lib/flags'
 
 interface PortalProviderProps {
   children: ReactNode
@@ -77,7 +78,13 @@ export function PortalProvider({ children, onComplete }: PortalProviderProps) {
   const goNext = useCallback(async () => {
     if (!canGoNext(state.currentStep, state.completedSteps)) return
 
-    const nextStep = getNextStep(state.currentStep)
+    let nextStep = getNextStep(state.currentStep)
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : undefined
+    const flags = getFeatureFlags(searchParams)
+    if (flags.shortPortal && state.currentStep === 2) {
+      nextStep = 6
+    }
+
     if (!nextStep) return
 
     const config = StepRegistry.get(state.currentStep)
@@ -132,7 +139,13 @@ export function PortalProvider({ children, onComplete }: PortalProviderProps) {
   const goBack = useCallback(() => {
     if (!canGoBack(state.currentStep)) return
 
-    const prevStep = getPrevStep(state.currentStep)
+    let prevStep = getPrevStep(state.currentStep)
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : undefined
+    const flags = getFeatureFlags(searchParams)
+    if (flags.shortPortal && state.currentStep === 6) {
+      prevStep = 2
+    }
+
     if (!prevStep) return
 
     const completedSteps = state.completedSteps.filter(s => s < prevStep)

@@ -1,277 +1,109 @@
-"use client";
-
-import React, { useState } from 'react';
-import StateVisualization from "@/components/StateVisualization";
-import ProgramTimeline from "@/components/ProgramTimeline";
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Wind,
-  Flame,
-  Waves,
-  BrainCircuit,
-  Sparkles,
-  Zap,
-  Heart,
-  Moon,
-  ArrowRight,
-  ChevronDown,
-  ShieldCheck,
-  Timer
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+
+/**
+ * Programs — editorial restraint. Name the need; skip sales theatre.
+ * One primary CTA → /step-1. See DESIGN.md.
+ */
 
 const PROGRAMS = [
   {
-    id: 'unwind',
     title: "Unwind & Rewind",
-    tagline: "Systemic Burnout Recovery",
-    duration: "21 Days",
-    problem: "Chronic cortisol elevation leading to neural fatigue, decision paralysis, and sympathetic nervous system dominance.",
-    process: "A synthesis of Solfeggio sound therapy to down-regulate the amygdala, combined with Vata-balancing Dinacharya rituals to ground the energetic body.",
-    outcome: "Restored parasympathetic tone, enhanced cognitive bandwidth, and a recalibrated stress-response threshold.",
-    color: "bg-blue-600",
-    accent: "text-blue-600",
-    steps: [
-      { day: "Day 1-7", title: "Neural Decompression", neurological: "Inhibition of cortisol production; alpha-wave entrainment.", emotional: "Shift from panic to observant stillness.", icon: Wind },
-      { day: "Day 8-14", title: "Systemic Grounding", neurological: "Vagus nerve stimulation; improved heart rate variability.", emotional: "Emergence of internal safety and stability.", icon: Zap },
-      { day: "Day 15-21", title: "Cognitive Rewiring", neurological: "Prefrontal cortex reactivation; enhanced neuroplasticity.", emotional: "Proactive clarity and creative vitality.", icon: Sparkles }
-    ],
-    before: {
-      label: "The Burnout State",
-      description: "Fragmented focus, shallow breathing, and constant 'on-edge' sensation.",
-      metrics: [{ label: "Cortisol", value: "High" }, { label: "Sleep Quality", value: "2/10" }]
-    },
-    after: {
-      label: "The Synchronized State",
-      description: "Deep presence, rhythmic vitality, and cognitive resilience.",
-      metrics: [{ label: "HRV", value: "+45%" }, { label: "Focus", value: "9/10" }]
-    }
+    duration: "21 days",
+    forWhom: "Burnout, decision fatigue, a nervous system that will not stand down.",
+    approach:
+      "Sound and breath to down-regulate stress, with daily ritual that restores rest without forcing productivity.",
   },
   {
-    id: 'quit-smoking',
     title: "Quit Smoking",
-    tagline: "Neural Pathway Decoupling",
-    duration: "30 Days",
-    problem: "Dopamine loop dependency reinforced by oral fixation and subconscious 'stress-relief' associations.",
-    process: "Subconscious hypnosis to rewrite the identity of a 'smoker' paired with Agni-stimulating herbs to accelerate cellular detoxification.",
-    outcome: "Complete cessation of cravings and a fundamental shift in self-identity and lung vitality.",
-    color: "bg-rose-600",
-    accent: "text-rose-600",
-    steps: [
-      { day: "Day 1-5", title: "The Decoupling", neurological: "Breaking the immediate dopamine-trigger association.", emotional: "Intense restlessness meeting new coping tools.", icon: Flame },
-      { day: "Day 6-15", title: "Identity Shift", neurological: "Subconscious acceptance of a non-smoker identity.", emotional: "Emergence of pride and sensory awakening.", icon: BrainCircuit },
-      { day: "Day 16-30", title: "Cellular Renewal", neurological: "Stabilized neurotransmitter levels; reduced inflammation.", emotional: "Freedom from dependency; profound empowerment.", icon: ShieldCheck }
-    ],
-    before: {
-      label: "The Dependency",
-      description: "Slave to the 2-hour craving cycle; diminished lung capacity.",
-      metrics: [{ label: "Dopamine", value: "Erratic" }, { label: "Vitality", value: "Low" }]
-    },
-    after: {
-      label: "The Sovereignty",
-      description: "Total freedom from cravings; restored respiratory depth.",
-      metrics: [{ label: "Cravings", value: "Zero" }, { label: "Oxygen", value: "+30%" }]
-    }
+    duration: "30 days",
+    forWhom: "A habit that outlived its usefulness — craving loops and identity still fused.",
+    approach:
+      "Hypnosis and subconscious rewiring paired with gentle detox support, so cessation becomes who you are, not what you resist.",
   },
   {
-    id: 'breakup',
     title: "Get Over a Breakup",
-    tagline: "Emotional Sovereignty Protocol",
-    duration: "14 Days",
-    problem: "Heart-center blockage, obsessive thought loops, and a fragmented sense of self-worth following attachment loss.",
-    process: "CBT-based cognitive re-architecture to dismantle 'loss' narratives, integrated with heart-chakra vibrational healing.",
-    outcome: "Dissolution of obsessive loops, emotional closure, and a reclaimed, empowered individual identity.",
-    color: "bg-indigo-600",
-    accent: "text-indigo-600",
-    steps: [
-      { day: "Day 1-4", title: "Narrative Audit", neurological: "Interrupting the rumination circuits in the brain.", emotional: "Moving from acute grief to analytical distance.", icon: Heart },
-      { day: "Day 5-10", title: "Somatic Release", neurological: "Clearing the 'heart-break' physical tension patterns.", emotional: "Release of resentment; emergence of self-love.", icon: Waves },
-      { day: "Day 11-14", title: "The Rebirth", neurological: "Strengthening the self-referential neural networks.", emotional: "Excitement for the future; total closure.", icon: Sparkles }
-    ],
-    before: {
-      label: "The Fragmentation",
-      description: "Identity tied to the past; constant mental replay of loss.",
-      metrics: [{ label: "Anxiety", value: "Peak" }, { label: "Self-Worth", value: "3/10" }]
-    },
-    after: {
-      label: "The Sovereignty",
-      description: "Whole and complete within oneself; past integrated as wisdom.",
-      metrics: [{ label: "Closure", value: "100%" }, { label: "Joy", value: "8/10" }]
-    }
+    duration: "14 days",
+    forWhom: "Rumination, heart-ache, a self still defined by who left.",
+    approach:
+      "CBT to interrupt the loop, somatic release for what the body still holds, and a clear close so the future can open.",
   },
   {
-    id: 'sleep',
-    title: "Sleep Program",
-    tagline: "Circadian Rhythm Architecture",
-    duration: "10 Days",
-    problem: "Chronic insomnia driven by blue-light toxicity, spatial Vastu discord, and an overactive 'monkey mind'.",
-    process: "Spatial alignment of the sleeping sanctuary (Vastu) combined with melatonin-inducing pranayama protocols.",
-    outcome: "Consistent entry into deep REM cycles and a natural, effortless wake-up vitality.",
-    color: "bg-purple-600",
-    accent: "text-purple-600",
-    steps: [
-      { day: "Day 1-3", title: "Sanctuary Alignment", neurological: "Reducing environmental hyper-vigilance.", emotional: "Immediate sense of safety in the bedroom.", icon: Moon },
-      { day: "Day 4-7", title: "Rhythm Reset", neurological: "Resynchronizing the suprachiasmatic nucleus.", emotional: "Reduction in evening anxiety and dread.", icon: Timer },
-      { day: "Day 8-10", title: "Deep Integration", neurological: "Optimized GABA production; sustained REM cycles.", emotional: "Morning clarity and sustained daily energy.", icon: Zap }
-    ],
-    before: {
-      label: "The Exhaustion",
-      description: "Tired but wired; dependent on stimulants to function.",
-      metrics: [{ label: "REM Sleep", value: "Minimal" }, { label: "Energy", value: "2/10" }]
-    },
-    after: {
-      label: "The Vitality",
-      description: "Natural sleep onset; waking up before the alarm with ease.",
-      metrics: [{ label: "Sleep Score", value: "95+" }, { label: "Alertness", value: "High" }]
-    }
-  }
-];
+    title: "Sleep",
+    duration: "10 days",
+    forWhom: "Tired but wired — nights that never quite arrive.",
+    approach:
+      "Vastu for the sleeping room, breath for the evening mind, and a rhythm that invites deep rest without dependence.",
+  },
+] as const;
 
-const Programs = () => {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
+export default function ProgramsPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <main className="pt-32 pb-24">
-        <div className="max-w-7xl mx-auto px-6 space-y-24">
-          <header className="max-w-4xl space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-amber-400 text-[10px] font-black uppercase tracking-[0.3em]">
-              <Sparkles className="w-3 h-3" /> Structured Transformations
-            </div>
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-slate-900 leading-[1.1]">
-              Bespoke <br />
-              <span className="text-amber-600 italic">Evolution Protocols</span>
+    <div className="min-h-screen bg-[hsl(var(--av-parchment))] texture-paper">
+      <main>
+        <section className="border-b border-[hsl(var(--av-stone))]">
+          <div className="max-w-[1120px] mx-auto px-6 pt-28 md:pt-36 pb-16 md:pb-24">
+            <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))] mb-6">
+              Programs
+            </p>
+            <h1 className="font-serif text-4xl md:text-6xl text-[hsl(var(--av-night))] leading-[1.1] max-w-[14ch]">
+              Time-bound paths for a clear need.
             </h1>
-            <p className="text-xl text-slate-500 leading-relaxed max-w-2xl">
-              Our programs are time-bound, high-intensity journeys designed to solve specific
-              systemic imbalances through a unified clinical and Vedic approach.
+            <p className="mt-8 font-body text-lg text-[hsl(var(--av-mute))] leading-relaxed max-w-[55ch]">
+              Four focused journeys. Clinical care and Vedic craft, held together —
+              not stacked as features. If none fit, begin the open journey and we will
+              listen first.
             </p>
-          </header>
-
-          <div className="space-y-8">
-            {PROGRAMS.map((program) => {
-              const isExpanded = expandedId === program.id;
-
-              return (
-                <div
-                  key={program.id}
-                  className={cn(
-                    "rounded-[48px] border transition-all duration-700 overflow-hidden group",
-                    isExpanded ? "bg-white shadow-2xl border-slate-200" : "bg-slate-50/50 border-transparent hover:bg-white hover:shadow-xl"
-                  )}
-                >
-                  <div
-                    className="p-8 md:p-12 cursor-pointer"
-                    onClick={() => setExpandedId(isExpanded ? null : program.id)}
-                  >
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                          <span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white", program.color)}>
-                            {program.duration}
-                          </span>
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{program.tagline}</span>
-                        </div>
-                        <h3 className="text-3xl md:text-4xl font-serif font-bold text-slate-900">{program.title}</h3>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="hidden md:block text-right">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Success Rate</p>
-                          <p className="text-xl font-black text-slate-900">94%</p>
-                        </div>
-                        <motion.div
-                          animate={{ rotate: isExpanded ? 180 : 0 }}
-                          className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:text-slate-900 transition-colors"
-                        >
-                          <ChevronDown className="w-6 h-6" />
-                        </motion.div>
-                      </div>
-                    </div>
-
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          <div className="pt-16 space-y-20">
-                            {/* Problem/Process/Outcome */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                              <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500">The Problem</h4>
-                                <p className="text-sm text-slate-600 leading-relaxed">{program.problem}</p>
-                              </div>
-                              <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500">The Process</h4>
-                                <p className="text-sm text-slate-600 leading-relaxed">{program.process}</p>
-                              </div>
-                              <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">The Outcome</h4>
-                                <p className="text-sm text-slate-900 font-bold leading-relaxed">{program.outcome}</p>
-                              </div>
-                            </div>
-
-                            {/* Before/After Visualization */}
-                            <div className="space-y-8">
-                              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-center">State Visualization</h4>
-                              <StateVisualization before={program.before} after={program.after} />
-                            </div>
-
-                            {/* Timeline */}
-                            <div className="space-y-12">
-                              <div className="text-center space-y-2">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Transformation Roadmap</h4>
-                                <h3 className="text-2xl font-serif font-bold text-slate-900">Day 1 to Day {program.duration.split(' ')[0]}</h3>
-                              </div>
-                              <ProgramTimeline steps={program.steps} color={program.color} />
-                            </div>
-
-                            {/* CTA */}
-                            <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
-                                  <ShieldCheck className="w-6 h-6 text-emerald-500" />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-bold text-slate-900">Forensic Privacy Guaranteed</p>
-                                  <p className="text-xs text-slate-500">All program data is hashed to your identity.</p>
-                                </div>
-                              </div>
-                              <Button asChild className={cn("h-16 px-12 rounded-2xl text-white font-bold text-lg shadow-xl", program.color)}>
-                                <Link href="/contact">Apply for Program <ArrowRight className="ml-2 w-5 h-5" /></Link>
-                              </Button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              );
-            })}
           </div>
+        </section>
 
-          <section className="bg-slate-900 rounded-[60px] p-12 md:p-24 text-center space-y-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-12 opacity-10">
-              <BrainCircuit className="w-64 h-64 text-blue-400" />
-            </div>
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-white">Need a Custom Protocol?</h2>
-            <p className="text-slate-400 max-w-xl mx-auto leading-relaxed">
-              If your challenges fall outside these structured paths, we can architect a bespoke
-              synthesis protocol tailored specifically to your unique system.
+        <section aria-labelledby="programs-list-heading">
+          <div className="max-w-[720px] mx-auto px-6 py-16 md:py-24">
+            <h2 id="programs-list-heading" className="sr-only">
+              Program list
+            </h2>
+            <ul className="divide-y divide-[hsl(var(--av-stone))]">
+              {PROGRAMS.map((program) => (
+                <li key={program.title} className="py-10 md:py-12 first:pt-0 last:pb-0 space-y-4">
+                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                    <h3 className="font-serif text-2xl md:text-3xl text-[hsl(var(--av-night))]">
+                      {program.title}
+                    </h3>
+                    <span className="font-mono text-sm tabular-nums text-[hsl(var(--av-mute))]">
+                      {program.duration}
+                    </span>
+                  </div>
+                  <p className="font-body text-base text-[hsl(var(--av-ink-text))] leading-relaxed max-w-[60ch]">
+                    {program.forWhom}
+                  </p>
+                  <p className="font-body text-sm text-[hsl(var(--av-mute))] leading-relaxed max-w-[60ch]">
+                    {program.approach}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="border-t border-[hsl(var(--av-stone))]">
+          <div className="max-w-[1120px] mx-auto px-6 py-20 md:py-28 flex flex-col items-center text-center gap-6">
+            <p className="font-serif text-xl md:text-2xl text-[hsl(var(--av-night))] max-w-[30ch]">
+              Your practice begins with a breath — not a package.
             </p>
-            <Button asChild variant="outline" className="h-14 px-10 rounded-2xl border-white/20 text-white hover:bg-white/10 font-bold">
-              <Link href="/contact">Request Bespoke Protocol</Link>
-            </Button>
-          </section>
-        </div>
+            <Link
+              href="/step-1"
+              className="inline-flex h-12 md:h-14 min-h-[44px] items-center justify-center px-8 md:px-10 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] font-body font-medium text-base transition-transform duration-[var(--duration-micro)] active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))]"
+            >
+              Begin Your Journey
+            </Link>
+            <Link
+              href="/services"
+              className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:text-[hsl(var(--av-night))] hover:decoration-[hsl(var(--av-gold))] transition-colors"
+            >
+              Browse by concern
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );
-};
-
-export default Programs;
+}

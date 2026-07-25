@@ -4,10 +4,21 @@ import { Pool } from 'pg'
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
+function shouldUseSsl(connectionString: string | undefined): boolean {
+  if (!connectionString) return false
+  if (/sslmode=disable/i.test(connectionString)) return false
+  if (/localhost|127\.0\.0\.1/i.test(connectionString)) return false
+  // Supabase / cloud poolers typically need TLS
+  return true
+}
+
 function createPrismaClient() {
+  const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL
   const pool = new Pool({
-    connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    connectionString,
+    ...(shouldUseSsl(connectionString)
+      ? { ssl: { rejectUnauthorized: false } }
+      : {}),
     connectionTimeoutMillis: 10000,
   })
   const adapter = new PrismaPg(pool)

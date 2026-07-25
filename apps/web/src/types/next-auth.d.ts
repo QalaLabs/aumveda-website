@@ -1,20 +1,23 @@
 import type { DefaultSession } from 'next-auth'
+import type { UserRole } from '@aumveda/types'
 
 declare module 'next-auth' {
   interface Session {
     user: {
       id: string
-      role: 'user' | 'admin'
+      role: UserRole
     } & DefaultSession['user']
   }
   interface User {
-    role: 'user' | 'admin'
+    role: UserRole
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string
-    role: 'user' | 'admin'
+    role: UserRole
+    sessionToken?: string
   }
 }
+

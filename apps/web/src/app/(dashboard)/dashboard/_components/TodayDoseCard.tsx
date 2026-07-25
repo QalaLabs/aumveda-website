@@ -2,33 +2,38 @@ import Link from 'next/link'
 
 interface Props {
   dose: { id: number; title: string; durationSec: number; promptText: string }
-  userId: string
 }
 
+/** Hero practice card — answers "What is my practice today?" */
 export default function TodayDoseCard({ dose }: Props) {
-  const mins = Math.floor(dose.durationSec / 60)
-  const secs = dose.durationSec % 60
+  const mins = Math.max(1, Math.round(dose.durationSec / 60))
 
   return (
-    <div className="bg-gradient-to-br from-brand-50 to-parchment border border-brand-100 rounded-2xl p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-brand-500 font-medium uppercase tracking-wide mb-1">Today&apos;s Daily Dose</p>
-          <h3 className="text-base font-semibold text-stone-800">{dose.title}</h3>
-          <p className="text-sm text-stone-500 mt-1 line-clamp-2">{dose.promptText}</p>
-          <p className="text-xs text-stone-400 mt-2">
-            {mins}:{secs.toString().padStart(2, '0')} min
+    <article className="relative overflow-hidden rounded-2xl bg-[hsl(var(--av-night))] text-[hsl(var(--av-parchment))]">
+      <div className="absolute inset-0 texture-paper opacity-30 pointer-events-none" aria-hidden />
+      <div className="relative p-8 md:p-10 space-y-8">
+        <div className="space-y-3">
+          <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+            Today&apos;s practice
+          </p>
+          <h2 className="font-serif text-3xl md:text-4xl leading-tight text-balance">
+            {dose.title}
+          </h2>
+          <p className="font-body text-base text-[hsl(var(--av-parchment)/0.72)] leading-relaxed max-w-[55ch]">
+            {dose.promptText}
+          </p>
+          <p className="font-mono text-sm tabular text-[hsl(var(--av-gold-soft))]">
+            {mins} min
           </p>
         </div>
+
         <Link
           href="/dashboard/dose"
-          className="flex-shrink-0 w-12 h-12 bg-brand-500 hover:bg-brand-600 rounded-full flex items-center justify-center transition-colors"
+          className="inline-flex h-12 md:h-14 items-center justify-center px-8 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium text-base transition-transform duration-100 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold-soft))]"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
+          Begin practice
         </Link>
       </div>
-    </div>
+    </article>
   )
 }

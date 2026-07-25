@@ -49,7 +49,8 @@ const portalDataSchema = z
     profileResult: z.string().max(32).optional().nullable(),
     portalCompletedAt: z.string().max(32).optional().nullable(),
   })
-  .strict()
+  // Strip unknown client fields (archetypeGift, tarotSeed, etc.) — do not .strict()
+  // or Step 3+ autosave POSTs reject with 400 and never mint a lead userId.
 
 const requestSchema = z.object({
   sessionId: z.string().min(4).max(128),

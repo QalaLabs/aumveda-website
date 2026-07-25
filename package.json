@@ -32,6 +32,9 @@
       "msgpackr-extract",
       "prisma",
       "unrs-resolver"
+    ],
+    "ignoredBuiltDependencies": [
+      "esbuild"
     ]
   },
   "dependencies": {

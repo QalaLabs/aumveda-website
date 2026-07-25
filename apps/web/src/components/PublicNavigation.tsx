@@ -1,92 +1,154 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Quiet hospitality nav — few links, one accent action → portal /step-1. */
+const NAV = [
+  { label: "About", path: "/about" },
+  { label: "Services", path: "/services" },
+  { label: "Insights", path: "/insights" },
+];
+
 const PublicNavigation = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const isHome = pathname === "/";
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Services', path: '/services' },
-    { label: 'Programs', path: '/programs' },
-    { label: 'Insights', path: '/insights' },
-    { label: 'Free Tools', path: '/tools' },
-    { label: 'Visionaries', path: '/visionaries' },
-    { label: 'Shop', path: '/shop' },
-    { label: 'Events', path: '/events' },
-    { label: 'Contact', path: '/contact' },
-  ];
+  /* Home is night-ink marketing — keep light type until scrolled. */
+  const overDark = isHome && !scrolled;
+  const ink = overDark ? "text-[hsl(var(--av-parchment))]" : "text-[hsl(var(--av-night))]";
+  const mute = overDark
+    ? "text-[hsl(var(--av-parchment)/0.7)] hover:text-[hsl(var(--av-gold-soft))]"
+    : "text-[hsl(var(--av-mute))] hover:text-[hsl(var(--av-night))]";
+  const homeScrolledInk = isHome && scrolled;
 
   return (
-    <nav className={cn(
-      "fixed top-0 left-0 right-0 z-[100] transition-all duration-500 px-6 py-4",
-      scrolled ? "bg-white/80 backdrop-blur-xl shadow-sm" : "bg-transparent"
-    )}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg group-hover:scale-110 transition-transform bg-white flex items-center justify-center">
-            <Image src="/logo.png" alt="Aumveda" width={48} height={48} className="object-contain w-10 h-10" />
-          </div>
-          <span className="text-2xl font-serif font-bold tracking-tight text-slate-900">Aumveda</span>
+    <nav
+      className={cn(
+        "fixed top-0 left-0 right-0 z-[100] transition-[background-color,backdrop-filter] duration-300",
+        scrolled
+          ? isHome
+            ? "bg-[hsl(var(--av-ink)/0.85)] backdrop-blur-md border-b border-[hsl(var(--av-parchment)/0.1)]"
+            : "bg-[hsl(var(--av-parchment)/0.92)] backdrop-blur-md border-b border-[hsl(var(--av-stone))]"
+          : "bg-transparent"
+      )}
+    >
+      <div className="max-w-[1120px] mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
+        <Link
+          href="/"
+          className={cn("flex items-center gap-3", homeScrolledInk ? "text-[hsl(var(--av-parchment))]" : ink)}
+          aria-label="AUMVEDA home"
+        >
+          <Image
+            src="/logo.png"
+            alt=""
+            width={36}
+            height={36}
+            className="object-contain w-9 h-9"
+          />
+          <span className="font-serif text-lg md:text-xl tracking-tight">AUMVEDA</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
+        <div className="hidden md:flex items-center gap-10">
+          {NAV.map((item) => (
             <Link
               key={item.path}
               href={item.path}
               className={cn(
-                "text-[10px] font-black uppercase tracking-widest transition-colors hover:text-primary",
-                pathname === item.path ? "text-primary" : "text-slate-600"
+                "font-body text-[13px] tracking-[0.04em] transition-colors",
+                homeScrolledInk
+                  ? pathname === item.path
+                    ? "text-[hsl(var(--av-parchment))]"
+                    : "text-[hsl(var(--av-parchment)/0.65)] hover:text-[hsl(var(--av-gold-soft))]"
+                  : pathname === item.path
+                    ? ink
+                    : mute
               )}
             >
               {item.label}
             </Link>
           ))}
-          <Button asChild className="bg-primary hover:bg-primary/90 rounded-xl px-6 font-bold text-xs">
-            <Link href="/login">
-              <User className="w-4 h-4 mr-2" /> Client Login
-            </Link>
-          </Button>
+          <Link
+            href="/step-1"
+            className={cn(
+              "inline-flex h-10 items-center px-5 font-body text-sm font-medium transition-transform active:scale-[0.97]",
+              isHome
+                ? "rounded-none border border-[hsl(var(--av-parchment)/0.22)] text-[hsl(var(--av-parchment))] uppercase tracking-[0.2em] text-[11px] hover:border-[hsl(var(--av-gold))] hover:bg-[hsl(var(--av-gold))] hover:text-[hsl(var(--av-ink))]"
+                : "rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))]"
+            )}
+          >
+            Begin
+          </Link>
         </div>
 
-        <button className="md:hidden text-slate-900" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X /> : <Menu />}
+        <button
+          type="button"
+          className={cn("md:hidden p-2", homeScrolledInk ? "text-[hsl(var(--av-parchment))]" : ink)}
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 bg-white border-t border-slate-100 p-6 flex flex-col gap-4 md:hidden animate-in slide-in-from-top-4">
-          {navItems.map((item) => (
+      {open && (
+        <div
+          className={cn(
+            "md:hidden border-t px-6 py-6 flex flex-col gap-4",
+            isHome
+              ? "border-[hsl(var(--av-parchment)/0.1)] bg-[hsl(var(--av-ink))]"
+              : "border-[hsl(var(--av-stone))] bg-[hsl(var(--av-parchment))]"
+          )}
+        >
+          {NAV.map((item) => (
             <Link
               key={item.path}
               href={item.path}
-              onClick={() => setIsOpen(false)}
+              onClick={() => setOpen(false)}
               className={cn(
-                "text-sm font-bold uppercase tracking-widest py-2",
-                pathname === item.path ? "text-primary" : "text-slate-600"
+                "font-body text-base py-2",
+                isHome ? "text-[hsl(var(--av-parchment))]" : "text-[hsl(var(--av-night))]"
               )}
             >
               {item.label}
             </Link>
           ))}
-          <Button asChild className="bg-primary hover:bg-primary/90 rounded-xl w-full h-12 font-bold">
-            <Link href="/login" onClick={() => setIsOpen(false)}>Client Login</Link>
-          </Button>
+          <Link
+            href="/step-1"
+            onClick={() => setOpen(false)}
+            className={cn(
+              "inline-flex h-12 items-center justify-center font-body font-medium",
+              isHome
+                ? "border border-[hsl(var(--av-gold)/0.6)] bg-[hsl(var(--av-gold)/0.1)] text-[hsl(var(--av-parchment))] uppercase tracking-[0.24em] text-[12px]"
+                : "rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))]"
+            )}
+          >
+            Begin Your Journey
+          </Link>
+          <Link
+            href="/auth/login"
+            onClick={() => setOpen(false)}
+            className={cn(
+              "text-center font-body text-sm py-2",
+              isHome ? "text-[hsl(var(--av-parchment)/0.55)]" : "text-[hsl(var(--av-mute))]"
+            )}
+          >
+            Client login
+          </Link>
         </div>
       )}
     </nav>

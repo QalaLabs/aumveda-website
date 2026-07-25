@@ -2,17 +2,38 @@ import { requireSession } from '@/lib/session'
 import { prisma } from '@aumveda/db'
 import Topbar from '../../_components/Topbar'
 import Link from 'next/link'
+import JournalSearchBar from './_components/JournalSearchBar'
 
-export const metadata = { title: 'Journal' }
+export const metadata = { title: 'Journal | AUMVEDA' }
 
-const MOOD_EMOJI: Record<number, string> = { 5: '😄', 4: '🙂', 3: '😐', 2: '😔', 1: '😞' }
-const MOOD_LABEL: Record<number, string> = { 5: 'Great', 4: 'Good', 3: 'Okay', 2: 'Low', 1: 'Difficult' }
+const MOOD_LABEL: Record<number, string> = {
+  5: 'Great',
+  4: 'Good',
+  3: 'Okay',
+  2: 'Low',
+  1: 'Difficult',
+}
 
-export default async function JournalListPage() {
+export default async function JournalListPage({
+  searchParams,
+}: {
+  searchParams: { search?: string }
+}) {
   const session = await requireSession()
+  const search = searchParams.search || ''
 
   const journals = await prisma.journal.findMany({
-    where: { userId: session.user.id },
+    where: {
+      userId: session.user.id,
+      isDeleted: false,
+      ...(search && {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { body: { contains: search, mode: 'insensitive' } },
+          { tags: { has: search.toLowerCase().replace(/\s+/g, '-') } },
+        ],
+      }),
+    },
     orderBy: { createdAt: 'desc' },
     select: { id: true, title: true, mood: true, body: true, tags: true, createdAt: true },
   })
@@ -20,74 +41,113 @@ export default async function JournalListPage() {
   return (
     <>
       <Topbar title="Journal" />
-      <div className="px-4 lg:px-8 py-6 max-w-2xl mx-auto">
-        <div className="flex justify-end mb-5">
-          <Link
-            href="/dashboard/journal/new"
-            className="bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition"
-          >
-            + New entry
-          </Link>
-        </div>
-
-        {journals.length === 0 ? (
-          <div className="bg-white border border-stone-100 rounded-2xl p-12 text-center">
-            <div className="text-5xl mb-4">📝</div>
-            <h2 className="text-lg font-semibold text-stone-800 mb-2">Your journal is empty</h2>
-            <p className="text-sm text-stone-500 mb-6">
-              Writing even a few lines each day can transform how you feel.
+      <main className="min-h-[calc(100vh-3.5rem)] bg-[hsl(var(--av-parchment))] texture-paper">
+        <div className="px-4 lg:px-8 py-10 md:py-14 max-w-2xl mx-auto space-y-10">
+          <header className="space-y-2">
+            <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+              Journal
             </p>
+            <h1 className="font-serif text-3xl md:text-4xl text-[hsl(var(--av-night))] text-balance">
+              How do I feel?
+            </h1>
+            <p className="font-body text-base text-[hsl(var(--av-mute))] max-w-[50ch] leading-relaxed">
+              A quiet place to notice what is present.
+            </p>
+          </header>
+
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+            <JournalSearchBar />
             <Link
               href="/dashboard/journal/new"
-              className="inline-block bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition"
+              className="inline-flex h-11 min-h-[44px] items-center justify-center px-6 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] font-body text-sm font-medium transition-transform duration-[var(--duration-micro)] active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))]"
             >
-              Write your first entry
+              New entry
             </Link>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {journals.map((j) => (
-              <Link
-                key={j.id}
-                href={`/dashboard/journal/${j.id}`}
-                className="flex items-start gap-4 bg-white border border-stone-100 hover:border-stone-200 rounded-2xl px-5 py-4 transition-colors"
+
+          {journals.length === 0 ? (
+            <section
+              aria-labelledby="journal-empty-heading"
+              className="border-t border-[hsl(var(--av-stone))] pt-12 pb-4 text-center space-y-5"
+            >
+              <h2
+                id="journal-empty-heading"
+                className="font-serif text-2xl text-[hsl(var(--av-night))] text-balance"
               >
-                <span className="text-2xl flex-shrink-0 mt-0.5">
-                  {MOOD_EMOJI[j.mood ?? 3] ?? '📝'}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-stone-800 truncate">
-                      {j.title ?? 'Untitled entry'}
-                    </p>
-                    <p className="text-xs text-stone-400 flex-shrink-0">
-                      {new Date(j.createdAt).toLocaleDateString('en-IN', {
-                        day: 'numeric', month: 'short',
-                      })}
-                    </p>
-                  </div>
-                  <p className="text-xs text-stone-400 mt-0.5">
-                    {j.mood ? MOOD_LABEL[j.mood] : ''}{j.mood && j.body ? ' · ' : ''}
-                    {j.body ? j.body.slice(0, 80) + (j.body.length > 80 ? '…' : '') : ''}
-                  </p>
-                  {(j.tags as string[])?.length > 0 && (
-                    <div className="flex gap-1.5 mt-2 flex-wrap">
-                      {(j.tags as string[]).slice(0, 3).map((tag) => (
-                        <span key={tag} className="text-xs bg-stone-100 text-stone-500 rounded-full px-2 py-0.5">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <svg className="w-4 h-4 text-stone-300 flex-shrink-0 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+                {search ? 'Nothing matched' : 'Begin with a few lines'}
+              </h2>
+              <p className="font-body text-base text-[hsl(var(--av-mute))] max-w-[40ch] mx-auto leading-relaxed">
+                {search
+                  ? 'Try a different word, or clear the search to see all entries.'
+                  : 'Writing even briefly can soften what you carry. There is no right way—only honesty.'}
+              </p>
+              {!search && (
+                <Link
+                  href="/dashboard/journal/new"
+                  className="inline-flex h-12 min-h-[44px] items-center justify-center px-8 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body text-base font-medium transition-transform duration-[var(--duration-micro)] active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-night))]"
+                >
+                  Write your first entry
+                </Link>
+              )}
+            </section>
+          ) : (
+            <section aria-label="Journal entries">
+              <ul className="divide-y divide-[hsl(var(--av-stone))] border-t border-b border-[hsl(var(--av-stone))]">
+                {journals.map((j) => (
+                  <li key={j.id}>
+                    <Link
+                      href={`/dashboard/journal/${j.id}`}
+                      className="group flex items-start gap-4 py-5 px-1 -mx-1 transition-colors duration-[var(--duration-ui)] hover:bg-[hsl(var(--av-stone)/0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))] rounded-sm"
+                    >
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h2 className="font-serif text-lg text-[hsl(var(--av-night))] truncate group-hover:text-[hsl(var(--av-ink))]">
+                            {j.title ?? 'Untitled entry'}
+                          </h2>
+                          <time
+                            dateTime={new Date(j.createdAt).toISOString()}
+                            className="font-body text-xs text-[hsl(var(--av-mute))] flex-shrink-0 tabular"
+                          >
+                            {new Date(j.createdAt).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}
+                          </time>
+                        </div>
+                        <p className="font-body text-sm text-[hsl(var(--av-mute))] leading-relaxed line-clamp-2">
+                          {j.mood != null && (
+                            <span className="text-[hsl(var(--av-ink-text))]">
+                              {MOOD_LABEL[j.mood] ?? ''}
+                            </span>
+                          )}
+                          {j.mood != null && j.body ? ' · ' : ''}
+                          {j.body
+                            ? j.body.slice(0, 100) + (j.body.length > 100 ? '…' : '')
+                            : ''}
+                        </p>
+                        {(j.tags as string[])?.length > 0 && (
+                          <p className="font-body text-xs text-[hsl(var(--av-mute))] pt-1">
+                            {(j.tags as string[])
+                              .slice(0, 3)
+                              .map((tag) => `#${tag}`)
+                              .join('  ')}
+                          </p>
+                        )}
+                      </div>
+                      <span
+                        aria-hidden
+                        className="font-body text-[hsl(var(--av-mute))] mt-1 group-hover:text-[hsl(var(--av-gold))] transition-colors"
+                      >
+                        →
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </main>
     </>
   )
 }

@@ -12,58 +12,79 @@ import { createServerClient } from '@supabase/ssr'
  */
 export async function requireSession() {
   if (process.env.NODE_ENV !== 'production' && process.env.DEV_BYPASS === 'true') {
-    // Look up (or create) the dev user and return a mock session
-    let user = await prisma.user.findUnique({ where: { email: 'dev@aumveda.com' } })
+    try {
+      // Look up (or create) the dev user and return a mock session
+      let user = await prisma.user.findUnique({ where: { email: 'dev@aumveda.com' } })
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: 'dev@aumveda.com',
-          name: 'Dev User',
-          emailVerified: new Date(),
-          role: 'user',
-          profile: {
-            create: {
-              timezone: 'Asia/Kolkata',
-              onboardingDone: true,
-              progress: 42,
-              streakDays: 3,
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: 'dev@aumveda.com',
+            name: 'Dev Client',
+            emailVerified: new Date(),
+            role: 'client',
+            profile: {
+              create: {
+                timezone: 'Asia/Kolkata',
+                onboardingDone: true,
+                progress: 42,
+                streakDays: 3,
+              },
             },
           },
-        },
-      })
-      // Seed a sample journal
-      await prisma.journal.create({
-        data: {
-          userId: user.id,
-          title: 'First reflection',
-          body: 'Today I started my healing journey with Aumveda. I feel a quiet sense of hope.',
-          mood: 4,
-          tags: ['gratitude', 'hope'],
-        },
-      }).catch(() => null)
-      await prisma.achievement.upsert({
-        where: { userId_key: { userId: user.id, key: 'FIRST_JOURNAL' } },
-        create: { userId: user.id, key: 'FIRST_JOURNAL' },
-        update: {},
-      }).catch(() => null)
-    } else {
-      // Ensure profile exists
-      await prisma.profile.upsert({
-        where: { userId: user.id },
-        create: { userId: user.id, timezone: 'Asia/Kolkata', onboardingDone: true, progress: 42, streakDays: 3 },
-        update: {},
-      })
-    }
+        })
+        await prisma.journal
+          .create({
+            data: {
+              userId: user.id,
+              title: 'First reflection',
+              body: 'Today I started my healing journey with Aumveda. I feel a quiet sense of hope.',
+              mood: 4,
+              tags: ['gratitude', 'hope'],
+            },
+          })
+          .catch(() => null)
+        await prisma.achievement
+          .upsert({
+            where: { userId_key: { userId: user.id, key: 'FIRST_JOURNAL' } },
+            create: { userId: user.id, key: 'FIRST_JOURNAL' },
+            update: {},
+          })
+          .catch(() => null)
+      } else {
+        await prisma.profile.upsert({
+          where: { userId: user.id },
+          create: {
+            userId: user.id,
+            timezone: 'Asia/Kolkata',
+            onboardingDone: true,
+            progress: 42,
+            streakDays: 3,
+          },
+          update: { onboardingDone: true },
+        })
+      }
 
-    return {
-      user: {
-        id: user.id,
-        email: user.email!,
-        name: user.name ?? 'Dev User',
-        role: (user.role ?? 'user') as 'user' | 'admin',
-      },
-      expires: new Date(Date.now() + 86400_000).toISOString(),
+      return {
+        user: {
+          id: user.id,
+          email: user.email!,
+          name: user.name ?? 'Dev Client',
+          role: (user.role ?? 'client') as 'user' | 'admin' | 'client',
+        },
+        expires: new Date(Date.now() + 86400_000).toISOString(),
+      }
+    } catch {
+      // DB offline — still allow local UI preview
+      return {
+        user: {
+          id: 'dev-local-preview',
+          email: 'dev@aumveda.com',
+          name: 'Dev Client',
+          role: 'client' as const,
+        },
+        expires: new Date(Date.now() + 86400_000).toISOString(),
+      }
     }
   }
 
@@ -122,4 +143,71 @@ export async function requireAdminSession() {
     user: { id: user.id, email: supabaseSession.user.email!, name: supabaseSession.user.user_metadata?.name ?? null, role: user.role as 'user' | 'admin' },
     expires: supabaseSession.expires_at ? new Date(supabaseSession.expires_at * 1000).toISOString() : '',
   }
+}
+
+/**
+ * API-route session helper. Same DEV_BYPASS behavior as requireSession,
+ * but returns null instead of redirecting when unauthenticated.
+ */
+export async function getApiSession() {
+  if (process.env.NODE_ENV !== 'production' && process.env.DEV_BYPASS === 'true') {
+    try {
+      let user = await prisma.user.findUnique({ where: { email: 'dev@aumveda.com' } })
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: 'dev@aumveda.com',
+            name: 'Dev Client',
+            emailVerified: new Date(),
+            role: 'client',
+            profile: {
+              create: {
+                timezone: 'Asia/Kolkata',
+                onboardingDone: true,
+                progress: 42,
+                streakDays: 3,
+              },
+            },
+          },
+        })
+      } else {
+        await prisma.profile.upsert({
+          where: { userId: user.id },
+          create: {
+            userId: user.id,
+            timezone: 'Asia/Kolkata',
+            onboardingDone: true,
+            progress: 42,
+            streakDays: 3,
+          },
+          update: { onboardingDone: true },
+        })
+      }
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email!,
+          name: user.name ?? 'Dev Client',
+          role: (user.role ?? 'client') as 'user' | 'admin' | 'client',
+        },
+        expires: new Date(Date.now() + 86400_000).toISOString(),
+      }
+    } catch {
+      return {
+        user: {
+          id: 'dev-local-preview',
+          email: 'dev@aumveda.com',
+          name: 'Dev Client',
+          role: 'client' as const,
+        },
+        expires: new Date(Date.now() + 86400_000).toISOString(),
+      }
+    }
+  }
+
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) return null
+  return session
 }

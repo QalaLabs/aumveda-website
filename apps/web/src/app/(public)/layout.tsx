@@ -1,101 +1,71 @@
-"use client"
+"use client";
 
-import dynamic from 'next/dynamic'
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-const PublicNavigation = dynamic(() => import('@/components/PublicNavigation'), { ssr: false })
-import Image from 'next/image'
-import Link from 'next/link'
-import { Mail, Phone, MapPin, Globe, PlayCircle } from 'lucide-react'
+const PublicNavigation = dynamic(() => import("@/components/PublicNavigation"), {
+  ssr: false,
+});
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className={cn(
+        "min-h-screen",
+        isHome ? "bg-[hsl(var(--av-ink))]" : "bg-[hsl(var(--av-parchment))]"
+      )}
+    >
       <PublicNavigation />
       <main>{children}</main>
-      <footer className="bg-slate-950 text-white pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 pb-16 border-b border-white/10">
-            {/* Brand */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl overflow-hidden bg-white flex items-center justify-center">
-                  <Image src="/logo.png" alt="Aumveda" width={48} height={48} className="object-contain w-10 h-10" />
-                </div>
-                <span className="text-2xl font-serif font-bold">Aumveda</span>
+
+      {/* Homepage carries its own closing beat — no second marketing footer */}
+      {!isHome && (
+        <footer className="bg-[hsl(var(--av-night))] text-[hsl(var(--av-parchment))] pt-20 pb-12">
+          <div className="max-w-[1120px] mx-auto px-6 space-y-12">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
+              <div className="space-y-4 max-w-sm">
+                <p className="font-serif text-2xl tracking-tight">AUMVEDA</p>
+                <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.5)] leading-relaxed">
+                  Mother–Daughter Neuro-Vedic Healing. Your Daily Dose of Healing.
+                </p>
               </div>
-              <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
-                A multi-dimensional synthesis of clinical psychology and Vedic wisdom, designed to reprogram your human system at the deepest level.
-              </p>
-              <div className="flex items-center gap-4">
-                <a href="https://instagram.com/aumveda" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10">
-                  <Globe className="w-4 h-4 text-slate-400" />
-                </a>
-                <a href="https://youtube.com/@aumveda" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10">
-                  <PlayCircle className="w-4 h-4 text-slate-400" />
-                </a>
+              <nav className="flex flex-wrap gap-x-8 gap-y-3 font-body text-sm text-[hsl(var(--av-parchment)/0.45)]">
+                <Link href="/about" className="hover:text-[hsl(var(--av-gold-soft))]">
+                  About
+                </Link>
+                <Link href="/services" className="hover:text-[hsl(var(--av-gold-soft))]">
+                  Services
+                </Link>
+                <Link href="/insights" className="hover:text-[hsl(var(--av-gold-soft))]">
+                  Insights
+                </Link>
+                <Link href="/contact" className="hover:text-[hsl(var(--av-gold-soft))]">
+                  Contact
+                </Link>
+                <Link href="/auth/login" className="hover:text-[hsl(var(--av-gold-soft))]">
+                  Client login
+                </Link>
+              </nav>
+            </div>
+            <div className="pt-8 border-t border-[hsl(var(--av-parchment)/0.1)] flex flex-col sm:flex-row justify-between gap-4 font-body text-xs text-[hsl(var(--av-parchment)/0.3)]">
+              <p>© {new Date().getFullYear()} AUMVEDA</p>
+              <div className="flex gap-6">
+                <Link href="/privacy-policy" className="hover:text-[hsl(var(--av-parchment)/0.6)]">
+                  Privacy
+                </Link>
+                <Link href="/terms" className="hover:text-[hsl(var(--av-parchment)/0.6)]">
+                  Terms
+                </Link>
               </div>
-            </div>
-
-            {/* Services */}
-            <div className="space-y-5">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400">Services</h4>
-              <ul className="space-y-3">
-                {['CBT Therapy', 'Hypnosis', 'Sound Therapy', 'Breathwork', 'Vedic Astrology', 'Vastu Shastra'].map(s => (
-                  <li key={s}><Link href="/services" className="text-sm text-slate-400 hover:text-white transition-colors">{s}</Link></li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Explore */}
-            <div className="space-y-5">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400">Explore</h4>
-              <ul className="space-y-3">
-                {[
-                  { label: 'Programs', href: '/programs' },
-                  { label: 'Free Tools', href: '/tools' },
-                  { label: 'Insights', href: '/insights' },
-                  { label: 'Events & Retreats', href: '/events' },
-                  { label: 'The Visionaries', href: '/visionaries' },
-                  { label: 'About Us', href: '/about' },
-                ].map(l => (
-                  <li key={l.href}><Link href={l.href} className="text-sm text-slate-400 hover:text-white transition-colors">{l.label}</Link></li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div className="space-y-5">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-amber-400">Contact</h4>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-slate-500 mt-0.5 shrink-0" />
-                  <a href="mailto:hello@aumveda.com" className="text-sm text-slate-400 hover:text-white transition-colors">hello@aumveda.com</a>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-slate-500 mt-0.5 shrink-0" />
-                  <a href="tel:+919999999999" className="text-sm text-slate-400 hover:text-white transition-colors">+91 99999 99999</a>
-                </li>
-                <li className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-slate-500 mt-0.5 shrink-0" />
-                  <span className="text-sm text-slate-400">Mumbai & Jaipur, India</span>
-                </li>
-              </ul>
-              <Link href="/contact" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-bold uppercase tracking-widest transition-colors">
-                Book a Session
-              </Link>
             </div>
           </div>
-
-          <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-600">
-            <p>© {new Date().getFullYear()} Aumveda. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <Link href="/privacy-policy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms of Service</Link>
-              <Link href="/refund-policy" className="hover:text-slate-400 transition-colors">Refunds</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
-  )
+  );
 }
