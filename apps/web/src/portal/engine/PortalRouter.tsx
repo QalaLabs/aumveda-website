@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { usePortal } from './PortalContext'
 import type { PortalStep } from './types'
@@ -39,11 +39,14 @@ export function RedirectGuard({ children }: { children: React.ReactNode }) {
   const { state, isStepAccessible, goToStep } = usePortal()
   const pathname = usePathname()
   const router = useRouter()
+  const prevEngineStepRef = useRef(state.currentStep)
 
   useEffect(() => {
     if (!state.isHydrated) return
 
     const currentRouteStep = getStepFromRoute(pathname)
+    const engineAdvanced = state.currentStep > prevEngineStepRef.current
+    prevEngineStepRef.current = state.currentStep
 
     if (state.phase === 'completed') {
       if (pathname !== '/step-8') {
@@ -64,14 +67,22 @@ export function RedirectGuard({ children }: { children: React.ReactNode }) {
         router.replace(getRouteForStep(state.currentStep))
         return
       }
-      // Block inaccessible earlier steps
-      if (!isStepAccessible(currentRouteStep)) {
-        router.replace(getRouteForStep(state.currentStep))
-        return
+
+      // URL behind engine:
+      // 1) Forward-nav race (engine already advanced, pathname lagging) → push URL forward.
+      //    NEVER goToStep(url) here — that rewound Step 2 → Step 1.
+      // 2) Browser back to an earlier step → sync engine only if accessible.
+      if (currentRouteStep < state.currentStep) {
+        if (engineAdvanced) {
+          router.replace(getRouteForStep(state.currentStep))
+          return
+        }
+        if (!isStepAccessible(currentRouteStep)) {
+          router.replace(getRouteForStep(state.currentStep))
+          return
+        }
+        goToStep(currentRouteStep)
       }
-      // URL is an earlier completed step — sync engine so StepRenderer
-      // matches the registered page component (avoids "Step N not registered")
-      goToStep(currentRouteStep)
     }
   }, [state.currentStep, state.isHydrated, state.phase, pathname, router, isStepAccessible, goToStep])
 

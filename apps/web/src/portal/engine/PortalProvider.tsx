@@ -10,7 +10,7 @@ import { autosaveManager, type AutosaveManagerState } from './AutosaveManager'
 import { engine as validationEngine } from './ValidationEngine'
 import { usePortalAnalytics } from '../hooks/usePortalAnalytics'
 import { getRouteForStep } from './PortalRouter'
-import type { PortalStep, PortalData } from './types'
+import type { PortalStep, PortalData, PortalState } from './types'
 import { TOTAL_PORTAL_STEPS } from './types'
 import { useRouter } from 'next/navigation'
 import { getFeatureFlags } from '@/lib/flags'
@@ -107,18 +107,16 @@ export function PortalProvider({ children, onComplete }: PortalProviderProps) {
     const completedSteps = [...new Set([...state.completedSteps, state.currentStep])]
     const progress = calculateProgress(completedSteps)
 
-    const updatedState = {
+    const updatedState: PortalState = {
       ...state,
-      currentStep: state.currentStep,
+      currentStep: nextStep,
       completedSteps,
       portalData: state.portalData,
       progress,
-    }
-    sessionPersistence.saveToLocal({
-      ...updatedState,
-      phase: nextStep as any,
+      phase: nextStep as PortalState['phase'],
       direction: 'forward',
-    } as any)
+    }
+    sessionPersistence.saveToLocal(updatedState)
 
     dispatch({
       type: 'GO_TO_STEP',
