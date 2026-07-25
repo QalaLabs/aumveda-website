@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 const FAQ = [
   {
@@ -9,7 +10,7 @@ const FAQ = [
   },
   {
     q: 'What if I need to reschedule?',
-    a: 'Reschedule or cancel up to 24 hours before your session with no charge. Within 24 hours, we ask you to give as much notice as you can so another person can use the slot.',
+    a: 'Reschedule or cancel up to 24 hours before your session with no charge — reply to your confirmation email or use Sessions in your sanctuary. Within 24 hours, give as much notice as you can.',
   },
   {
     q: 'Do I need to prepare anything?',
@@ -44,33 +45,46 @@ export function TrustInvite({
           Discovery Call
         </p>
         <h2 className="font-serif text-3xl text-[hsl(var(--av-parchment))] text-balance">
-          You are in the right place
+          A private consultation
         </h2>
         <p className="font-body text-base text-[hsl(var(--av-parchment)/0.6)] leading-relaxed max-w-[48ch] mx-auto">
-          A calm conversation with a real practitioner — not a sales call.
+          Fifteen quiet minutes with a real practitioner — not a sales call, not a form.
         </p>
       </div>
 
-      {/* Founder */}
-      <div className="rounded-2xl border border-[hsl(var(--av-parchment)/0.12)] p-6 md:p-8 space-y-4">
-        <div className="flex items-center gap-4">
+      <div className="rounded-2xl border border-[hsl(var(--av-parchment)/0.12)] overflow-hidden">
+        <div className="relative aspect-[21/9] bg-[hsl(var(--av-night))]">
+          <Image
+            src="/marketing/founders.jpg"
+            alt="Archana Jain and Sejal Jain"
+            fill
+            className="object-cover object-center opacity-90"
+            sizes="(max-width: 640px) 100vw, 560px"
+          />
           <div
-            className="w-14 h-14 rounded-full bg-[hsl(var(--av-gold)/0.15)] border border-[hsl(var(--av-gold)/0.4)] flex items-center justify-center font-serif text-xl text-[hsl(var(--av-gold-soft))]"
+            className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--av-night))] via-transparent to-transparent"
             aria-hidden
-          >
-            {therapistName.charAt(0)}
-          </div>
-          <div>
-            <h3 className="font-serif text-xl text-[hsl(var(--av-parchment))]">{therapistName}</h3>
-            <p className="font-body text-sm text-[hsl(var(--av-gold))]">{therapistRole}</p>
-          </div>
+          />
         </div>
-        <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.7)] leading-relaxed">
-          {therapistBio}
-        </p>
+        <div className="p-6 md:p-8 space-y-4 -mt-8 relative">
+          <div className="flex items-center gap-4">
+            <div
+              className="w-14 h-14 rounded-full bg-[hsl(var(--av-gold)/0.15)] border border-[hsl(var(--av-gold)/0.4)] flex items-center justify-center font-serif text-xl text-[hsl(var(--av-gold-soft))]"
+              aria-hidden
+            >
+              {therapistName.charAt(0)}
+            </div>
+            <div>
+              <h3 className="font-serif text-xl text-[hsl(var(--av-parchment))]">{therapistName}</h3>
+              <p className="font-body text-sm text-[hsl(var(--av-gold))]">{therapistRole}</p>
+            </div>
+          </div>
+          <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.7)] leading-relaxed">
+            {therapistBio}
+          </p>
+        </div>
       </div>
 
-      {/* What happens */}
       <div className="space-y-6">
         <h3 className="font-serif text-xl text-[hsl(var(--av-parchment))] text-center">
           What happens next
@@ -79,7 +93,7 @@ export function TrustInvite({
           {[
             {
               t: 'Before',
-              d: 'We review your portal profile so you do not start from zero. A calendar confirmation arrives by email.',
+              d: 'We review your portal profile so you do not start from zero. A confirmation email and calendar invite arrive immediately.',
             },
             {
               t: 'During',
@@ -102,12 +116,16 @@ export function TrustInvite({
         </ol>
       </div>
 
-      {/* Privacy */}
-      <p className="font-body text-sm text-center text-[hsl(var(--av-parchment)/0.5)] max-w-[42ch] mx-auto leading-relaxed">
-        Confidential. India-hosted. Your story stays with the people guiding you.
-      </p>
+      <div className="space-y-3 text-center max-w-[42ch] mx-auto">
+        <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.5)] leading-relaxed">
+          Confidential. India-hosted. Your story stays with the people guiding you.
+        </p>
+        <p className="font-body text-xs text-[hsl(var(--av-parchment)/0.4)] leading-relaxed">
+          Cancel or reschedule free of charge until 24 hours before. After that, reply to your
+          confirmation so we can offer the slot to someone waiting.
+        </p>
+      </div>
 
-      {/* FAQ */}
       <div className="border-t border-[hsl(var(--av-parchment)/0.1)] pt-8 space-y-2 max-w-lg mx-auto">
         <p className="font-body text-[11px] uppercase tracking-[0.2em] text-[hsl(var(--av-parchment)/0.4)] text-center mb-4">
           Common questions
@@ -138,7 +156,7 @@ export function TrustInvite({
         <button
           type="button"
           onClick={onContinue}
-          className="min-h-[52px] px-10 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium transition-transform duration-100 active:scale-[0.97]"
+          className="min-h-[52px] px-10 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium transition-opacity duration-300 hover:opacity-90"
         >
           Choose a time
         </button>

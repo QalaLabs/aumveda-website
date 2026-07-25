@@ -14,21 +14,32 @@ const transporter = host && user
     })
   : null
 
+export type EmailAttachment = {
+  filename: string
+  content: string | Buffer
+  contentType?: string
+}
+
 export async function sendEmail({
   to,
   subject,
   html,
   text,
+  attachments,
 }: {
   to: string
   subject: string
   html: string
   text?: string
+  attachments?: EmailAttachment[]
 }) {
   if (!transporter) {
     console.log('\n┌────────────────────────────────────────────────────────┐')
     console.log(`│ [SMTP SIMULATOR] Email sent to: ${to.padEnd(25)} │`)
     console.log(`│ Subject: ${subject.padEnd(46)} │`)
+    if (attachments?.length) {
+      console.log(`│ Attachments: ${attachments.map((a) => a.filename).join(', ')}`)
+    }
     console.log('├────────────────────────────────────────────────────────┤')
     console.log(text || html)
     console.log('└────────────────────────────────────────────────────────┘\n')
@@ -42,6 +53,11 @@ export async function sendEmail({
       subject,
       html,
       text,
+      attachments: attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+      })),
     })
   } catch (error) {
     console.error(`FAILED TO SEND EMAIL to ${to}:`, error)

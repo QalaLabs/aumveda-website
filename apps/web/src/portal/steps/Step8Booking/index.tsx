@@ -13,7 +13,6 @@ import { fadeUpVariants } from '../../animation/variants'
 import { usePortal } from '../../engine/PortalContext'
 import type { StepProps, PortalData } from '../../engine/types'
 import { CalendarSelector } from './CalendarSelector'
-import { PaymentForm } from './PaymentForm'
 import { TrustInvite } from './TrustInvite'
 
 export function registerStep8() {
@@ -31,50 +30,17 @@ type SubState =
   | 'decoding'
   | 'report'
   | 'invite'
-  | 'path'
   | 'booking'
-  | 'payment'
   | 'register'
   | 'success'
 
-interface PackageOption {
-  id: 'free' | 'single' | '3_session' | '12_session'
-  name: string
-  price: number
-  duration: number
-  description: string
+const DISCOVERY = {
+  id: 'free' as const,
+  name: 'Free Discovery Call',
+  price: 0,
+  duration: 15,
+  description: '15 minutes to review your blueprint and align on what comes next.',
 }
-
-const PACKAGES: PackageOption[] = [
-  {
-    id: 'free',
-    name: 'Free Discovery Call',
-    price: 0,
-    duration: 15,
-    description: '15 minutes to review your blueprint and align on what comes next.',
-  },
-  {
-    id: 'single',
-    name: 'Deep Dive Session',
-    price: 1500,
-    duration: 60,
-    description: '60-minute somatic or Vedic deep dive with your matched practitioner.',
-  },
-  {
-    id: '3_session',
-    name: '3-Session Reset',
-    price: 3999,
-    duration: 180,
-    description: 'Three guided sessions for nervous-system regulation and integration.',
-  },
-  {
-    id: '12_session',
-    name: '12-Session Transformation',
-    price: 12999,
-    duration: 720,
-    description: 'Full pathway with personalised Daily Dose and ongoing support.',
-  },
-]
 
 function Step8Booking({ data }: StepProps<PortalData>) {
   const router = useRouter()
@@ -82,10 +48,7 @@ function Step8Booking({ data }: StepProps<PortalData>) {
 
   const [subState, setSubState] = useState<SubState>('decoding')
   const [loadingProgress, setLoadingProgress] = useState(0)
-  const [selectedPackage, setSelectedPackage] = useState<PackageOption>(PACKAGES[0])
   const [bookingTime, setBookingTime] = useState<string | null>(null)
-  const [paymentId, setPaymentId] = useState<string | null>(null)
-  const [showDeeper, setShowDeeper] = useState(false)
 
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
@@ -176,6 +139,10 @@ function Step8Booking({ data }: StepProps<PortalData>) {
     e.preventDefault()
     setRegError('')
 
+    if (!bookingTime) {
+      setRegError('Please choose a time for your Discovery Call.')
+      return
+    }
     if (password.length < 8) {
       setRegError('Password must be at least 8 characters.')
       return
@@ -202,12 +169,11 @@ function Step8Booking({ data }: StepProps<PortalData>) {
         body: JSON.stringify({
           email: data.email,
           practitioner: therapist.id,
-          serviceType: selectedPackage.id === 'free' ? 'discovery_call' : selectedPackage.name,
+          serviceType: 'discovery_call',
           bookingDatetime: bookingTime,
-          durationMinutes: selectedPackage.duration,
-          amountPaid: selectedPackage.price,
-          packageType: selectedPackage.id,
-          razorpayPaymentId: paymentId,
+          durationMinutes: DISCOVERY.duration,
+          amountPaid: 0,
+          packageType: 'free',
         }),
       })
       const bookData = await bookRes.json()
@@ -223,11 +189,19 @@ function Step8Booking({ data }: StepProps<PortalData>) {
       })
 
       if (signInResult?.error) {
-        setRegError('Account created. Please sign in to continue.')
-        setTimeout(() => router.push('/auth/login'), 2000)
+        setRegError('Account created and booking saved. Please sign in to view confirmation.')
+        setTimeout(() => {
+          router.push(
+            `/auth/login?callbackUrl=${encodeURIComponent(
+              `/dashboard/appointments/confirmed?bookingId=${bookData.bookingId}`
+            )}`
+          )
+        }, 1800)
       } else {
         setSubState('success')
-        setTimeout(() => router.push('/dashboard'), 2800)
+        setTimeout(() => {
+          router.push(`/dashboard/appointments/confirmed?bookingId=${bookData.bookingId}`)
+        }, 2200)
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
@@ -244,6 +218,7 @@ function Step8Booking({ data }: StepProps<PortalData>) {
       month: 'long',
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'Asia/Kolkata',
       timeZoneName: 'short',
     })
   }
@@ -337,7 +312,7 @@ function Step8Booking({ data }: StepProps<PortalData>) {
                 <button
                   type="button"
                   onClick={() => setSubState('invite')}
-                  className="min-h-[52px] px-10 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium active:scale-[0.97] transition-transform"
+                  className="min-h-[52px] px-10 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium transition-opacity hover:opacity-90"
                 >
                   Meet your practitioner
                 </button>
@@ -360,98 +335,9 @@ function Step8Booking({ data }: StepProps<PortalData>) {
                 therapistName={therapist.name}
                 therapistRole={therapist.role}
                 therapistBio={therapist.bio}
-                onContinue={() => {
-                  setSelectedPackage(PACKAGES[0])
-                  setSubState('path')
-                }}
+                onContinue={() => setSubState('booking')}
                 onBack={() => setSubState('report')}
               />
-            </PortalContent>
-          </motion.div>
-        )}
-
-        {subState === 'path' && (
-          <motion.div
-            key="path"
-            variants={fadeUpVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="px-4 py-12"
-          >
-            <PortalContent maxWidth="max-w-lg">
-              <div className="space-y-10 text-center">
-                <div className="space-y-3">
-                  <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
-                    How would you like to begin?
-                  </p>
-                  <h2 className="font-serif text-3xl text-[hsl(var(--av-parchment))] text-balance">
-                    Start with a Discovery Call
-                  </h2>
-                  <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)] leading-relaxed max-w-[42ch] mx-auto">
-                    Free · 15 minutes · with {therapist.name}. No obligation.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedPackage(PACKAGES[0])
-                    setSubState('booking')
-                  }}
-                  className="w-full min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium active:scale-[0.97] transition-transform"
-                >
-                  Book free Discovery Call
-                </button>
-
-                <div className="border-t border-[hsl(var(--av-parchment)/0.1)] pt-8">
-                  <button
-                    type="button"
-                    onClick={() => setShowDeeper(!showDeeper)}
-                    className="font-body text-sm text-[hsl(var(--av-parchment)/0.5)] underline underline-offset-4"
-                    aria-expanded={showDeeper}
-                  >
-                    {showDeeper ? 'Hide programmes' : 'Prefer a structured programme?'}
-                  </button>
-
-                  {showDeeper && (
-                    <ul className="mt-6 space-y-3 text-left">
-                      {PACKAGES.filter((p) => p.id !== 'free').map((pkg) => (
-                        <li key={pkg.id}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedPackage(pkg)
-                              setSubState('booking')
-                            }}
-                            className="w-full rounded-2xl border border-[hsl(var(--av-parchment)/0.12)] p-5 text-left hover:border-[hsl(var(--av-gold)/0.4)] transition-colors"
-                          >
-                            <div className="flex justify-between gap-3">
-                              <span className="font-serif text-lg text-[hsl(var(--av-parchment))]">
-                                {pkg.name}
-                              </span>
-                              <span className="font-mono text-sm tabular text-[hsl(var(--av-gold-soft))]">
-                                ₹{pkg.price.toLocaleString('en-IN')}
-                              </span>
-                            </div>
-                            <p className="mt-2 font-body text-sm text-[hsl(var(--av-parchment)/0.5)]">
-                              {pkg.description}
-                            </p>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setSubState('invite')}
-                  className="font-body text-sm text-[hsl(var(--av-parchment)/0.35)]"
-                >
-                  Back
-                </button>
-              </div>
             </PortalContent>
           </motion.div>
         )}
@@ -466,67 +352,57 @@ function Step8Booking({ data }: StepProps<PortalData>) {
             className="px-4 py-12"
           >
             <PortalContent maxWidth="max-w-xl">
-              <div className="space-y-8">
+              <div className="space-y-10">
                 <div className="text-center space-y-2">
                   <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
-                    {selectedPackage.name}
+                    Free Discovery Call
                   </p>
-                  <h2 className="font-serif text-2xl text-[hsl(var(--av-parchment))]">
+                  <h2 className="font-serif text-2xl md:text-3xl text-[hsl(var(--av-parchment))] text-balance">
                     Pick a moment that feels calm
                   </h2>
+                  <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)]">
+                    15 minutes · with {therapist.name} · no payment
+                  </p>
                 </div>
 
                 <div className="rounded-2xl border border-[hsl(var(--av-parchment)/0.12)] p-6">
                   <CalendarSelector
                     practitionerName={therapist.name}
-                    onChange={(datetime) => setBookingTime(datetime)}
+                    durationMinutes={15}
+                    onChange={(datetime) => setBookingTime(datetime || null)}
                   />
+                </div>
+
+                <div className="space-y-4 border-t border-[hsl(var(--av-parchment)/0.1)] pt-8">
+                  <h3 className="font-serif text-lg text-[hsl(var(--av-parchment))] text-center">
+                    Session expectations
+                  </h3>
+                  <ul className="space-y-3 max-w-md mx-auto font-body text-sm text-[hsl(var(--av-parchment)/0.65)] leading-relaxed">
+                    <li>Quiet private space and stable connection.</li>
+                    <li>We already hold your portal answers — come as you are.</li>
+                    <li>Join link arrives by email closer to the hour.</li>
+                    <li>Cancel or reschedule free until 24 hours before.</li>
+                  </ul>
                 </div>
 
                 <div className="flex flex-col items-center gap-3">
                   <button
                     type="button"
                     disabled={!bookingTime}
-                    onClick={() => {
-                      if (selectedPackage.id === 'free') setSubState('register')
-                      else setSubState('payment')
-                    }}
-                    className="w-full max-w-sm min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium disabled:opacity-40 active:scale-[0.97] transition-transform"
+                    onClick={() => setSubState('register')}
+                    className="w-full max-w-sm min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium disabled:opacity-40 transition-opacity hover:opacity-90"
                   >
-                    {selectedPackage.id === 'free' ? 'Continue' : 'Continue to payment'}
+                    Continue
                   </button>
                   <button
                     type="button"
-                    onClick={() => setSubState('path')}
+                    onClick={() => setSubState('invite')}
                     className="font-body text-sm text-[hsl(var(--av-parchment)/0.4)]"
                   >
                     Back
                   </button>
                 </div>
               </div>
-            </PortalContent>
-          </motion.div>
-        )}
-
-        {subState === 'payment' && (
-          <motion.div
-            key="payment"
-            variants={fadeUpVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="px-4 py-12"
-          >
-            <PortalContent maxWidth="max-w-md">
-              <PaymentForm
-                basePrice={selectedPackage.price}
-                packageName={selectedPackage.name}
-                onPaymentSuccess={(payId) => {
-                  setPaymentId(payId)
-                  setTimeout(() => setSubState('register'), 800)
-                }}
-                onCancel={() => setSubState('booking')}
-              />
             </PortalContent>
           </motion.div>
         )}
@@ -550,8 +426,8 @@ function Step8Booking({ data }: StepProps<PortalData>) {
                     Secure your place
                   </h2>
                   {bookingTime && (
-                    <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)] pt-2">
-                      {selectedPackage.name} · {formatBooking()} · {therapist.name}
+                    <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)] pt-2 leading-relaxed">
+                      Discovery Call · {formatBooking()} · {therapist.name}
                     </p>
                   )}
                 </div>
@@ -622,16 +498,16 @@ function Step8Booking({ data }: StepProps<PortalData>) {
                   </div>
 
                   <p className="font-body text-xs text-[hsl(var(--av-parchment)/0.4)] leading-relaxed">
-                    By continuing you create a private account for your practices and sessions.
-                    You can cancel or reschedule up to 24 hours before.
+                    You create a private account for your sanctuary. Confirmation email and calendar
+                    invite send immediately. Cancel or reschedule until 24 hours before — no charge.
                   </p>
 
                   <button
                     type="submit"
-                    disabled={submitting}
-                    className="w-full min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium disabled:opacity-50 active:scale-[0.97] transition-transform"
+                    disabled={submitting || !bookingTime}
+                    className="w-full min-h-[52px] rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium disabled:opacity-50 transition-opacity"
                   >
-                    {submitting ? 'Confirming…' : 'Confirm booking'}
+                    {submitting ? 'Confirming…' : 'Confirm Discovery Call'}
                   </button>
                 </form>
               </div>
@@ -653,14 +529,14 @@ function Step8Booking({ data }: StepProps<PortalData>) {
                 Confirmed
               </p>
               <h2 className="font-serif text-3xl text-[hsl(var(--av-parchment))] mt-3 text-balance">
-                You made the right decision
+                Your Discovery Call is reserved
               </h2>
               <p className="font-body text-base text-[hsl(var(--av-parchment)/0.6)] leading-relaxed mt-4">
-                A confirmation email is on its way. Your practice home is ready — we will meet you
-                {bookingTime ? ` on ${formatBooking()}` : ' soon'}.
+                Confirmation email and calendar invite are on their way
+                {bookingTime ? ` for ${formatBooking()}` : ''}.
               </p>
               <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.4)] mt-6">
-                Opening your dashboard…
+                Opening your confirmation…
               </p>
             </PortalContent>
           </motion.div>

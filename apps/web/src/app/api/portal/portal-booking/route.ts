@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@aumveda/db'
 import { z } from 'zod'
+import { sendBookingConfirmationEmail } from '@/lib/booking-confirm'
 
 const schema = z.object({
   email: z.string().email(),
   practitioner: z.enum(['archana', 'sejal']),
   serviceType: z.string(),
-  bookingDatetime: z.string(),
-  durationMinutes: z.number().int(),
+  bookingDatetime: z.string().min(1),
+  durationMinutes: z.number().int().positive(),
   amountPaid: z.number().nonnegative(),
   packageType: z.enum(['free', 'single', '3_session', '12_session']),
   razorpayPaymentId: z.string().optional().nullable(),
@@ -18,7 +19,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 })
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? 'Invalid input' },
+        { status: 400 }
+      )
     }
 
     const {
@@ -33,36 +37,47 @@ export async function POST(req: NextRequest) {
     } = parsed.data
 
     const normalizedEmail = email.toLowerCase().trim()
+    const when = new Date(bookingDatetime)
+    if (Number.isNaN(when.getTime())) {
+      return NextResponse.json({ error: 'Invalid booking time.' }, { status: 400 })
+    }
+    if (when.getTime() < Date.now() + 15 * 60_000) {
+      return NextResponse.json(
+        { error: 'Please choose a time at least 15 minutes from now.' },
+        { status: 400 }
+      )
+    }
 
-    // Find user by email
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
-      select: { id: true },
+      select: { id: true, name: true, email: true },
     })
 
-    if (!user) {
-      return NextResponse.json({ error: 'User lead not found. Please complete step 6.' }, { status: 404 })
+    if (!user?.email) {
+      return NextResponse.json(
+        { error: 'User lead not found. Please complete step 6.' },
+        { status: 404 }
+      )
     }
 
     const userId = user.id
+    // Free Discovery Call is confirmed without payment
+    const status = packageType === 'free' || amountPaid === 0 ? 'confirmed' : 'pending'
 
-    // Use Prisma transaction to ensure database consistency
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Create the booking
       const booking = await tx.booking.create({
         data: {
           userId,
           practitioner,
           serviceType,
-          bookingDatetime: new Date(bookingDatetime),
+          bookingDatetime: when,
           durationMinutes,
           amountPaid,
-          status: amountPaid > 0 ? 'confirmed' : 'pending',
+          status,
           razorpayPaymentId: razorpayPaymentId || null,
         },
       })
 
-      // 2. If a package was purchased, create it
       if (packageType !== 'free') {
         let sessionsTotal = 1
         let expiryMonths = 3
@@ -83,22 +98,19 @@ export async function POST(req: NextRequest) {
             userId,
             packageType,
             sessionsTotal,
-            sessionsUsed: 1, // first session is booked now
+            sessionsUsed: 1,
             amountPaid,
             expiresAt,
           },
         })
       }
 
-      // 3. Mark portal completion (upsert — register-lead may create a user
-      // without UserPortalData if Step 6 sync failed or was skipped)
       await tx.userPortalData.upsert({
         where: { userId },
         update: { portalCompletedAt: new Date() },
         create: { userId, portalCompletedAt: new Date() },
       })
 
-      // 4. Record a completion event
       await tx.event.create({
         data: {
           userId,
@@ -107,6 +119,21 @@ export async function POST(req: NextRequest) {
             packageType,
             practitioner,
             amountPaid,
+            bookingId: booking.id,
+          },
+          source: 'server',
+        },
+      })
+
+      await tx.event.create({
+        data: {
+          userId,
+          eventName: 'booking.confirmed',
+          payload: {
+            bookingId: booking.id,
+            practitioner,
+            serviceType,
+            bookingDatetime: when.toISOString(),
           },
           source: 'server',
         },
@@ -115,8 +142,33 @@ export async function POST(req: NextRequest) {
       return booking
     })
 
-    return NextResponse.json({ ok: true, bookingId: result.id })
-  } catch (error: any) {
+    // Email must not fail the booking — log and continue
+    try {
+      const origin =
+        req.headers.get('origin') ||
+        process.env.NEXTAUTH_URL ||
+        'https://aumveda.com'
+      await sendBookingConfirmationEmail({
+        to: user.email,
+        clientName: user.name?.split(' ')[0] || 'friend',
+        bookingId: result.id,
+        practitioner,
+        serviceType,
+        bookingDatetime: when,
+        durationMinutes,
+        siteUrl: origin,
+      })
+    } catch (emailErr) {
+      console.error('BOOKING CONFIRM EMAIL FAILED:', emailErr)
+    }
+
+    return NextResponse.json({
+      ok: true,
+      bookingId: result.id,
+      status: result.status,
+      bookingDatetime: result.bookingDatetime.toISOString(),
+    })
+  } catch (error: unknown) {
     console.error('PORTAL BOOKING ROUTE ERROR:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
