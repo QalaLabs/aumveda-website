@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Slider } from '@/components/ui/slider'
-import { getMoodColor, getMoodEmoji } from '@/utils/mood'
 import {
   Send,
   Loader2,
@@ -382,9 +381,9 @@ export default function JournalEditor({ initialData }: Props) {
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title (optional)"
+        placeholder="A title, if one arrives…"
         aria-label="Entry title"
-        className="w-full font-serif text-2xl text-[hsl(var(--av-night))] bg-transparent border-none outline-none placeholder:text-[hsl(var(--av-mute)/0.5)] focus-visible:outline-none"
+        className="w-full font-serif text-3xl md:text-4xl text-[hsl(var(--av-night))] bg-transparent border-none outline-none placeholder:text-[hsl(var(--av-mute)/0.45)] focus-visible:outline-none leading-tight"
       />
 
       <textarea
@@ -392,9 +391,9 @@ export default function JournalEditor({ initialData }: Props) {
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="What is present for you today…"
-        rows={10}
+        rows={14}
         aria-label="Journal entry body"
-        className="w-full font-body text-base text-[hsl(var(--av-ink-text))] leading-relaxed bg-transparent border-none outline-none resize-none placeholder:text-[hsl(var(--av-mute)/0.5)] max-w-[65ch] focus-visible:outline-none"
+        className="w-full font-body text-lg text-[hsl(var(--av-ink-text))] leading-[1.85] bg-transparent border-none outline-none resize-none placeholder:text-[hsl(var(--av-mute)/0.45)] max-w-[65ch] focus-visible:outline-none min-h-[280px]"
       />
 
       {aiReflection && (
@@ -420,11 +419,11 @@ export default function JournalEditor({ initialData }: Props) {
 
       <div className="space-y-3 pt-2 border-t border-[hsl(var(--av-stone))]">
         <div className="flex justify-between items-center">
-          <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-mute))] flex items-center gap-2">
-            Mood <span className="text-base normal-case tracking-normal" aria-hidden>{getMoodEmoji(mood[0])}</span>
+          <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-mute))]">
+            How the body feels
           </p>
-          <span className="font-mono text-sm tabular text-[hsl(var(--av-night))]" style={{ color: getMoodColor(mood[0]) }}>
-            {mood[0]}/10
+          <span className="font-body text-sm text-[hsl(var(--av-mute))] tabular">
+            {mood[0] <= 3 ? 'Heavy' : mood[0] <= 5 ? 'Tender' : mood[0] <= 7 ? 'Steady' : 'Light'}
           </span>
         </div>
         <Slider value={mood} onValueChange={setMood} min={1} max={10} step={1} className="py-2" />

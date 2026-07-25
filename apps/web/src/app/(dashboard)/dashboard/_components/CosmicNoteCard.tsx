@@ -1,34 +1,49 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface CosmicNoteProps {
   note: { title: string; body: string; weekOf: Date | string } | null
 }
 
-/** Weekly cosmic guidance — top of dashboard */
+/** Weekly cosmic guidance — editorial band, not a SaaS card */
 export default function CosmicNoteCard({ note }: CosmicNoteProps) {
   if (!note) return null
 
   const weekLabel = new Date(note.weekOf).toLocaleDateString('en-IN', {
     day: 'numeric',
-    month: 'short',
+    month: 'long',
   })
 
   return (
-    <article className="relative overflow-hidden rounded-2xl border border-[hsl(var(--av-gold)/0.35)] bg-[hsl(var(--av-night))] text-[hsl(var(--av-parchment))]">
-      <div className="absolute inset-0 texture-paper opacity-25 pointer-events-none" aria-hidden />
-      <div className="relative p-7 md:p-9 space-y-4">
-        <div className="flex items-baseline justify-between gap-4">
+    <article className="space-y-8">
+      <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-sm">
+        <Image
+          src="/marketing/founders.jpg"
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="(max-width: 768px) 100vw, 720px"
+          priority
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--av-parchment))] via-[hsl(var(--av-parchment)/0.35)] to-transparent"
+          aria-hidden
+        />
+      </div>
+
+      <div className="space-y-4 -mt-16 relative">
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
-            Cosmic note
+            This week&apos;s cosmic weather
           </p>
-          <p className="font-mono text-xs tabular text-[hsl(var(--av-gold-soft)/0.8)]">
+          <p className="font-mono text-xs tabular text-[hsl(var(--av-mute))]">
             Week of {weekLabel}
           </p>
         </div>
-        <h2 className="font-serif text-2xl md:text-3xl leading-tight text-balance text-[hsl(var(--av-gold-soft))]">
+        <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] text-balance text-[hsl(var(--av-night))] max-w-[18ch]">
           {note.title}
         </h2>
-        <p className="font-body text-base text-[hsl(var(--av-parchment)/0.78)] leading-relaxed max-w-[52ch]">
+        <p className="font-body text-lg text-[hsl(var(--av-mute))] leading-relaxed max-w-[42ch]">
           {note.body}
         </p>
       </div>
@@ -36,47 +51,25 @@ export default function CosmicNoteCard({ note }: CosmicNoteProps) {
   )
 }
 
-interface StreakSummaryProps {
-  streakDays: number
+interface QuietGroundingProps {
   checkInDone: boolean
-  progress: number
 }
 
-export function StreakSummary({ streakDays, checkInDone, progress }: StreakSummaryProps) {
+/** Soft grounding line — not KPI */
+export function QuietGrounding({ checkInDone }: QuietGroundingProps) {
   return (
-    <section className="rounded-2xl border border-[hsl(var(--av-stone))] bg-[hsl(40_40%_97%)] p-6 md:p-7 space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <p className="font-body text-[11px] uppercase tracking-[0.2em] text-[hsl(var(--av-mute))]">
-            Today&apos;s check-in
-          </p>
-          <p className="font-serif text-xl text-[hsl(var(--av-night))] mt-1">
-            {checkInDone ? 'Held for today' : 'A few quiet minutes'}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/check-in"
-          className="inline-flex h-11 min-h-[44px] items-center justify-center px-6 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] font-body text-sm font-medium"
-        >
-          {checkInDone ? 'Revisit' : 'Begin check-in'}
-        </Link>
-      </div>
-      <div className="flex flex-wrap gap-3 pt-1 border-t border-[hsl(var(--av-stone))]">
-        <p className="font-body text-sm text-[hsl(var(--av-night))] tabular pt-3">
-          <span className="text-[hsl(var(--av-mute))]">Streak · </span>
-          {streakDays} day{streakDays === 1 ? '' : 's'}
-        </p>
-        <p className="font-body text-sm text-[hsl(var(--av-night))] tabular pt-3">
-          <span className="text-[hsl(var(--av-mute))]">Completion · </span>
-          {Math.round(progress)}%
-        </p>
-        <Link
-          href="/dashboard/progress"
-          className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4 pt-3 ml-auto"
-        >
-          See badges
-        </Link>
-      </div>
-    </section>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-2">
+      <p className="font-body text-sm text-[hsl(var(--av-mute))] leading-relaxed max-w-[40ch]">
+        {checkInDone
+          ? 'You have already checked in today. Return whenever you need grounding.'
+          : 'A few quiet minutes to arrive in your body before practice.'}
+      </p>
+      <Link
+        href="/dashboard/check-in"
+        className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:decoration-[hsl(var(--av-gold))] shrink-0"
+      >
+        {checkInDone ? 'Revisit check-in' : 'Begin check-in'}
+      </Link>
+    </div>
   )
 }

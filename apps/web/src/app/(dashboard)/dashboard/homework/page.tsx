@@ -21,9 +21,9 @@ type HomeworkItem = {
 const STATUS_ORDER = ['assigned', 'submitted', 'reviewed'] as const
 
 const STATUS_LABEL: Record<string, string> = {
-  assigned: 'Assigned',
-  submitted: 'Submitted',
-  reviewed: 'Reviewed',
+  assigned: 'Offered',
+  submitted: 'Shared',
+  reviewed: 'Received',
 }
 
 export default function HomeworkPage() {
@@ -42,7 +42,7 @@ export default function HomeworkPage() {
       const data = await res.json()
       if (data.success) setItems(data.items ?? [])
     } catch {
-      setError('Could not load homework.')
+      setError('Could not load practice.')
     } finally {
       setLoading(false)
     }
@@ -67,7 +67,7 @@ export default function HomeworkPage() {
       })
       const data = await res.json()
       if (!res.ok || !data.success) {
-        setError(data.error || 'Submit failed.')
+        setError(data.error || 'Could not share.')
         return
       }
       setActiveId(null)
@@ -75,7 +75,7 @@ export default function HomeworkPage() {
       setUrl('')
       await load()
     } catch {
-      setError('Could not submit. Try again.')
+      setError('Could not share. Try again.')
     } finally {
       setSubmitting(false)
     }
@@ -88,7 +88,7 @@ export default function HomeworkPage() {
 
   return (
     <>
-      <Topbar title="Homework" />
+      <Topbar title="Practice" />
       <main className="min-h-[calc(100vh-3.5rem)] bg-[hsl(var(--av-parchment))] texture-paper">
         <div className="px-4 lg:px-8 py-10 md:py-14 max-w-2xl mx-auto space-y-12 pb-24">
           <header className="space-y-3">
@@ -96,10 +96,11 @@ export default function HomeworkPage() {
               Between sessions
             </p>
             <h1 className="font-serif text-3xl md:text-4xl text-[hsl(var(--av-night))] text-balance">
-              Your homework
+              Your practice
             </h1>
             <p className="font-body text-base text-[hsl(var(--av-mute))] max-w-[50ch] leading-relaxed">
-              Practices assigned by your healer. Offer a reflection or a link when you are ready.
+              Guidance from your healers — integration, not assignment. Share a reflection when you
+              are ready.
             </p>
           </header>
 
@@ -110,11 +111,11 @@ export default function HomeworkPage() {
           )}
 
           {loading ? (
-            <div className="h-32 rounded-2xl bg-[hsl(40_40%_97%)] animate-pulse" />
+            <div className="h-32 rounded-sm bg-[hsl(var(--av-stone)/0.35)] animate-pulse" />
           ) : items.length === 0 ? (
             <section className="border-t border-[hsl(var(--av-stone))] pt-10 space-y-4 text-center">
               <h2 className="font-serif text-2xl text-[hsl(var(--av-night))]">
-                Nothing assigned yet
+                Nothing offered yet
               </h2>
               <p className="font-body text-[hsl(var(--av-mute))] max-w-[40ch] mx-auto leading-relaxed">
                 After your next session, practices will appear here. Until then, your daily check-in
@@ -150,7 +151,7 @@ export default function HomeworkPage() {
                               )}
                               {item.dueAt && (
                                 <p className="font-body text-xs text-[hsl(var(--av-mute))]">
-                                  Due{' '}
+                                  Hold by{' '}
                                   {new Date(item.dueAt).toLocaleDateString('en-IN', {
                                     day: 'numeric',
                                     month: 'short',
@@ -162,29 +163,29 @@ export default function HomeworkPage() {
                             {item.status === 'assigned' && (
                               <div className="space-y-3">
                                 {activeId === item.id ? (
-                                  <div className="space-y-3 rounded-2xl border border-[hsl(var(--av-stone))] bg-[hsl(40_40%_97%)] p-4">
+                                  <div className="space-y-3 border border-[hsl(var(--av-stone))] bg-[hsl(40_40%_97%)] p-5">
                                     <textarea
                                       placeholder="Your reflection…"
                                       value={text}
                                       onChange={(e) => setText(e.target.value)}
                                       rows={3}
-                                      className="w-full rounded-xl border border-[hsl(var(--av-stone))] bg-transparent px-3 py-2 font-body text-sm text-[hsl(var(--av-night))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--av-gold))]"
+                                      className="w-full rounded-sm border border-[hsl(var(--av-stone))] bg-transparent px-3 py-2 font-body text-sm text-[hsl(var(--av-night))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--av-gold))]"
                                     />
                                     <input
                                       type="url"
                                       placeholder="Or a link (optional)"
                                       value={url}
                                       onChange={(e) => setUrl(e.target.value)}
-                                      className="w-full min-h-[44px] rounded-xl border border-[hsl(var(--av-stone))] bg-transparent px-3 py-2 font-body text-sm text-[hsl(var(--av-night))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--av-gold))]"
+                                      className="w-full min-h-[44px] rounded-sm border border-[hsl(var(--av-stone))] bg-transparent px-3 py-2 font-body text-sm text-[hsl(var(--av-night))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[hsl(var(--av-gold))]"
                                     />
                                     <div className="flex gap-3">
                                       <button
                                         type="button"
                                         disabled={submitting}
                                         onClick={() => void submit(item.id)}
-                                        className="inline-flex h-11 items-center px-5 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body text-sm font-medium disabled:opacity-60"
+                                        className="inline-flex h-11 items-center px-5 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] font-body text-sm font-medium disabled:opacity-60"
                                       >
-                                        {submitting ? 'Sending…' : 'Submit'}
+                                        {submitting ? 'Sharing…' : 'Share reflection'}
                                       </button>
                                       <button
                                         type="button"

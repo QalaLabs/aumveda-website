@@ -4,18 +4,9 @@ import { prisma } from '@aumveda/db'
 import Link from 'next/link'
 import Topbar from '../_components/Topbar'
 import TodayDoseCard from './_components/TodayDoseCard'
-import CosmicNoteCard, { StreakSummary } from './_components/CosmicNoteCard'
+import CosmicNoteCard, { QuietGrounding } from './_components/CosmicNoteCard'
 
-export const metadata = { title: 'Your Practice | AUMVEDA' }
-
-const PROFILE_LABEL: Record<string, string> = {
-  anxious_achiever: 'Anxious Achiever',
-  wounded_warrior: 'Wounded Warrior',
-  frozen_heart: 'Frozen Heart',
-  lost_soul: 'Lost Soul',
-  silent_sufferer: 'Silent Sufferer',
-  awakening_one: 'Awakening One',
-}
+export const metadata = { title: 'Your Sanctuary | AUMVEDA' }
 
 export default async function DashboardPage() {
   const session = await requireSession()
@@ -35,7 +26,6 @@ export default async function DashboardPage() {
     durationSec: number
     promptText: string
   } | null
-  let portalData = null as { profileResult: string | null; chakraSelected: string | null } | null
   let user = null as { name: string | null } | null
   let nextAppointment = null as {
     bookingDatetime: Date
@@ -50,7 +40,6 @@ export default async function DashboardPage() {
     ;[
       profile,
       todayDose,
-      portalData,
       user,
       nextAppointment,
       recentJournals,
@@ -66,7 +55,6 @@ export default async function DashboardPage() {
         orderBy: { publishDate: 'desc' },
         select: { id: true, title: true, durationSec: true, promptText: true },
       }),
-      prisma.userPortalData.findUnique({ where: { userId } }),
       prisma.user.findUnique({
         where: { id: userId },
         select: { name: true },
@@ -96,7 +84,6 @@ export default async function DashboardPage() {
       }),
     ])
   } catch {
-    // Local preview without DB — show empty sanctuary shell
     profile = { progress: 42, streakDays: 3, onboardingDone: true }
     user = { name: session.user.name ?? 'Dev Client' }
     cosmicNote = {
@@ -116,39 +103,38 @@ export default async function DashboardPage() {
     day: 'numeric',
     month: 'long',
   })
-  const profileLabel = PROFILE_LABEL[portalData?.profileResult || ''] || null
-  const chakraLabel = portalData?.chakraSelected
-    ? portalData.chakraSelected.replace(/_/g, ' ')
-    : null
 
   return (
     <>
       <Topbar />
-      <main className="min-h-screen bg-[hsl(var(--av-parchment))]">
-        <div className="max-w-[720px] mx-auto px-6 py-10 md:py-14 space-y-10">
-          <header className="space-y-1">
+      <main className="min-h-screen bg-[hsl(var(--av-parchment))] texture-paper">
+        <div className="max-w-[720px] mx-auto px-6 py-10 md:py-14 space-y-14 pb-24">
+          {/* Arrival */}
+          <header className="space-y-2">
             <p className="font-body text-sm text-[hsl(var(--av-mute))]">{dateLabel}</p>
-            <h1 className="font-serif text-2xl md:text-3xl text-[hsl(var(--av-night))]">
-              {firstName}, your practice is ready.
+            <h1 className="font-serif text-2xl md:text-3xl text-[hsl(var(--av-night))] text-balance">
+              Welcome back, {firstName}.
             </h1>
+            <p className="font-body text-base text-[hsl(var(--av-mute))] max-w-[40ch] leading-relaxed">
+              Your private healing space. One practice. Soft pace.
+            </p>
           </header>
 
+          {/* Cosmic Weather — emotional anchor */}
           <CosmicNoteCard note={cosmicNote} />
 
-          <StreakSummary
-            streakDays={profile?.streakDays ?? 0}
-            checkInDone={!!todayCheckIn?.completedAt}
-            progress={profile?.progress ?? 0}
-          />
+          {/* Grounding */}
+          <QuietGrounding checkInDone={!!todayCheckIn?.completedAt} />
 
+          {/* Today’s Dose — hero */}
           {todayDose ? (
             <TodayDoseCard dose={todayDose} />
           ) : (
-            <section className="rounded-2xl border border-[hsl(var(--av-stone))] bg-[hsl(40_40%_97%)] p-8 md:p-10 space-y-4">
+            <section className="space-y-4 border-t border-[hsl(var(--av-stone))] pt-12">
               <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
                 Today&apos;s practice
               </p>
-              <h2 className="font-serif text-2xl text-[hsl(var(--av-night))]">
+              <h2 className="font-serif text-3xl text-[hsl(var(--av-night))] text-balance">
                 Your first dose arrives after the portal.
               </h2>
               <p className="font-body text-[hsl(var(--av-mute))] leading-relaxed max-w-[50ch]">
@@ -164,138 +150,118 @@ export default async function DashboardPage() {
             </section>
           )}
 
-          <section className="space-y-6 border-t border-[hsl(var(--av-stone))] pt-10">
-            <p className="font-body text-[11px] uppercase tracking-[0.2em] text-[hsl(var(--av-mute))]">
-              Alongside
-            </p>
+          {/* Reflection + secondary */}
+          <section className="space-y-0 divide-y divide-[hsl(var(--av-stone))] border-t border-[hsl(var(--av-stone))]">
+            <div className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="font-body text-sm text-[hsl(var(--av-mute))]">Reflection</p>
+                <p className="font-serif text-xl text-[hsl(var(--av-night))] mt-0.5">
+                  {recentJournals[0]
+                    ? recentJournals[0].title || 'Continue reflecting'
+                    : 'How do you feel?'}
+                </p>
+              </div>
+              <Link
+                href={
+                  recentJournals[0]
+                    ? `/dashboard/journal/${recentJournals[0].id}`
+                    : '/dashboard/journal/new'
+                }
+                className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:decoration-[hsl(var(--av-gold))]"
+              >
+                {recentJournals[0] ? 'Open' : 'Write'}
+              </Link>
+            </div>
 
-            <div className="space-y-0 divide-y divide-[hsl(var(--av-stone))]">
-              {nextAppointment ? (
-                <div className="py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div>
-                    <p className="font-body text-sm text-[hsl(var(--av-mute))]">Next session</p>
-                    <p className="font-serif text-lg text-[hsl(var(--av-night))] mt-0.5">
-                      {new Date(nextAppointment.bookingDatetime).toLocaleDateString('en-IN', {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
+            {nextAppointment ? (
+              <div className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="font-body text-sm text-[hsl(var(--av-mute))]">Next session</p>
+                  <p className="font-serif text-xl text-[hsl(var(--av-night))] mt-0.5">
+                    {new Date(nextAppointment.bookingDatetime).toLocaleDateString('en-IN', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                  {nextAppointment.practitioner ? (
                     <p className="font-body text-sm text-[hsl(var(--av-mute))] capitalize mt-0.5">
                       with {nextAppointment.practitioner}
                     </p>
-                  </div>
-                  {nextAppointment.zoomLink ? (
-                    <a
-                      href={nextAppointment.zoomLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-10 items-center px-5 rounded-full border border-[hsl(var(--av-night))] text-[hsl(var(--av-night))] font-body text-sm"
-                    >
-                      Join
-                    </a>
-                  ) : (
-                    <Link
-                      href="/dashboard/appointments"
-                      className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4"
-                    >
-                      View appointments
-                    </Link>
-                  )}
+                  ) : null}
                 </div>
-              ) : (
-                <div className="py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div>
-                    <p className="font-body text-sm text-[hsl(var(--av-mute))]">Discovery Call</p>
-                    <p className="font-serif text-lg text-[hsl(var(--av-night))] mt-0.5">
-                      Ready when you are
-                    </p>
-                  </div>
-                  <Link
-                    href="/dashboard/appointments"
+                {nextAppointment.zoomLink ? (
+                  <a
+                    href={nextAppointment.zoomLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex h-10 items-center px-5 rounded-full border border-[hsl(var(--av-night))] text-[hsl(var(--av-night))] font-body text-sm"
                   >
-                    Book
+                    Join
+                  </a>
+                ) : (
+                  <Link
+                    href="/dashboard/appointments"
+                    className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4"
+                  >
+                    View sessions
                   </Link>
-                </div>
-              )}
-
-              <div className="py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                )}
+              </div>
+            ) : (
+              <div className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <p className="font-body text-sm text-[hsl(var(--av-mute))]">Homework</p>
-                  <p className="font-serif text-lg text-[hsl(var(--av-night))] mt-0.5">
-                    Between sessions
+                  <p className="font-body text-sm text-[hsl(var(--av-mute))]">Sessions</p>
+                  <p className="font-serif text-xl text-[hsl(var(--av-night))] mt-0.5">
+                    Held when you are ready
                   </p>
                 </div>
                 <Link
-                  href="/dashboard/homework"
-                  className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:decoration-[hsl(var(--av-gold))]"
+                  href="/dashboard/appointments"
+                  className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4"
                 >
                   Open
                 </Link>
               </div>
+            )}
 
-              <div className="py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <p className="font-body text-sm text-[hsl(var(--av-mute))]">Journal</p>
-                  <p className="font-serif text-lg text-[hsl(var(--av-night))] mt-0.5">
-                    {recentJournals[0]
-                      ? recentJournals[0].title || 'Continue reflecting'
-                      : 'How do you feel?'}
-                  </p>
-                </div>
-                <Link
-                  href={
-                    recentJournals[0]
-                      ? `/dashboard/journal/${recentJournals[0].id}`
-                      : '/dashboard/journal'
-                  }
-                  className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:decoration-[hsl(var(--av-gold))]"
-                >
-                  {recentJournals[0] ? 'Open' : 'Write'}
-                </Link>
+            <div className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="font-body text-sm text-[hsl(var(--av-mute))]">Practice</p>
+                <p className="font-serif text-xl text-[hsl(var(--av-night))] mt-0.5">
+                  Guidance between sessions
+                </p>
               </div>
+              <Link
+                href="/dashboard/homework"
+                className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:decoration-[hsl(var(--av-gold))]"
+              >
+                Open
+              </Link>
+            </div>
 
-              {(profileLabel || chakraLabel || (profile?.streakDays ?? 0) > 0) && (
-                <div className="py-5 space-y-3">
-                  <p className="font-body text-sm text-[hsl(var(--av-mute))]">Your map</p>
-                  <ul className="flex flex-wrap gap-2">
-                    {profileLabel && (
-                      <li className="font-body text-xs px-3 py-1.5 rounded-full bg-[hsl(40_40%_97%)] border border-[hsl(var(--av-stone))] text-[hsl(var(--av-night))]">
-                        {profileLabel}
-                      </li>
-                    )}
-                    {chakraLabel && (
-                      <li className="font-body text-xs px-3 py-1.5 rounded-full bg-[hsl(40_40%_97%)] border border-[hsl(var(--av-stone))] text-[hsl(var(--av-night))] capitalize">
-                        {chakraLabel}
-                      </li>
-                    )}
-                    {(profile?.streakDays ?? 0) > 0 && (
-                      <li className="font-body text-xs px-3 py-1.5 rounded-full bg-[hsl(40_40%_97%)] border border-[hsl(var(--av-stone))] text-[hsl(var(--av-night))] tabular">
-                        {profile?.streakDays} day streak
-                      </li>
-                    )}
-                  </ul>
-                  <div className="flex flex-wrap gap-4">
-                    <Link
-                      href="/dashboard/journey"
-                      className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4"
-                    >
-                      My journey
-                    </Link>
-                    <Link
-                      href="/dashboard/progress"
-                      className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4"
-                    >
-                      See progress
-                    </Link>
-                  </div>
-                </div>
-              )}
+            <div className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="font-body text-sm text-[hsl(var(--av-mute))]">Journey</p>
+                <p className="font-serif text-xl text-[hsl(var(--av-night))] mt-0.5">
+                  Your living story
+                </p>
+              </div>
+              <Link
+                href="/dashboard/journey"
+                className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:decoration-[hsl(var(--av-gold))]"
+              >
+                Open
+              </Link>
             </div>
           </section>
+
+          {/* Belonging / hope */}
+          <p className="font-serif text-xl md:text-2xl text-[hsl(var(--av-night))] text-balance leading-snug max-w-[28ch] pt-4">
+            You belong here. Return tomorrow — the space will wait.
+          </p>
         </div>
       </main>
     </>

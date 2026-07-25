@@ -1,13 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Moon, Footprints, BookOpen, Heart, Activity, Calendar, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import Topbar from '../../_components/Topbar'
-import ProgressGauge from '@/components/ProgressGauge'
-import ProgressChart from '@/components/ProgressChart'
-import BadgeShelf from '@/components/BadgeShelf'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface ProgressHistoryPoint {
   date: string
@@ -25,204 +20,166 @@ interface ProgressData {
   breakdown: { sleep: number; activity: number; journal: number; wellbeing: number }
 }
 
-function ScoreBar({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between text-xs">
-        <span className="flex items-center gap-1.5 text-stone-500 font-medium">
-          {icon} {label}
-        </span>
-        <span className="font-bold text-stone-700">{value}%</span>
-      </div>
-      <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-brand-400 to-brand-600 rounded-full transition-all duration-700"
-          style={{ width: `${value}%` }}
-        />
-      </div>
-    </div>
-  )
+function narrativeFrom(data: ProgressData | null): { k: string; v: string }[] {
+  if (!data) {
+    return [
+      {
+        k: 'Beginning',
+        v: 'Your transformation story starts with one practice, one reflection, one quiet return.',
+      },
+    ]
+  }
+
+  const { breakdown, current, history } = data
+  const lines: { k: string; v: string }[] = []
+
+  if (breakdown.activity >= 60) {
+    lines.push({
+      k: 'Practice',
+      v: 'My practice has become steadier. Showing up feels less like effort and more like belonging.',
+    })
+  } else if (breakdown.activity >= 30) {
+    lines.push({
+      k: 'Practice',
+      v: 'My consistency is improving. Small returns are rewriting the old pattern of starting and stopping.',
+    })
+  } else {
+    lines.push({
+      k: 'Practice',
+      v: 'I am learning to return. Even irregular practice still counts as beginning again.',
+    })
+  }
+
+  if (breakdown.journal >= 50) {
+    lines.push({
+      k: 'Reflection',
+      v: 'My reflections are changing. The page holds more honesty, and less performance.',
+    })
+  } else if (breakdown.journal > 0) {
+    lines.push({
+      k: 'Reflection',
+      v: 'I am finding words for what used to stay unnamed. Writing is becoming a soft companion.',
+    })
+  } else {
+    lines.push({
+      k: 'Reflection',
+      v: 'When I am ready, the journal will wait — without pressure to perform insight.',
+    })
+  }
+
+  if (breakdown.wellbeing >= 60) {
+    lines.push({
+      k: 'Nervous system',
+      v: 'I have become calmer. Softness is showing up in places that used to hold only urgency.',
+    })
+  } else if (breakdown.wellbeing >= 40) {
+    lines.push({
+      k: 'Nervous system',
+      v: 'Regulation is arriving in waves. Some days tender, some days steadier — both are true.',
+    })
+  } else {
+    lines.push({
+      k: 'Nervous system',
+      v: 'The body is still learning safety. Softness is allowed to take the time it needs.',
+    })
+  }
+
+  if (history.length >= 5 && current >= data.average) {
+    lines.push({
+      k: 'Identity',
+      v: 'I am becoming someone who tends to myself. That is the transformation that lasts.',
+    })
+  } else {
+    lines.push({
+      k: 'Identity',
+      v: 'Healing is not a score. It is the quiet decision to keep returning to this space.',
+    })
+  }
+
+  return lines
 }
 
 export default function ProgressPage() {
-  const [range, setRange] = useState<'7d' | '30d'>('7d')
-  const [metric, setMetric] = useState<'score' | 'wellbeing' | 'activity' | 'journal'>('score')
   const [data, setData] = useState<ProgressData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Session stats & chakra stats (simulated values based on user database profile)
-  const sessionsCount = 2 
-  const sessionsTotal = 3
-  const activeChakra = 'Heart (Anahata)'
-
   useEffect(() => {
     setLoading(true)
-    fetch(`/api/profile/progress?range=${range}`)
+    fetch('/api/profile/progress?range=30d')
       .then((r) => r.json())
       .then((d) => {
         if (d.success) setData(d)
       })
       .finally(() => setLoading(false))
-  }, [range])
+  }, [])
 
-  // Map history based on selected metric to reuse ProgressChart
-  const chartData = data
-    ? data.history.map((pt) => ({
-        date: pt.date,
-        score:
-          metric === 'score'
-            ? pt.score
-            : metric === 'wellbeing'
-            ? pt.wellbeing
-            : metric === 'activity'
-            ? pt.activity
-            : pt.journal,
-      }))
-    : []
-
-  const averageScore = chartData.length
-    ? Math.round(chartData.reduce((s, pt) => s + pt.score, 0) / chartData.length)
-    : 0
+  const narratives = narrativeFrom(data)
+  const daysHeld = data?.history?.length ?? 0
 
   return (
     <>
       <Topbar title="Progress" />
-      <div className="px-4 lg:px-8 py-6 max-w-3xl mx-auto space-y-8 bg-stone-50 min-h-screen pb-16">
-        
-        {/* Back navigation */}
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-stone-600 transition">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
-          </Link>
-        </div>
-
-        {/* Score Gauge & Metric Breakdown */}
-        <div className="bg-white border border-stone-100 rounded-3xl p-6 shadow-sm">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="flex-shrink-0">
-              <ProgressGauge value={data?.current ?? 0} size={170} strokeWidth={13} />
-            </div>
-
-            <div className="flex-1 w-full space-y-4">
-              <h3 className="text-xs font-bold text-stone-500 uppercase tracking-widest">Somatic Score Breakdown</h3>
-              <ScoreBar
-                label="Sleep Quality"
-                value={data?.breakdown.sleep ?? 50}
-                icon={<Moon className="w-3.5 h-3.5 text-indigo-400" />}
-              />
-              <ScoreBar
-                label="Practice Completion"
-                value={data?.breakdown.activity ?? 0}
-                icon={<Footprints className="w-3.5 h-3.5 text-emerald-500" />}
-              />
-              <ScoreBar
-                label="Journaling Streaks"
-                value={data?.breakdown.journal ?? 0}
-                icon={<BookOpen className="w-3.5 h-3.5 text-amber-500" />}
-              />
-              <ScoreBar
-                label="Mood / Wellbeing"
-                value={data?.breakdown.wellbeing ?? 50}
-                icon={<Heart className="w-3.5 h-3.5 text-rose-400" />}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Sessions & Chakra Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white border border-stone-100 rounded-2xl p-5 shadow-sm flex items-start gap-4">
-            <div className="p-3 rounded-xl bg-brand-50 text-brand-600">
-              <Calendar className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[10px] text-stone-400 uppercase font-semibold">Therapeutic Attendance</p>
-              <h4 className="text-xl font-bold text-stone-700 mt-1">
-                {sessionsCount} / {sessionsTotal} <span className="text-xs text-stone-400 font-normal">sessions attended</span>
-              </h4>
-              <p className="text-[10px] text-stone-400 mt-1">1 Discovery session and 1 Reset session completed.</p>
-            </div>
-          </div>
-
-          <div className="bg-white border border-stone-100 rounded-2xl p-5 shadow-sm flex items-start gap-4">
-            <div className="p-3 rounded-xl bg-brand-50 text-brand-600">
-              <Sparkles className="w-5 h-5 text-[#C9A84C]" />
-            </div>
-            <div>
-              <p className="text-[10px] text-stone-400 uppercase font-semibold">Chakra Unblocking</p>
-              <h4 className="text-lg font-bold text-stone-700 mt-1 capitalize">
-                {activeChakra}
-              </h4>
-              <p className="text-[10px] text-stone-400 mt-1">Currently working on clearing throat expressions.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Chart Section */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-stone-500 uppercase tracking-widest">Journey History</h3>
-              <select
-                value={metric}
-                onChange={(e) => setMetric(e.target.value as any)}
-                className="text-xs font-semibold bg-white border border-stone-200 rounded-lg px-2.5 py-1 outline-none text-stone-700"
-              >
-                <option value="score">Healing Score</option>
-                <option value="wellbeing">Mood / Wellbeing</option>
-                <option value="activity">Practice Completion</option>
-                <option value="journal">Journaling Activity</option>
-              </select>
-            </div>
-
-            <Tabs value={range} onValueChange={(v) => setRange(v as '7d' | '30d')}>
-              <TabsList className="h-8 bg-stone-100">
-                <TabsTrigger value="7d" className="text-xs px-3">7 Days</TabsTrigger>
-                <TabsTrigger value="30d" className="text-xs px-3">30 Days</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+      <main className="min-h-[calc(100vh-3.5rem)] bg-[hsl(var(--av-parchment))] texture-paper">
+        <div className="max-w-[720px] mx-auto px-6 py-10 md:py-14 space-y-14 pb-24">
+          <header className="space-y-3">
+            <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+              Transformation
+            </p>
+            <h1 className="font-serif text-3xl md:text-4xl text-[hsl(var(--av-night))] text-balance">
+              Who I am becoming
+            </h1>
+            <p className="font-body text-base text-[hsl(var(--av-mute))] max-w-[50ch] leading-relaxed">
+              Not charts. Not KPIs. Evidence of a quieter nervous system and a more honest life.
+            </p>
+          </header>
 
           {loading ? (
-            <div className="h-[200px] bg-stone-100 rounded-2xl animate-pulse" />
-          ) : chartData.length > 0 ? (
-            <ProgressChart data={chartData} average={averageScore} />
+            <div className="h-40 bg-[hsl(var(--av-stone)/0.35)] animate-pulse rounded-sm" />
           ) : (
-            <div className="h-[200px] bg-white border border-stone-100 rounded-2xl flex flex-col items-center justify-center text-center p-6 shadow-sm">
-              <div className="text-3xl mb-2">📊</div>
-              <p className="text-sm font-medium text-stone-600">No history data available</p>
-              <p className="text-xs text-stone-400 mt-1">Complete your first daily dose or log a reflection to start tracking.</p>
-            </div>
+            <>
+              <p className="font-serif text-2xl md:text-3xl text-[hsl(var(--av-night))] leading-snug text-balance max-w-[28ch]">
+                {daysHeld > 0
+                  ? `${daysHeld} day${daysHeld === 1 ? '' : 's'} of showing up — held without spectacle.`
+                  : 'Your first days of practice will live here as story, not score.'}
+              </p>
+
+              <section className="divide-y divide-[hsl(var(--av-stone))] border-t border-[hsl(var(--av-stone))]">
+                {narratives.map((n) => (
+                  <article key={n.k} className="py-8 space-y-3">
+                    <p className="font-body text-[11px] uppercase tracking-[0.2em] text-[hsl(var(--av-mute))]">
+                      {n.k}
+                    </p>
+                    <p className="font-serif text-xl md:text-2xl text-[hsl(var(--av-night))] leading-snug text-balance max-w-[36ch]">
+                      {n.v}
+                    </p>
+                  </article>
+                ))}
+              </section>
+
+              <div className="flex flex-wrap gap-6 pt-2">
+                <Link
+                  href="/dashboard/dose"
+                  className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4"
+                >
+                  Today&apos;s practice
+                </Link>
+                <Link
+                  href="/dashboard/journal"
+                  className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4"
+                >
+                  Journal
+                </Link>
+                <Link
+                  href="/dashboard/journey"
+                  className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4"
+                >
+                  My journey
+                </Link>
+              </div>
+            </>
           )}
         </div>
-
-        {/* Milestone badges Day 7 / 21 / 30 / 90 */}
-        <div className="rounded-2xl border border-[hsl(var(--av-stone))] bg-[hsl(40_40%_97%)] p-6 space-y-4">
-          <div>
-            <p className="font-body text-[11px] uppercase tracking-[0.2em] text-[hsl(var(--av-gold))]">
-              Streak milestones
-            </p>
-            <h3 className="font-serif text-xl text-[hsl(var(--av-night))] mt-1">
-              Day 7 · 21 · 30 · 90
-            </h3>
-            <p className="font-body text-sm text-[hsl(var(--av-mute))] mt-1 leading-relaxed">
-              Earned through daily check-ins. See the full shelf below.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/check-in"
-            className="inline-flex h-10 items-center font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4"
-          >
-            Continue your streak
-          </Link>
-        </div>
-
-        {/* Badge Shelf */}
-        <div className="bg-white border border-stone-100 rounded-3xl p-6 shadow-sm">
-          <BadgeShelf />
-        </div>
-
-      </div>
+      </main>
     </>
   )
 }

@@ -5,13 +5,13 @@ import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Practice' },
-  { href: '/dashboard/check-in', label: 'Check-in' },
+  { href: '/dashboard', label: 'Home' },
   { href: '/dashboard/dose', label: 'Dose' },
-  { href: '/dashboard/homework', label: 'Homework' },
-  { href: '/dashboard/journey', label: 'Journey' },
+  { href: '/dashboard/check-in', label: 'Check-in' },
+  { href: '/dashboard/homework', label: 'Practice' },
   { href: '/dashboard/journal', label: 'Journal' },
   { href: '/dashboard/progress', label: 'Progress' },
+  { href: '/dashboard/journey', label: 'Journey' },
   { href: '/dashboard/appointments', label: 'Sessions' },
 ]
 

@@ -14,98 +14,127 @@ const PROFILE_LABEL: Record<string, string> = {
   awakening_one: 'Awakening One',
 }
 
-const Q_LABELS: { key: keyof PortalAnswers; label: string }[] = [
-  { key: 'q1Answer', label: 'Sleep' },
-  { key: 'q2Answer', label: 'Mood' },
-  { key: 'q3Answer', label: 'Stress response' },
-  { key: 'q4Answer', label: 'Relationships' },
-  { key: 'q5Answer', label: 'Money' },
-  { key: 'q6Answer', label: 'Parents' },
-  { key: 'q7Answer', label: 'Childhood' },
-]
-
-type PortalAnswers = {
-  q1Answer: string | null
-  q2Answer: string | null
-  q3Answer: string | null
-  q4Answer: string | null
-  q5Answer: string | null
-  q6Answer: string | null
-  q7Answer: string | null
-}
-
-function JourneyRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="py-5 space-y-1.5">
-      <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-mute))]">
-        {label}
-      </p>
-      <p className="font-serif text-lg md:text-xl text-[hsl(var(--av-night))] leading-snug whitespace-pre-wrap">
-        {value}
-      </p>
-    </div>
-  )
+type Milestone = {
+  when: string
+  label: string
+  body: string
 }
 
 export default async function JourneyPage() {
   const session = await requireSession()
   const userId = session.user.id
 
-  let portalData = null as Awaited<
-    ReturnType<typeof prisma.userPortalData.findUnique>
-  >
+  let portalData = null as Awaited<ReturnType<typeof prisma.userPortalData.findUnique>>
+  let recentCompletions: { completedAt: Date; dose: { title: string } }[] = []
+  let recentJournals: { createdAt: Date; title: string | null; body: string | null }[] = []
+
   try {
-    portalData = await prisma.userPortalData.findUnique({ where: { userId } })
+    ;[portalData, recentCompletions, recentJournals] = await Promise.all([
+      prisma.userPortalData.findUnique({ where: { userId } }),
+      prisma.dailyDoseCompletion.findMany({
+        where: { userId },
+        orderBy: { completedAt: 'desc' },
+        take: 5,
+        include: { dose: { select: { title: true } } },
+      }),
+      prisma.journal.findMany({
+        where: { userId, isDeleted: false },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { createdAt: true, title: true, body: true },
+      }),
+    ])
   } catch {
     portalData = null
   }
 
-  const intention = portalData?.intentionText?.trim() || null
-  const why =
-    intention ||
-    (portalData?.profileResult
-      ? `You arrived as ${PROFILE_LABEL[portalData.profileResult] || portalData.profileResult}.`
-      : null)
+  const milestones: Milestone[] = []
 
-  const currentIdealParts: string[] = []
-  if (portalData?.chakraSelected) {
-    currentIdealParts.push(
-      `Current focus: ${portalData.chakraSelected.replace(/_/g, ' ')} chakra`
-    )
+  if (portalData?.portalCompletedAt || portalData?.intentionText || portalData?.profileResult) {
+    const when = portalData.portalCompletedAt
+      ? new Date(portalData.portalCompletedAt).toLocaleDateString('en-IN', {
+          month: 'short',
+          year: 'numeric',
+        })
+      : 'Beginning'
+    milestones.push({
+      when,
+      label: 'Why I began',
+      body:
+        portalData.intentionText?.trim() ||
+        (portalData.profileResult
+          ? `I arrived as ${PROFILE_LABEL[portalData.profileResult] || portalData.profileResult}.`
+          : 'I stepped into the portal seeking a softer way home.'),
+    })
   }
-  if (portalData?.archetypeSelected) {
-    currentIdealParts.push(`Archetype: ${portalData.archetypeSelected}`)
-  }
-  if (portalData?.tarotCard) {
-    currentIdealParts.push(
-      `Tarot: ${portalData.tarotCard}${portalData.tarotTheme ? ` · ${portalData.tarotTheme.replace(/_/g, ' ')}` : ''}`
-    )
-  }
-  const currentToIdeal = currentIdealParts.length > 0 ? currentIdealParts.join('\n') : null
 
-  const answeredQs = Q_LABELS.filter((q) => portalData?.[q.key])
-  const hasAnything =
-    !!why ||
-    !!currentToIdeal ||
-    answeredQs.length > 0 ||
-    !!portalData?.profileResult ||
-    !!portalData?.nervousSystemScore
+  if (portalData?.chakraSelected || portalData?.archetypeSelected || portalData?.tarotCard) {
+    const parts: string[] = []
+    if (portalData.chakraSelected) {
+      parts.push(`${portalData.chakraSelected.replace(/_/g, ' ')} chakra`)
+    }
+    if (portalData.archetypeSelected) parts.push(portalData.archetypeSelected)
+    if (portalData.tarotCard) {
+      parts.push(
+        `${portalData.tarotCard}${
+          portalData.tarotTheme ? ` · ${portalData.tarotTheme.replace(/_/g, ' ')}` : ''
+        }`
+      )
+    }
+    milestones.push({
+      when: 'Map',
+      label: 'Where I am',
+      body: parts.join(' · '),
+    })
+  }
+
+  if (portalData?.profileResult) {
+    milestones.push({
+      when: 'Pattern',
+      label: 'What I carry',
+      body: PROFILE_LABEL[portalData.profileResult] || portalData.profileResult.replace(/_/g, ' '),
+    })
+  }
+
+  for (const c of recentCompletions) {
+    milestones.push({
+      when: new Date(c.completedAt).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+      }),
+      label: 'Practice',
+      body: c.dose.title,
+    })
+  }
+
+  for (const j of recentJournals) {
+    milestones.push({
+      when: new Date(j.createdAt).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+      }),
+      label: 'Reflection',
+      body: j.title || (j.body ? j.body.slice(0, 120) + (j.body.length > 120 ? '…' : '') : 'A quiet entry'),
+    })
+  }
+
+  const hasAnything = milestones.length > 0
 
   return (
     <>
       <Topbar title="My Journey" />
       <main className="min-h-[calc(100vh-3.5rem)] bg-[hsl(var(--av-parchment))] texture-paper">
-        <div className="px-4 lg:px-8 py-10 md:py-14 max-w-2xl mx-auto space-y-10 pb-24">
+        <div className="px-4 lg:px-8 py-10 md:py-14 max-w-2xl mx-auto space-y-12 pb-24">
           <header className="space-y-3">
             <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
               My journey
             </p>
             <h1 className="font-serif text-3xl md:text-4xl text-[hsl(var(--av-night))] text-balance">
-              Why you began
+              A living story
             </h1>
             <p className="font-body text-base text-[hsl(var(--av-mute))] max-w-[52ch] leading-relaxed">
-              Your portal answers, held gently — intention, map, and the path from where you were to
-              where you are tending toward.
+              Milestones from your portal, practices, and reflections — not a form dump. Your path,
+              held in time.
             </p>
           </header>
 
@@ -115,98 +144,48 @@ export default async function JourneyPage() {
                 Your story starts in the portal
               </h2>
               <p className="font-body text-[hsl(var(--av-mute))] max-w-[42ch] mx-auto leading-relaxed">
-                Complete the healing profile and your intention, chakra, and pattern answers will
-                live here.
+                Complete the healing profile and your intention, map, and early practices will live
+                here as a timeline.
               </p>
               <Link
                 href="/step-1"
-                className="inline-flex h-12 items-center px-8 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body text-base font-medium"
+                className="inline-flex h-12 items-center px-8 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] font-body text-base font-medium"
               >
                 Begin the portal
               </Link>
             </section>
           ) : (
-            <section className="divide-y divide-[hsl(var(--av-stone))] border-t border-[hsl(var(--av-stone))]">
-              {why && <JourneyRow label="Why / intention" value={why} />}
-              {currentToIdeal && (
-                <JourneyRow label="Current → ideal" value={currentToIdeal} />
-              )}
-              {portalData?.profileResult && (
-                <JourneyRow
-                  label="Pattern profile"
-                  value={
-                    PROFILE_LABEL[portalData.profileResult] ||
-                    portalData.profileResult.replace(/_/g, ' ')
-                  }
-                />
-              )}
-              {(portalData?.nervousSystemScore ||
-                portalData?.relationshipScore ||
-                portalData?.childhoodScore ||
-                portalData?.financialScore) && (
-                <div className="py-5 space-y-3">
-                  <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-mute))]">
-                    Dimension scores
+            <ol className="relative border-l border-[hsl(var(--av-stone))] ml-2 space-y-0">
+              {milestones.map((m, i) => (
+                <li key={`${m.label}-${m.when}-${i}`} className="relative pl-8 py-6">
+                  <span
+                    className="absolute left-[-5px] top-8 w-2.5 h-2.5 rounded-full bg-[hsl(var(--av-gold))]"
+                    aria-hidden
+                  />
+                  <p className="font-mono text-xs tabular text-[hsl(var(--av-mute))]">{m.when}</p>
+                  <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-gold))] mt-2">
+                    {m.label}
                   </p>
-                  <ul className="flex flex-wrap gap-2">
-                    {[
-                      ['Nervous system', portalData.nervousSystemScore],
-                      ['Relationship', portalData.relationshipScore],
-                      ['Childhood', portalData.childhoodScore],
-                      ['Financial', portalData.financialScore],
-                    ]
-                      .filter(([, v]) => v)
-                      .map(([label, value]) => (
-                        <li
-                          key={label as string}
-                          className="font-body text-xs px-3 py-1.5 rounded-full border border-[hsl(var(--av-stone))] text-[hsl(var(--av-night))]"
-                        >
-                          {label}: {(value as string).replace(/_/g, ' ')}
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              )}
-              {answeredQs.length > 0 && (
-                <div className="py-5 space-y-4">
-                  <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-mute))]">
-                    Pattern answers
+                  <p className="font-serif text-xl md:text-2xl text-[hsl(var(--av-night))] mt-2 leading-snug text-balance max-w-[36ch]">
+                    {m.body}
                   </p>
-                  <ul className="space-y-3">
-                    {answeredQs.map(({ key, label }) => (
-                      <li key={key} className="font-body text-sm text-[hsl(var(--av-night))]">
-                        <span className="text-[hsl(var(--av-mute))]">{label} · </span>
-                        {portalData?.[key]}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {portalData?.portalCompletedAt && (
-                <p className="py-5 font-body text-sm text-[hsl(var(--av-mute))]">
-                  Portal completed{' '}
-                  {new Date(portalData.portalCompletedAt).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </p>
-              )}
-            </section>
+                </li>
+              ))}
+            </ol>
           )}
 
-          <div className="flex flex-wrap gap-4 pt-2">
+          <div className="flex flex-wrap gap-4 pt-2 border-t border-[hsl(var(--av-stone))]">
             <Link
               href="/dashboard/progress"
               className="font-body text-sm text-[hsl(var(--av-night))] underline underline-offset-4"
             >
-              Progress & badges
+              Who I am becoming
             </Link>
             <Link
               href="/dashboard"
               className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4"
             >
-              Back to practice
+              Back to sanctuary
             </Link>
           </div>
         </div>

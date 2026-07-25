@@ -44,10 +44,11 @@ export default async function AppointmentsPage() {
               Sessions
             </p>
             <h1 className="font-serif text-3xl md:text-4xl text-[hsl(var(--av-night))] text-balance">
-              You are held here
+              Held with care
             </h1>
             <p className="font-body text-base text-[hsl(var(--av-mute))] max-w-[55ch] leading-relaxed">
-              Your appointments, held with care. What is shared in session stays in confidence.
+              Session history lives here — quiet, confidential, part of your sanctuary, not a
+              calendar product.
             </p>
           </header>
 
