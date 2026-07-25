@@ -61,10 +61,44 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = user.id
-    // Free Discovery Call is confirmed without payment
     const status = packageType === 'free' || amountPaid === 0 ? 'confirmed' : 'pending'
 
+    // Idempotent window: same user + same start (±90s) + active booking
+    const windowStart = new Date(when.getTime() - 90_000)
+    const windowEnd = new Date(when.getTime() + 90_000)
+    const existing = await prisma.booking.findFirst({
+      where: {
+        userId,
+        serviceType,
+        bookingDatetime: { gte: windowStart, lte: windowEnd },
+        status: { in: ['pending', 'confirmed'] },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    if (existing) {
+      return NextResponse.json({
+        ok: true,
+        bookingId: existing.id,
+        status: existing.status,
+        bookingDatetime: existing.bookingDatetime.toISOString(),
+        emailSent: false,
+        duplicate: true,
+      })
+    }
+
     const result = await prisma.$transaction(async (tx) => {
+      // Re-check inside transaction against races
+      const raced = await tx.booking.findFirst({
+        where: {
+          userId,
+          serviceType,
+          bookingDatetime: { gte: windowStart, lte: windowEnd },
+          status: { in: ['pending', 'confirmed'] },
+        },
+      })
+      if (raced) return { booking: raced, created: false as const }
+
       const booking = await tx.booking.create({
         data: {
           userId,
@@ -139,34 +173,41 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      return booking
+      return { booking, created: true as const }
     })
 
-    // Email must not fail the booking — log and continue
-    try {
-      const origin =
-        req.headers.get('origin') ||
-        process.env.NEXTAUTH_URL ||
-        'https://aumveda.com'
-      await sendBookingConfirmationEmail({
-        to: user.email,
-        clientName: user.name?.split(' ')[0] || 'friend',
-        bookingId: result.id,
-        practitioner,
-        serviceType,
-        bookingDatetime: when,
-        durationMinutes,
-        siteUrl: origin,
-      })
-    } catch (emailErr) {
-      console.error('BOOKING CONFIRM EMAIL FAILED:', emailErr)
+    let emailSent = false
+    if (result.created) {
+      try {
+        const origin =
+          req.headers.get('origin') ||
+          process.env.NEXTAUTH_URL ||
+          'https://aumveda.com'
+        const mail = await sendBookingConfirmationEmail({
+          to: user.email,
+          clientName: user.name?.split(' ')[0] || 'friend',
+          bookingId: result.booking.id,
+          practitioner,
+          serviceType,
+          bookingDatetime: when,
+          durationMinutes,
+          siteUrl: origin,
+        })
+        // Simulated (no SMTP) still "ok" for booking; flag pending so UI offers ICS download
+        emailSent = !mail.simulated
+      } catch (emailErr) {
+        console.error('BOOKING CONFIRM EMAIL FAILED:', emailErr)
+        emailSent = false
+      }
     }
 
     return NextResponse.json({
       ok: true,
-      bookingId: result.id,
-      status: result.status,
-      bookingDatetime: result.bookingDatetime.toISOString(),
+      bookingId: result.booking.id,
+      status: result.booking.status,
+      bookingDatetime: result.booking.bookingDatetime.toISOString(),
+      emailSent,
+      duplicate: !result.created,
     })
   } catch (error: unknown) {
     console.error('PORTAL BOOKING ROUTE ERROR:', error)

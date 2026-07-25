@@ -15,7 +15,7 @@ export async function sendBookingConfirmationEmail(opts: {
   bookingDatetime: Date
   durationMinutes: number
   siteUrl?: string
-}) {
+}): Promise<{ simulated: boolean }> {
   const practitionerName = PRACTITIONER_LABEL[opts.practitioner] || opts.practitioner
   const whenIst = opts.bookingDatetime.toLocaleString('en-IN', {
     weekday: 'long',
@@ -112,7 +112,7 @@ export async function sendBookingConfirmationEmail(opts: {
     attendeeName: opts.clientName,
   })
 
-  await sendEmail({
+  const result = await sendEmail({
     to: opts.to,
     subject: `${title} · ${whenIst}`,
     html,
@@ -125,6 +125,7 @@ export async function sendBookingConfirmationEmail(opts: {
       },
     ],
   })
+  return { simulated: result.simulated }
 }
 
 function escapeHtml(s: string) {

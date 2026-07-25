@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -55,6 +55,7 @@ function Step8Booking({ data }: StepProps<PortalData>) {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [regError, setRegError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const submitLock = useRef(false)
 
   useEffect(() => {
     if (subState !== 'decoding') return
@@ -137,6 +138,7 @@ function Step8Booking({ data }: StepProps<PortalData>) {
 
   const handleRegisterClient = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitLock.current || submitting) return
     setRegError('')
 
     if (!bookingTime) {
@@ -152,6 +154,7 @@ function Step8Booking({ data }: StepProps<PortalData>) {
       return
     }
 
+    submitLock.current = true
     setSubmitting(true)
 
     try {
@@ -181,6 +184,9 @@ function Step8Booking({ data }: StepProps<PortalData>) {
 
       await completePortal()
 
+      const emailQ = bookData.emailSent === false ? '&email=pending' : ''
+      const confirmPath = `/dashboard/appointments/confirmed?bookingId=${bookData.bookingId}${emailQ}`
+
       const signInResult = await signIn('credentials', {
         email: data.email,
         password,
@@ -191,21 +197,18 @@ function Step8Booking({ data }: StepProps<PortalData>) {
       if (signInResult?.error) {
         setRegError('Account created and booking saved. Please sign in to view confirmation.')
         setTimeout(() => {
-          router.push(
-            `/auth/login?callbackUrl=${encodeURIComponent(
-              `/dashboard/appointments/confirmed?bookingId=${bookData.bookingId}`
-            )}`
-          )
+          router.push(`/auth/login?callbackUrl=${encodeURIComponent(confirmPath)}`)
         }, 1800)
       } else {
         setSubState('success')
         setTimeout(() => {
-          router.push(`/dashboard/appointments/confirmed?bookingId=${bookData.bookingId}`)
+          router.push(confirmPath)
         }, 2200)
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
       setRegError(message)
+      submitLock.current = false
       setSubmitting(false)
     }
   }

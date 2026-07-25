@@ -41,7 +41,9 @@ export function buildBookingIcs(opts: {
 }
 
 function formatIcsUtc(d: Date): string {
-  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
+  // Google / Apple / Outlook expect YYYYMMDDTHHMMSSZ
+  const iso = d.toISOString()
+  return iso.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')
 }
 
 function escapeIcs(s: string): string {

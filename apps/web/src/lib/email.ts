@@ -32,7 +32,7 @@ export async function sendEmail({
   html: string
   text?: string
   attachments?: EmailAttachment[]
-}) {
+}): Promise<{ ok: true; simulated: boolean }> {
   if (!transporter) {
     console.log('\n┌────────────────────────────────────────────────────────┐')
     console.log(`│ [SMTP SIMULATOR] Email sent to: ${to.padEnd(25)} │`)
@@ -43,7 +43,7 @@ export async function sendEmail({
     console.log('├────────────────────────────────────────────────────────┤')
     console.log(text || html)
     console.log('└────────────────────────────────────────────────────────┘\n')
-    return
+    return { ok: true, simulated: true }
   }
 
   try {
@@ -59,6 +59,7 @@ export async function sendEmail({
         contentType: a.contentType,
       })),
     })
+    return { ok: true, simulated: false }
   } catch (error) {
     console.error(`FAILED TO SEND EMAIL to ${to}:`, error)
     throw error
