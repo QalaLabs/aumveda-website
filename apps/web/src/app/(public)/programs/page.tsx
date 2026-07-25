@@ -1,109 +1,188 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import {
+  BeginCtaBand,
+  EditorialHero,
+  EditorialPage,
+  EditorialSection,
+} from "@/components/marketing/EditorialShell";
 
-/**
- * Programs — editorial restraint. Name the need; skip sales theatre.
- * One primary CTA → /step-1. See DESIGN.md.
- */
+export const metadata: Metadata = {
+  title: "Programmes — Transformation Stories",
+  description:
+    "Named transformations with AUMVEDA — regulate your nervous system, restore sleep, release patterns — with clear practices and outcomes.",
+};
 
-const PROGRAMS = [
+const PROGRAMMES = [
   {
-    title: "Unwind & Rewind",
-    duration: "21 days",
-    forWhom: "Burnout, decision fatigue, a nervous system that will not stand down.",
-    approach:
-      "Sound and breath to down-regulate stress, with daily ritual that restores rest without forcing productivity.",
+    title: "Regulate Your Nervous System",
+    span: "30 days",
+    forWhom: "High-functioning minds that cannot downshift. Anxiety that looks like success.",
+    transformation:
+      "From constant vigilance to a body that can rest without collapsing — so insight has somewhere safe to land.",
+    practices: [
+      "Daily Dose breath and somatic micro-practices",
+      "1:1 check-ins with Sejal",
+      "Optional chart orientation with Archana",
+    ],
+    outcomes: [
+      "Shorter recovery from stress spikes",
+      "Clearer sleep onset",
+      "A practice you can keep after day 30",
+    ],
+    img: "/marketing/meditation.jpg",
   },
   {
-    title: "Quit Smoking",
-    duration: "30 days",
-    forWhom: "A habit that outlived its usefulness — craving loops and identity still fused.",
-    approach:
-      "Hypnosis and subconscious rewiring paired with gentle detox support, so cessation becomes who you are, not what you resist.",
+    title: "Restore Deep Sleep",
+    span: "21 days",
+    forWhom: "People who fall asleep late, wake wired, or treat rest like a luxury they earn.",
+    transformation:
+      "From negotiating with the night to a wind-down ritual the nervous system recognises.",
+    practices: [
+      "Evening Dose sequences",
+      "Breath and sound protocols",
+      "Vastu / room rhythm notes when relevant",
+    ],
+    outcomes: [
+      "More consistent sleep window",
+      "Less midnight rumination",
+      "Morning clarity without force",
+    ],
+    img: "/marketing/ritual.jpg",
   },
   {
-    title: "Get Over a Breakup",
-    duration: "14 days",
-    forWhom: "Rumination, heart-ache, a self still defined by who left.",
-    approach:
-      "CBT to interrupt the loop, somatic release for what the body still holds, and a clear close so the future can open.",
+    title: "Release What Loops",
+    span: "45 days",
+    forWhom: "Breakups, grief, or habit loops that coaching alone could not close.",
+    transformation:
+      "From replaying the story to metabolising it — body, meaning, and daily return.",
+    practices: [
+      "Somatic and hypnotherapy-informed sessions with Sejal",
+      "Karmic / pattern framing with Archana where useful",
+      "Journal and Dose continuity",
+    ],
+    outcomes: [
+      "Less compulsive mental replay",
+      "Softer relationship to triggers",
+      "A forward practice, not only insight",
+    ],
+    img: "/marketing/herbs.jpg",
   },
   {
-    title: "Sleep",
-    duration: "10 days",
-    forWhom: "Tired but wired — nights that never quite arrive.",
-    approach:
-      "Vastu for the sleeping room, breath for the evening mind, and a rhythm that invites deep rest without dependence.",
+    title: "Unwind the Overachiever",
+    span: "30 days",
+    forWhom: "Leaders and creators whose outer life works while the inner system stays on.",
+    transformation:
+      "From productivity as identity to presence as capacity — without losing excellence.",
+    practices: [
+      "Boundary and breath work",
+      "Daily Dose personalised by AHI",
+      "Discovery-aligned 1:1 pacing",
+    ],
+    outcomes: [
+      "Cleaner work/rest edges",
+      "Fewer cortisol-driven decisions",
+      "A rhythm that survives busy seasons",
+    ],
+    img: "/marketing/founders.jpg",
   },
-] as const;
+];
 
 export default function ProgramsPage() {
   return (
-    <div className="min-h-screen bg-[hsl(var(--av-parchment))] texture-paper">
-      <main>
-        <section className="border-b border-[hsl(var(--av-stone))]">
-          <div className="max-w-[1120px] mx-auto px-6 pt-28 md:pt-36 pb-16 md:pb-24">
-            <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))] mb-6">
-              Programs
-            </p>
-            <h1 className="font-serif text-4xl md:text-6xl text-[hsl(var(--av-night))] leading-[1.1] max-w-[14ch]">
-              Time-bound paths for a clear need.
-            </h1>
-            <p className="mt-8 font-body text-lg text-[hsl(var(--av-mute))] leading-relaxed max-w-[55ch]">
-              Four focused journeys. Clinical care and Vedic craft, held together —
-              not stacked as features. If none fit, begin the open journey and we will
-              listen first.
-            </p>
-          </div>
-        </section>
+    <EditorialPage>
+      <EditorialHero
+        eyebrow="Programmes · Transformation"
+        title={
+          <>
+            Not products.
+            <span className="italic"> Named change.</span>
+          </>
+        }
+        lede="Each programme is a transformation story: who it is for, what shifts, which practices hold you, and what you should feel by the end — not a feature list."
+      />
 
-        <section aria-labelledby="programs-list-heading">
-          <div className="max-w-[720px] mx-auto px-6 py-16 md:py-24">
-            <h2 id="programs-list-heading" className="sr-only">
-              Program list
-            </h2>
-            <ul className="divide-y divide-[hsl(var(--av-stone))]">
-              {PROGRAMS.map((program) => (
-                <li key={program.title} className="py-10 md:py-12 first:pt-0 last:pb-0 space-y-4">
-                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                    <h3 className="font-serif text-2xl md:text-3xl text-[hsl(var(--av-night))]">
-                      {program.title}
-                    </h3>
-                    <span className="font-mono text-sm tabular-nums text-[hsl(var(--av-mute))]">
-                      {program.duration}
-                    </span>
-                  </div>
-                  <p className="font-body text-base text-[hsl(var(--av-ink-text))] leading-relaxed max-w-[60ch]">
-                    {program.forWhom}
-                  </p>
-                  <p className="font-body text-sm text-[hsl(var(--av-mute))] leading-relaxed max-w-[60ch]">
-                    {program.approach}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+      <EditorialSection eyebrow="How to read this" title="Story first. Price later.">
+        <p className="av-lede max-w-[60ch] text-mute">
+          Commerce comes after trust. Here we name the work. Fit is confirmed on a
+          Discovery Call after your portal decode — so nothing is sold into the wrong
+          nervous system.
+        </p>
+        <Link
+          href="/services"
+          className="mt-8 inline-flex text-[11px] uppercase tracking-[0.28em] text-gold hover:text-night"
+        >
+          See the full journey →
+        </Link>
+      </EditorialSection>
 
-        <section className="border-t border-[hsl(var(--av-stone))]">
-          <div className="max-w-[1120px] mx-auto px-6 py-20 md:py-28 flex flex-col items-center text-center gap-6">
-            <p className="font-serif text-xl md:text-2xl text-[hsl(var(--av-night))] max-w-[30ch]">
-              Your practice begins with a breath — not a package.
-            </p>
-            <Link
-              href="/step-1"
-              className="inline-flex h-12 md:h-14 min-h-[44px] items-center justify-center px-8 md:px-10 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] font-body font-medium text-base transition-transform duration-[var(--duration-micro)] active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))]"
-            >
-              Begin Your Journey
-            </Link>
-            <Link
-              href="/services"
-              className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:text-[hsl(var(--av-night))] hover:decoration-[hsl(var(--av-gold))] transition-colors"
-            >
-              Browse by concern
-            </Link>
+      {PROGRAMMES.map((p, i) => (
+        <section key={p.title} className="border-b border-stone">
+          <div className="av-wide av-gutter av-section-y grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className={`relative aspect-[4/5] overflow-hidden lg:col-span-5 ${i % 2 === 1 ? "lg:order-2" : ""}`}>
+              <Image
+                src={p.img}
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover"
+              />
+            </div>
+            <div className={`space-y-8 lg:col-span-7 ${i % 2 === 1 ? "lg:order-1" : ""}`}>
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-gold">{p.span}</p>
+                <h2 className="av-title mt-4 text-night">{p.title}</h2>
+              </div>
+              <div className="space-y-2">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-mute">Who it is for</p>
+                <p className="av-lede text-ink-text">{p.forWhom}</p>
+              </div>
+              <div className="space-y-2">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-mute">
+                  Expected transformation
+                </p>
+                <p className="av-lede text-mute">{p.transformation}</p>
+              </div>
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-mute">Practices</p>
+                  <ul className="mt-3 space-y-2 text-[15px] leading-[1.8] text-ink-text">
+                    {p.practices.map((x) => (
+                      <li key={x} className="flex gap-3">
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" aria-hidden />
+                        {x}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-mute">Outcomes</p>
+                  <ul className="mt-3 space-y-2 text-[15px] leading-[1.8] text-ink-text">
+                    {p.outcomes.map((x) => (
+                      <li key={x} className="flex gap-3">
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-gold" aria-hidden />
+                        {x}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <Link
+                href="/step-1"
+                className="inline-flex text-[11px] uppercase tracking-[0.28em] text-gold hover:text-night"
+              >
+                Begin toward this work →
+              </Link>
+            </div>
           </div>
         </section>
-      </main>
-    </div>
+      ))}
+
+      <BeginCtaBand
+        title="Programmes follow fit — not impulse."
+        body="Decode in the portal. Meet on a Discovery Call. Then we place you in the right arc."
+      />
+    </EditorialPage>
   );
 }

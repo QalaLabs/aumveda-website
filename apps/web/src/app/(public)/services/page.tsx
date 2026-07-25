@@ -1,129 +1,164 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  BeginCtaBand,
+  EditorialHero,
+  EditorialPage,
+  EditorialSection,
+} from "@/components/marketing/EditorialShell";
 
-/**
- * Services — concern-led, calm list. Not a feature dump.
- * One primary CTA → /step-1. See DESIGN.md.
- */
+export const metadata: Metadata = {
+  title: "Services — The Healing Journey",
+  description:
+    "From Discovery Call to Healing Blueprint and ongoing practice — how AUMVEDA holds transformation with Archana and Sejal.",
+};
 
-const CONCERNS = [
+const JOURNEY = [
   {
-    concern: "Thoughts that will not quiet",
-    modalities: "CBT · talk therapy · hypnosis",
-    heldBy: "Sejal",
+    n: "01",
+    t: "Journey",
+    d: "You arrive with a pattern — sleep, stress, relationship, purpose. We do not rush to sell. We orient.",
   },
   {
-    concern: "A body stuck in stress",
-    modalities: "Breathwork · sound therapy · bioresonance",
-    heldBy: "Sejal",
+    n: "02",
+    t: "Discovery Call",
+    d: "About fifteen quiet minutes with Sejal or Archana. Listening first. Sensing fit. No pressure.",
   },
   {
-    concern: "Healing that fades between sessions",
-    modalities: "Behavior dosing — small daily protocols",
-    heldBy: "Sejal",
+    n: "03",
+    t: "Assessment",
+    d: "The portal decode — breath, chakra, archetype, intention, chart, pattern — becomes your living map.",
   },
   {
-    concern: "Timing, purpose, and karmic pattern",
-    modalities: "Vedic & Western astrology",
-    heldBy: "Archana",
+    n: "04",
+    t: "Healing Blueprint",
+    d: "AHI and practitioner insight shape a Daily Dose and session plan matched to your nervous system and story.",
   },
   {
-    concern: "A home or workspace that feels against you",
-    modalities: "Vastu — residential and commercial",
-    heldBy: "Archana",
+    n: "05",
+    t: "Programme",
+    d: "1:1 sessions, structured programmes, or community circles — chosen for depth, not catalogue size.",
   },
   {
-    concern: "Clarity at a crossroads",
-    modalities: "Tarot · angel cards · crystallomancy",
-    heldBy: "Archana",
+    n: "06",
+    t: "Transformation",
+    d: "Return. Measure in sleep, breath, belonging — not streak theatre. Practice that stays.",
   },
-] as const;
+];
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen bg-[hsl(var(--av-parchment))] texture-paper">
-      <main>
-        <section className="border-b border-[hsl(var(--av-stone))]">
-          <div className="max-w-[1120px] mx-auto px-6 pt-28 md:pt-36 pb-16 md:pb-24">
-            <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))] mb-6">
-              Services
-            </p>
-            <h1 className="font-serif text-4xl md:text-6xl text-[hsl(var(--av-night))] leading-[1.1] max-w-[16ch]">
-              What brings you here?
-            </h1>
-            <p className="mt-8 font-body text-lg text-[hsl(var(--av-mute))] leading-relaxed max-w-[55ch]">
-              Archana maps the outer architecture — astrology, Vastu, ritual.
-              Sejal tends the inner system — CBT, breath, sound, subconscious work.
-              You do not choose a modality first. You name what hurts.
-            </p>
-          </div>
-        </section>
+    <EditorialPage>
+      <EditorialHero
+        eyebrow="Services · Path"
+        title={
+          <>
+            Not a menu.
+            <span className="italic"> A journey.</span>
+          </>
+        }
+        lede="AUMVEDA is not priced like a spa menu. It is a sequence: discovery, assessment, blueprint, practice — held by a Vedic practitioner and a healing facilitator who work as one lineage."
+      />
 
-        <section aria-labelledby="concerns-heading">
-          <div className="max-w-[720px] mx-auto px-6 py-16 md:py-24">
-            <h2 id="concerns-heading" className="sr-only">
-              Concerns we hold
-            </h2>
-            <ul className="divide-y divide-[hsl(var(--av-stone))]">
-              {CONCERNS.map((item) => (
-                <li key={item.concern} className="py-8 md:py-10 first:pt-0 last:pb-0">
-                  <p className="font-serif text-xl md:text-2xl text-[hsl(var(--av-night))] leading-snug">
-                    {item.concern}
-                  </p>
-                  <p className="mt-3 font-body text-sm text-[hsl(var(--av-mute))] leading-relaxed">
-                    {item.modalities}
-                    <span className="text-[hsl(var(--av-stone))] mx-2" aria-hidden>
-                      ·
-                    </span>
-                    <span className="text-[hsl(var(--av-ink-text))]">{item.heldBy}</span>
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="border-t border-[hsl(var(--av-stone))]">
-          <div className="max-w-[1120px] mx-auto px-6 py-16 md:py-20 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
-            <div className="space-y-3">
-              <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
-                Archana · Jaipur
-              </p>
-              <p className="font-body text-base text-[hsl(var(--av-ink-text))] leading-relaxed max-w-[40ch]">
-                Astrology · Tarot · Vastu · Crystallomancy
-              </p>
-            </div>
-            <div className="space-y-3">
-              <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
-                Sejal · Mumbai
-              </p>
-              <p className="font-body text-base text-[hsl(var(--av-ink-text))] leading-relaxed max-w-[40ch]">
-                CBT · Hypnosis · Sound · Breathwork · Talk therapy · Bioresonance ·
-                Behavior dosing
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-t border-[hsl(var(--av-stone))]">
-          <div className="max-w-[1120px] mx-auto px-6 py-20 md:py-28 flex flex-col items-center text-center gap-6">
-            <p className="font-serif text-xl md:text-2xl text-[hsl(var(--av-night))] max-w-[28ch]">
-              Not sure where to begin? Start with the journey — we will meet you there.
-            </p>
-            <Link
-              href="/step-1"
-              className="inline-flex h-12 md:h-14 min-h-[44px] items-center justify-center px-8 md:px-10 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] font-body font-medium text-base transition-transform duration-[var(--duration-micro)] active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))]"
+      <EditorialSection
+        id="journey"
+        eyebrow="How care moves"
+        title="From curiosity to transformation."
+      >
+        <ol className="divide-y divide-stone border-y border-stone">
+          {JOURNEY.map((step) => (
+            <li
+              key={step.n}
+              className="grid grid-cols-1 gap-4 py-10 md:grid-cols-12 md:items-baseline md:gap-10 md:py-12"
             >
-              Begin Your Journey
-            </Link>
-            <Link
-              href="/programs"
-              className="font-body text-sm text-[hsl(var(--av-mute))] underline underline-offset-4 decoration-[hsl(var(--av-stone))] hover:text-[hsl(var(--av-night))] hover:decoration-[hsl(var(--av-gold))] transition-colors"
-            >
-              See structured programs
-            </Link>
+              <p className="font-mono text-[11px] tracking-[0.2em] text-gold md:col-span-1">
+                {step.n}
+              </p>
+              <h3 className="font-serif text-2xl text-night md:col-span-3 md:text-3xl">
+                {step.t}
+              </h3>
+              <p className="av-lede text-mute md:col-span-8">{step.d}</p>
+            </li>
+          ))}
+        </ol>
+      </EditorialSection>
+
+      <EditorialSection
+        id="held-by"
+        eyebrow="Who holds you"
+        title="Two practitioners. One map."
+      >
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
+          <div className="space-y-4 border-t border-stone pt-8">
+            <h3 className="font-serif text-2xl text-night">With Archana</h3>
+            <p className="text-[15px] leading-[1.9] text-mute">
+              Outer architecture — chart, Vastu, ritual, karmic pattern. When the room
+              and the rhythm of a life need reordering before the mind can rest.
+            </p>
           </div>
-        </section>
-      </main>
-    </div>
+          <div className="space-y-4 border-t border-stone pt-8">
+            <h3 className="font-serif text-2xl text-night">With Sejal</h3>
+            <p className="text-[15px] leading-[1.9] text-mute">
+              Inner system — breath, somatic safety, CBT-informed coaching, hypnosis,
+              sound. When the body must feel safe before insight can stay.
+            </p>
+          </div>
+        </div>
+        <p className="av-lede mt-12 max-w-[60ch] text-mute">
+          Many clients move between both. That is the moat: you are not asked to pick
+          East or West.
+        </p>
+      </EditorialSection>
+
+      <EditorialSection
+        id="doorways"
+        eyebrow="Doorways"
+        title="Ways to enter — without a price wall."
+      >
+        <ul className="space-y-0">
+          {[
+            {
+              t: "Portal Decode",
+              d: "Free to begin. Eight steps. Your map.",
+              href: "/step-1",
+              cta: "Begin",
+            },
+            {
+              t: "Discovery Call",
+              d: "Fifteen quiet minutes. Fit, not force.",
+              href: "/step-1",
+              cta: "Start toward a call",
+            },
+            {
+              t: "Structured programmes",
+              d: "Named transformations — regulate, sleep, release — with clear outcomes.",
+              href: "/programs",
+              cta: "See programmes",
+            },
+          ].map((row) => (
+            <li
+              key={row.t}
+              className="flex flex-col gap-4 border-t border-stone py-8 md:flex-row md:items-end md:justify-between md:py-10"
+            >
+              <div className="max-w-xl space-y-2">
+                <h3 className="font-serif text-2xl text-night">{row.t}</h3>
+                <p className="text-[15px] leading-[1.8] text-mute">{row.d}</p>
+              </div>
+              <Link
+                href={row.href}
+                className="inline-flex text-[11px] uppercase tracking-[0.28em] text-gold transition-colors hover:text-night"
+              >
+                {row.cta} →
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </EditorialSection>
+
+      <BeginCtaBand
+        title="The first step is not a purchase."
+        body="Begin the portal. If the lineage fits, we meet on a Discovery Call."
+      />
+    </EditorialPage>
   );
 }

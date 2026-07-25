@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -13,6 +13,14 @@ const primaryBtn =
   'w-full inline-flex h-12 min-h-[44px] items-center justify-center rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body text-base font-medium transition-transform duration-[var(--duration-micro)] active:scale-[0.97] disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-night))]'
 
 export default function ConfirmResetPage() {
+  return (
+    <Suspense fallback={<p className="font-body text-sm text-[hsl(var(--av-mute))]">Loading…</p>}>
+      <ConfirmResetPageInner />
+    </Suspense>
+  )
+}
+
+function ConfirmResetPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [token, setToken] = useState('')

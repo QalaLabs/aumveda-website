@@ -37,7 +37,11 @@ export default async function DashboardPage() {
   } | null
   let portalData = null as { profileResult: string | null; chakraSelected: string | null } | null
   let user = null as { name: string | null } | null
-  let nextAppointment = null as { bookingDatetime: Date } | null
+  let nextAppointment = null as {
+    bookingDatetime: Date
+    practitioner?: string | null
+    zoomLink?: string | null
+  } | null
   let recentJournals = [] as { id: number; title: string | null; createdAt: Date }[]
   let cosmicNote = null as { title: string; body: string; weekOf: Date } | null
   let todayCheckIn = null as { completedAt: Date | null } | null

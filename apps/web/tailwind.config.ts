@@ -25,7 +25,10 @@ export default {
         popover: { DEFAULT: "hsl(var(--popover))", foreground: "hsl(var(--popover-foreground))" },
         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
         night: "hsl(var(--av-night))",
-        ink: "hsl(var(--av-ink))",
+        ink: {
+          DEFAULT: "hsl(var(--av-ink))",
+          text: "hsl(var(--av-ink-text))",
+        },
         gold: {
           DEFAULT: "hsl(var(--av-gold))",
           soft: "hsl(var(--av-gold-soft))",
@@ -33,6 +36,7 @@ export default {
         parchment: "hsl(var(--av-parchment))",
         cream: "hsl(var(--av-parchment))",
         stone: "hsl(var(--av-stone))",
+        mute: "hsl(var(--av-mute))",
         sage: { DEFAULT: "hsl(var(--av-sage))", 500: "hsl(var(--av-sage))" },
         brand: {
           50: "hsl(var(--av-parchment))",
@@ -42,6 +46,9 @@ export default {
           500: "hsl(var(--av-night))",
           600: "hsl(var(--av-ink))",
         },
+      },
+      maxWidth: {
+        measure: "var(--av-measure)",
       },
       borderRadius: {
         lg: "var(--radius)",

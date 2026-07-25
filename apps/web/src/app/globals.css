@@ -38,9 +38,15 @@
     --radius: 0.75rem;
 
     --ease-out-av: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --duration-micro: 100ms;
     --duration-ui: 220ms;
     --duration-ritual: 500ms;
+
+    --av-display: clamp(2.75rem, 1.2rem + 6vw, 5.5rem);
+    --av-title: clamp(2rem, 1.2rem + 2.8vw, 3.5rem);
+    --av-lede: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --av-measure: 65ch;
   }
 
   html {
@@ -101,12 +107,72 @@
   to { clip-path: inset(0 0 0 0); }
 }
 
+@layer components {
+  .av-section-y {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+  .av-gutter {
+    @apply px-6 md:px-12 lg:px-16;
+  }
+  .av-measure {
+    max-width: var(--av-measure);
+  }
+  .av-content {
+    @apply mx-auto w-full max-w-[1120px];
+  }
+  .av-wide {
+    @apply mx-auto w-full max-w-[1400px];
+  }
+  .av-display {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: var(--av-display);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .av-title {
+    font-family: var(--font-serif), Georgia, serif;
+    font-size: var(--av-title);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .av-lede {
+    font-size: var(--av-lede);
+    line-height: 1.9;
+  }
+  .av-eyebrow-ink {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: hsl(var(--av-mute));
+    font-weight: 500;
+  }
+  .av-cta {
+    @apply inline-flex items-center gap-6 border px-8 py-5 text-[11px] uppercase tracking-[0.32em] transition-all;
+    border-color: hsl(var(--av-parchment) / 0.22);
+    color: hsl(var(--av-parchment));
+    transition-duration: var(--duration-ritual);
+    transition-timing-function: var(--ease-out);
+  }
+  .av-cta:hover {
+    border-color: hsl(var(--av-gold));
+    background-color: hsl(var(--av-gold));
+    color: hsl(var(--av-ink));
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+  .duration-ui {
+    transition-duration: var(--duration-ui);
+  }
+  .ease-av {
+    transition-timing-function: var(--ease-out);
   }
   .surface-night {
     background-color: hsl(var(--av-night));

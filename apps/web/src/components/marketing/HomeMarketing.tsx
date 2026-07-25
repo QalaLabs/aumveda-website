@@ -711,6 +711,7 @@ function HomeFooter() {
               {[
                 { l: "About", href: "/about" },
                 { l: "Services", href: "/services" },
+                { l: "Programmes", href: "/programs" },
                 { l: "Insights", href: "/insights" },
               ].map((item) => (
                 <li key={item.l}>

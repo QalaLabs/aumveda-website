@@ -60,7 +60,6 @@ export async function middleware(request: NextRequest) {
     if (
       isDashboardRoute &&
       role !== 'client' &&
-      role !== 'user' &&
       role !== 'admin' &&
       role !== 'super_admin'
     ) {
