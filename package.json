@@ -30,12 +30,10 @@
     "onlyBuiltDependencies": [
       "@prisma/client",
       "@prisma/engines",
+      "esbuild",
       "msgpackr-extract",
       "prisma",
       "unrs-resolver"
-    ],
-    "ignoredBuiltDependencies": [
-      "esbuild"
     ]
   },
   "dependencies": {

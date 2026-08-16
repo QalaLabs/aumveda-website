@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { signOut } from 'next-auth/react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +13,7 @@ import {
 import {
   Edit2,
   LogOut,
-  Globe,
-  ShieldCheck,
-  RefreshCw
+  Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import EditProfileModal from "./EditProfileModal";
@@ -71,7 +70,7 @@ const ProfileHeader = () => {
         setSparkData(data.trend.map((t: any) => t.score));
       }
     } catch (err) {
-      setSparkData([65, 72, 68, 85, 78, 92, 88]);
+      setSparkData([]);
     }
   };
 
@@ -134,16 +133,9 @@ const ProfileHeader = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="bg-slate-900 text-white border-none rounded-xl p-3">
-                <p className="text-xs font-medium">Latest daily score: {profile.progress} • Updated today</p>
+                <p className="text-xs font-medium">Latest daily score: {profile.progress}</p>
               </TooltipContent>
             </Tooltip>
-
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
-              <RefreshCw className="w-3 h-3 text-emerald-500" />
-              <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">
-                Last sync: 2 days ago
-              </span>
-            </div>
           </div>
 
           <div className="flex flex-wrap justify-center md:justify-end items-center gap-3 w-full md:w-auto">
@@ -157,16 +149,9 @@ const ProfileHeader = () => {
               Edit Profile
             </Button>
             <Button
-              variant="outline"
-              size="sm"
-              className="rounded-xl border-slate-200 hover:bg-slate-50 font-bold text-xs h-10 px-5"
-            >
-              <Globe className="w-3.5 h-3.5 mr-2 text-blue-500" />
-              Connect Google
-            </Button>
-            <Button
               variant="ghost"
               size="sm"
+              onClick={() => signOut({ callbackUrl: '/auth/login' })}
               className="rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 font-bold text-xs h-10 px-5"
             >
               <LogOut className="w-3.5 h-3.5 mr-2" />

@@ -1,11 +1,51 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalPassThroughEnv": [
+    "CI",
+    "VERCEL",
+    "VERCEL_ENV",
+    "VERCEL_URL",
+    "NODE_ENV"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "NEXTAUTH_SECRET",
+        "NEXTAUTH_URL",
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_GEMINI_API_KEY",
+        "NEXT_PUBLIC_GOOGLE_PLACES_API_KEY",
+        "NEXT_PUBLIC_FLAG_SHORT_PORTAL",
+        "NEXT_PUBLIC_FLAG_BREATH_VARIANT",
+        "NEXT_PUBLIC_FLAG_EXIT_INTENT",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "EMAIL_SERVER_HOST",
+        "EMAIL_SERVER_PORT",
+        "EMAIL_SERVER_USER",
+        "EMAIL_SERVER_PASSWORD",
+        "EMAIL_FROM",
+        "CRON_SECRET",
+        "PRACTITIONER_NOTIFY_EMAIL",
+        "SEJAL_NOTIFY_EMAIL",
+        "ARCHANA_NOTIFY_EMAIL",
+        "ADMIN_NOTIFY_EMAIL",
+        "PROKERALA_CLIENT_ID",
+        "PROKERALA_CLIENT_SECRET",
+        "N8N_PORTAL_WEBHOOK_URL",
+        "N8N_WHATSAPP_WEBHOOK",
+        "DEV_BYPASS"
+      ]
     },
     "dev": {
       "cache": false,

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
-
 interface ChartRequestBody {
   dob: string
   timeOfBirth?: string | null
@@ -13,7 +11,7 @@ interface ChartResult {
   sunSign: string
   moonSign: string
   risingSign: string | null
-  source: 'prokerala' | 'fallback'
+  source: 'prokerala'
 }
 
 let cachedToken: { token: string; expiresAt: number } | null = null
@@ -82,19 +80,6 @@ async function fetchFromProkerala(body: ChartRequestBody): Promise<ChartResult> 
   return { sunSign, moonSign, risingSign, source: 'prokerala' }
 }
 
-function mockChart(body: ChartRequestBody): ChartResult {
-  // Deterministic-per-birth-detail placeholder used only when Prokerala credentials are absent
-  // or the live call fails. Never silently presented as real astrology — `source: 'fallback'` is
-  // surfaced to the client so the UI can label it honestly.
-  const seed = `${body.dob}${body.lat}${body.lng}`.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-  return {
-    sunSign: SIGNS[seed % 12],
-    moonSign: SIGNS[(seed * 7) % 12],
-    risingSign: body.timeOfBirth ? SIGNS[(seed * 13) % 12] : null,
-    source: 'fallback',
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as ChartRequestBody
@@ -107,8 +92,11 @@ export async function POST(req: NextRequest) {
       const result = await fetchFromProkerala(body)
       return NextResponse.json({ ok: true, data: result })
     } catch (prokeralaError) {
-      console.error('[astrology/chart] Prokerala call failed, using fallback:', prokeralaError)
-      return NextResponse.json({ ok: true, data: mockChart(body) })
+      console.error('[astrology/chart] Prokerala unavailable — refusing to fabricate a chart:', prokeralaError)
+      return NextResponse.json(
+        { ok: false, error: 'Chart calculation is temporarily unavailable. Please try again later.' },
+        { status: 503 },
+      )
     }
   } catch (error) {
     console.error('[astrology/chart] Fatal error:', error)

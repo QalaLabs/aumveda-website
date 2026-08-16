@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import ActivityFilters from '@/components/ActivityFilters'
 import ActivityItem from '@/components/ActivityItem'
 import ActivityDetailModal from '@/components/ActivityDetailModal'
@@ -54,7 +54,14 @@ export default function ActivityPage() {
     e.description?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const stats = { growthScore: 84, consistency: 12, milestones: 5, totalEvents: events.length + 142 }
+  const stats = useMemo(() => {
+    const activeDays = new Set(
+      events.map(e => (e.timestamp || '').slice(0, 10)).filter(Boolean)
+    ).size
+    const milestones = events.filter(e => e.isMilestone).length
+    const eventTypes = new Set(events.map(e => e.name || e.type).filter(Boolean)).size
+    return { total: events.length, activeDays, milestones, eventTypes }
+  }, [events])
 
   return (
     <>

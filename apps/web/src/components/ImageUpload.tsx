@@ -32,6 +32,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
           userId: 'mock-user-id'
         })
       });
+      if (!presignRes.ok) throw new Error('presign failed');
       const { signedUrl, publicUrl, key } = await presignRes.json();
 
       await new Promise(resolve => setTimeout(resolve, 1500));

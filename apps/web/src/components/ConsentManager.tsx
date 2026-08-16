@@ -11,10 +11,10 @@ import { Separator } from "@/components/ui/separator";
 
 const ConsentManager = () => {
   const [consents, setConsents] = useState({
-    tracking: true,
+    tracking: false,
     marketing: false,
-    health_sync: true,
-    ai_personalization: true
+    health_sync: false,
+    ai_personalization: false
   });
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);

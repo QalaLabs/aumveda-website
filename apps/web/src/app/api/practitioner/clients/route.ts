@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server'
+import { getApiPractitionerSession } from '@/lib/session'
 
 export async function GET() {
+  const session = await getApiPractitionerSession()
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { prisma } = await import('@aumveda/db')
     const clients = await prisma.user.findMany({
@@ -56,6 +62,7 @@ export async function GET() {
 
     return NextResponse.json({ ok: true, data })
   } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 })
+    console.error('PRACTITIONER CLIENTS ERROR:', e)
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Loader2, Lock, ShieldCheck, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { generateForensicHash } from "@/lib/hash-utils";
@@ -24,18 +24,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ courseId, moduleId, userId, u
   const [error, setError] = useState<string | null>(null);
   const [config, setConfig] = useState<any>(null);
   const [tokenExpired, setTokenExpired] = useState(false);
-  
+
   const playerRef = useRef<any>(null);
   const progressInterval = useRef<any>(null);
   const forensicHash = useRef(generateForensicHash(`${userId}-${userEmail}`));
 
-  const trackProgress = async (status: string, progress: number = 0) => {
+  const trackProgress = useCallback(async (status: string, progress: number = 0) => {
     try {
       await fetch('/api/courses/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId,
           courseId,
           moduleId,
           progress: Math.round(progress),
@@ -45,52 +44,25 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ courseId, moduleId, userId, u
     } catch (err) {
       console.error("Failed to track progress:", err);
     }
-  };
+  }, [courseId, moduleId]);
 
-  const fetchSecureConfig = async () => {
-    setLoading(true);
-    setError(null);
-    setTokenExpired(false);
-    
-    try {
-      const tokenRes = await fetch(`/api/courses/${courseId}/modules/${moduleId}/embed-token?userId=${userId}`);
-      const tokenData = await tokenRes.json();
+  const stopProgressPolling = useCallback(() => {
+    if (progressInterval.current) clearInterval(progressInterval.current);
+  }, []);
 
-      if (!tokenRes.ok) throw new Error(tokenData.error || "Access Denied");
-
-      const configRes = await fetch(`/api/embed/config?token=${tokenData.token}`);
-      const configData = await configRes.json();
-
-      if (!configRes.ok) {
-        if (configRes.status === 401) {
-          setTokenExpired(true);
-          throw new Error("Security token expired");
-        }
-        throw new Error(configData.error || "Invalid Token");
+  const startProgressPolling = useCallback(() => {
+    stopProgressPolling();
+    progressInterval.current = setInterval(() => {
+      if (playerRef.current?.getCurrentTime) {
+        const currentTime = playerRef.current.getCurrentTime();
+        const duration = playerRef.current.getDuration();
+        const percent = (currentTime / duration) * 100;
+        if (percent > 0) trackProgress('watching', percent);
       }
+    }, 10000);
+  }, [stopProgressPolling, trackProgress]);
 
-      setConfig(configData);
-      initPlayer(configData.videoId);
-    } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  const initPlayer = (videoId: string) => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-      window.onYouTubeIframeAPIReady = () => createPlayer(videoId);
-    } else {
-      createPlayer(videoId);
-    }
-  };
-
-  const createPlayer = (videoId: string) => {
+  const createPlayer = useCallback((videoId: string) => {
     if (playerRef.current) {
       playerRef.current.loadVideoById(videoId);
       setLoading(false);
@@ -128,23 +100,50 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ courseId, moduleId, userId, u
         }
       }
     });
-  };
+  }, [moduleId, trackProgress, startProgressPolling, stopProgressPolling]);
 
-  const startProgressPolling = () => {
-    stopProgressPolling();
-    progressInterval.current = setInterval(() => {
-      if (playerRef.current?.getCurrentTime) {
-        const currentTime = playerRef.current.getCurrentTime();
-        const duration = playerRef.current.getDuration();
-        const percent = (currentTime / duration) * 100;
-        if (percent > 0) trackProgress('watching', percent);
+  const initPlayer = useCallback((videoId: string) => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = () => createPlayer(videoId);
+    } else {
+      createPlayer(videoId);
+    }
+  }, [createPlayer]);
+
+  const fetchSecureConfig = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setTokenExpired(false);
+
+    try {
+      const tokenRes = await fetch(`/api/courses/${courseId}/modules/${moduleId}/embed-token`);
+      const tokenData = await tokenRes.json();
+
+      if (!tokenRes.ok) throw new Error(tokenData.error || "Access Denied");
+
+      const configRes = await fetch(`/api/embed/config?token=${tokenData.token}`);
+      const configData = await configRes.json();
+
+      if (!configRes.ok) {
+        if (configRes.status === 401) {
+          setTokenExpired(true);
+          throw new Error("Security token expired");
+        }
+        throw new Error(configData.error || "Invalid Token");
       }
-    }, 10000);
-  };
 
-  const stopProgressPolling = () => {
-    if (progressInterval.current) clearInterval(progressInterval.current);
-  };
+      setConfig(configData);
+      initPlayer(configData.videoId);
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [courseId, moduleId, initPlayer]);
 
   useEffect(() => {
     fetchSecureConfig();
@@ -152,7 +151,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ courseId, moduleId, userId, u
       stopProgressPolling();
       if (playerRef.current) playerRef.current.destroy();
     };
-  }, [courseId, moduleId]);
+  }, [fetchSecureConfig, stopProgressPolling]);
 
   if (error) {
     return (
@@ -181,9 +180,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ courseId, moduleId, userId, u
           <p className="text-slate-400 text-sm font-medium animate-pulse">Verifying Entitlements...</p>
         </div>
       )}
-      
+
       <div id={`player-${moduleId}`} className="w-full h-full" />
-      
+
       {/* Forensic Watermark Overlay */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden z-20 opacity-30">
         <div className="absolute top-10 left-10 -rotate-12 text-white/20 text-[9px] font-mono whitespace-nowrap">

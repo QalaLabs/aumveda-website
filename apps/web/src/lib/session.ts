@@ -211,3 +211,23 @@ export async function getApiSession() {
   if (!session?.user?.id) return null
   return session
 }
+
+const PRACTITIONER_ROLES = new Set(['practitioner', 'admin', 'super_admin'])
+
+/**
+ * API-route session helper for practitioner-only endpoints. Same DEV_BYPASS
+ * behavior as getApiSession, but returns null unless the session belongs to
+ * a practitioner, admin, or super_admin. In production this check is strict.
+ */
+export async function getApiPractitionerSession() {
+  if (process.env.NODE_ENV !== 'production' && process.env.DEV_BYPASS === 'true') {
+    const session = await getApiSession()
+    return session
+  }
+
+  const session = await getApiSession()
+  if (!session) return null
+  const role = session.user.role
+  if (!role || !PRACTITIONER_ROLES.has(role)) return null
+  return session
+}

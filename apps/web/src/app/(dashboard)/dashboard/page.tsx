@@ -84,13 +84,10 @@ export default async function DashboardPage() {
       }),
     ])
   } catch {
-    profile = { progress: 42, streakDays: 3, onboardingDone: true }
-    user = { name: session.user.name ?? 'Dev Client' }
-    cosmicNote = {
-      title: "This Week's Cosmic Weather",
-      body: 'A quiet week for nervous-system softness. Lean into breath, journaling, and one small daily dose.',
-      weekOf: today,
-    }
+    // DB unavailable — degrade to empty states; never fabricate user metrics.
+    profile = null
+    user = null
+    cosmicNote = null
   }
 
   if (profile && !profile.onboardingDone) {

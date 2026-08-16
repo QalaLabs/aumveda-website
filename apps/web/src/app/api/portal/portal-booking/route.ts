@@ -66,7 +66,18 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = user.id
-    const status = packageType === 'free' || amountPaid === 0 ? 'confirmed' : 'pending'
+
+    // Fail closed on payments: live Razorpay verification is not implemented, so a paid
+    // package must never be minted from a client-supplied (unverifiable) payment ID.
+    const isFree = packageType === 'free' || amountPaid === 0
+    if (!isFree) {
+      return NextResponse.json(
+        { error: 'Online payments are not enabled yet. Please book the free Discovery Call or contact Aumveda.' },
+        { status: 402 },
+      )
+    }
+
+    const status = isFree ? 'confirmed' : 'pending'
 
     // Idempotent window: same user + same start (±90s) + active booking
     const windowStart = new Date(when.getTime() - 90_000)

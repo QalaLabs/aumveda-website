@@ -29,20 +29,24 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Task 5.3: Simulating WhatsApp re-engagement triggers via n8n for drop-offs at Steps 2-5
+    // Task 5.3: n8n WhatsApp re-engagement for drop-offs at Steps 2-5.
+    // Dispatch only when the webhook is configured — never log lead emails.
     if (eventName === 'portal.dropoff') {
       const step = payload?.step
       const email = payload?.email
       const sessionId = payload?.sessionId
 
-      if (step >= 2 && step <= 5) {
-        console.log(
-          `[Re-engagement Engine] Queuing WhatsApp re-engagement alert via n8n in 1 hour for lead: ${
-            email || 'Anonymous'
-          } (Session: ${sessionId}) dropped at Step ${step}`
-        )
-        // In production, we'd trigger a webhook to n8n here:
-        // await fetch(process.env.N8N_WHATSAPP_WEBHOOK, { method: 'POST', body: JSON.stringify({ email, step, sessionId }) })
+      if (step >= 2 && step <= 5 && process.env.N8N_WHATSAPP_WEBHOOK && email && sessionId) {
+        try {
+          await fetch(process.env.N8N_WHATSAPP_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, step, sessionId }),
+            signal: AbortSignal.timeout(8000),
+          })
+        } catch (webhookErr) {
+          console.error('N8N RE-ENGAGEMENT DISPATCH FAILED:', webhookErr)
+        }
       }
     }
 

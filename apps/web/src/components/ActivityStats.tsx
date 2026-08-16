@@ -7,30 +7,30 @@ import { cn } from "@/lib/utils";
 
 interface ActivityStatsProps {
   stats: {
-    growthScore: number;
-    consistency: number;
+    total: number;
+    activeDays: number;
     milestones: number;
-    totalEvents: number;
+    eventTypes: number;
   };
 }
 
 const ActivityStats: React.FC<ActivityStatsProps> = ({ stats }) => {
   const items = [
     {
-      label: "Growth Score",
-      value: `${stats.growthScore}%`,
-      icon: TrendingUp,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-      description: "Your overall progress"
+      label: "Activities",
+      value: stats.total,
+      icon: Star,
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      description: "Events in this timeline"
     },
     {
-      label: "Consistency",
-      value: `${stats.consistency} Days`,
+      label: "Active Days",
+      value: `${stats.activeDays} Day${stats.activeDays === 1 ? '' : 's'}`,
       icon: Zap,
       color: "text-amber-600",
       bg: "bg-amber-50",
-      description: "Current daily streak"
+      description: "Distinct days with activity"
     },
     {
       label: "Milestones",
@@ -38,15 +38,15 @@ const ActivityStats: React.FC<ActivityStatsProps> = ({ stats }) => {
       icon: Trophy,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
-      description: "Badges earned"
+      description: "Key milestones reached"
     },
     {
-      label: "Total Wisdom",
-      value: stats.totalEvents,
-      icon: Star,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
-      description: "Activities logged"
+      label: "Types Tracked",
+      value: stats.eventTypes,
+      icon: TrendingUp,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      description: "Kinds of activities"
     },
   ];
 

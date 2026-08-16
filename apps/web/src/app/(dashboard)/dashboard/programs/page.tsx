@@ -1,7 +1,7 @@
 import { requireSession } from '@/lib/session'
 import { prisma } from '@aumveda/db'
 import Link from 'next/link'
-import { ArrowLeft, Package, User, FileText, CheckCircle2, Download, ExternalLink, Activity } from 'lucide-react'
+import { ArrowLeft, Package, User } from 'lucide-react'
 import Topbar from '../../_components/Topbar'
 
 export const metadata = { title: 'Purchased Programs & Packages | Aumveda' }
@@ -20,13 +20,6 @@ export default async function ProgramsPage() {
       orderBy: { startDate: 'desc' },
     }),
   ])
-
-  // Mock downloads associated with their intake profile
-  const downloads = [
-    { name: 'Somatic Healing Blueprint PDF', size: '2.4 MB', type: 'Assessment Outcome' },
-    { name: 'Vastu Sleeping Direction Guideline', size: '1.1 MB', type: 'Energy Blueprint' },
-    { name: 'Intestinal Gut Rebalancing Plan', size: '840 KB', type: 'Routines & Diet' },
-  ]
 
   return (
     <>
@@ -131,7 +124,7 @@ export default async function ProgramsPage() {
             <div className="space-y-1">
               <h4 className="text-xs font-bold text-stone-700">Archana Jain & Sejal Gala</h4>
               <p className="text-xs text-stone-400 leading-relaxed">
-                Your diagnostic results mapped you to Archana (for astrological chakras alignments) and Sejal (for somatic releases and trauma boundaries).
+                Aumveda's practitioner team includes Archana (astrological chakra alignments) and Sejal (somatic releases and trauma boundaries). Your personal assignment will appear here once your first session is booked.
               </p>
               <div className="pt-2">
                 <Link
@@ -145,21 +138,13 @@ export default async function ProgramsPage() {
           </div>
         </div>
 
-        {/* Downloads */}
+        {/* Downloads — placeholder for real document delivery */}
         <div className="space-y-4">
           <h3 className="text-xs uppercase tracking-widest text-stone-500 font-bold">Blueprints & PDF Downloads</h3>
-          <div className="space-y-2.5">
-            {downloads.map((dl, i) => (
-              <div key={i} className="bg-white border border-stone-100 rounded-2xl p-4 shadow-sm flex items-center justify-between transition hover:border-stone-200">
-                <div className="space-y-0.5">
-                  <p className="text-xs font-bold text-stone-700">{dl.name}</p>
-                  <p className="text-[9px] text-stone-400 font-medium">{dl.type} · {dl.size}</p>
-                </div>
-                <button className="p-2 bg-stone-50 hover:bg-brand-50 hover:text-brand-600 text-stone-400 rounded-xl transition">
-                  <Download className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+          <div className="bg-white border border-stone-100 rounded-2xl p-6 text-center shadow-sm">
+            <p className="text-xs text-stone-400">
+              Your assessment blueprints and practice guides will appear here once they are published.
+            </p>
           </div>
         </div>
 

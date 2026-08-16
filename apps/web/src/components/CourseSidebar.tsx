@@ -5,19 +5,30 @@ import { PlayCircle, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 interface Module {
-  id: string;
+  id: string | number;
   title: string;
-  duration: string;
-  level: string;
+  durationSec: number | null;
+  isPreview: boolean;
+  orderIndex: number;
   completed?: boolean;
+  watchedSec?: number;
 }
 
 interface CourseSidebarProps {
   modules: Module[];
-  activeModuleId: string;
-  onModuleSelect: (id: string) => void;
+  activeModuleId: string | number;
+  onModuleSelect: (id: string | number) => void;
   courseTitle: string;
   overallProgress: number;
+}
+
+function formatDuration(durationSec: number | null): string {
+  if (durationSec == null) return '';
+  const m = Math.floor(durationSec / 60)
+  const s = Math.round(durationSec % 60)
+  if (m < 1) return `${s}s`
+  if (s === 0) return `${m} min`
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 const CourseSidebar: React.FC<CourseSidebarProps> = ({
@@ -67,7 +78,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
                   "text-[10px] font-bold uppercase tracking-wider",
                   isActive ? "text-blue-600" : "text-slate-400"
                 )}>
-                  Lesson {index + 1} • {mod.duration}
+                  Lesson {index + 1}{mod.durationSec != null ? ` • ${formatDuration(mod.durationSec)}` : ''}
                 </span>
                 {mod.completed ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />

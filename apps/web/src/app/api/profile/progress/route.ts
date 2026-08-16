@@ -1,11 +1,12 @@
-import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@aumveda/db'
 import { format } from 'date-fns'
+import { getApiSession } from '@/lib/session'
+import { prisma } from '@aumveda/db'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions)
+  const session = await getApiSession()
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -39,17 +40,20 @@ export async function GET(req: Request) {
     ? Math.round(history.reduce((s, d) => s + d.score, 0) / history.length)
     : 0
 
-  // Streak: consecutive days with at least one completion
   const streak = await prisma.profile.findUnique({
     where: { userId },
     select: { streakDays: true, progress: true },
   })
 
+  const current = latest ? Math.round(latest.score) : Math.round(streak?.progress ?? 0)
+
   return NextResponse.json({
     success: true,
-    current: latest ? Math.round(latest.score) : Math.round(streak?.progress ?? 0),
+    current,
     average,
     history,
+    trend: history,
+    summary: { latest: current, average },
     breakdown: latest
       ? {
           sleep: Math.round(latest.sleepScore),
@@ -57,6 +61,6 @@ export async function GET(req: Request) {
           journal: Math.round(latest.journalScore),
           wellbeing: Math.round(latest.wellbeingScore),
         }
-      : { sleep: 50, activity: 0, journal: 0, wellbeing: 50 },
+      : { sleep: 0, activity: 0, journal: 0, wellbeing: 0 },
   })
 }

@@ -220,10 +220,22 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // Authenticated owner-only read. The portal POST flow is intentionally open
+  // (lead capture), but reading back a user's full portal data (birth details,
+  // scores, profile result) must not be possible by guessing a userId.
+  const { getServerSession } = await import('next-auth')
+  const { authOptions } = await import('@/lib/auth')
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
+  }
   const { searchParams } = new URL(req.url)
   const userId = searchParams.get('userId')
   if (!userId) {
     return NextResponse.json({ ok: false, error: 'userId required' }, { status: 400 })
+  }
+  if (userId !== session.user.id) {
+    return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 })
   }
   const data = await prisma.userPortalData.findUnique({ where: { userId } })
   return NextResponse.json({ ok: true, data })

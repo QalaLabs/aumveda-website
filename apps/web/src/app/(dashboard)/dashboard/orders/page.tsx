@@ -11,17 +11,10 @@ import { showSuccess, showError } from '@/utils/toast'
 import { Loader2, ShoppingBag, History, ArrowLeft } from 'lucide-react'
 import Topbar from '../../_components/Topbar'
 
-const RECOMMENDED_PRODUCT = {
-  id: 'healing-journal',
-  name: 'Aumveda Guided Journal',
-  price: 799,
-  rating: 4.8,
-  image: 'https://images.unsplash.com/photo-1512069772995-ec65ed45afd6?auto=format&fit=crop&q=80&w=400',
-}
-
 export default function OrdersPage() {
   const router = useRouter()
   const [orders, setOrders] = useState<any[]>([])
+  const [recommended, setRecommended] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
@@ -32,6 +25,23 @@ export default function OrdersPage() {
       .then(d => { if (d.success) setOrders(d.orders) })
       .catch(() => showError('Failed to load order history'))
       .finally(() => setLoading(false))
+
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.products?.length > 0) {
+          const p = d.products[0]
+          setRecommended({
+            id: p.id,
+            slug: p.slug,
+            title: p.title,
+            description: p.description,
+            priceInr: p.priceInr,
+            imageUrl: p.imageUrl,
+          })
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const handleViewDetails = async (order: any) => {
@@ -93,7 +103,17 @@ export default function OrdersPage() {
           </div>
 
           <div className="lg:col-span-4 space-y-8">
-            <QuickShopCard product={RECOMMENDED_PRODUCT} onAddToCart={() => showSuccess('Added to cart!')} />
+            {recommended ? (
+              <QuickShopCard product={recommended} onAddToCart={() => showSuccess(`${recommended.title} added to cart!`)} />
+            ) : (
+              <div className="p-8 bg-white rounded-[32px] border border-slate-100 shadow-sm">
+                <h4 className="font-bold text-slate-900">Shop</h4>
+                <p className="text-xs text-slate-500 mt-1">Featured products will appear here once the shop is live.</p>
+                <Button asChild variant="outline" className="mt-4 rounded-xl text-xs font-semibold">
+                  <Link href="/dashboard/shop">Browse Shop</Link>
+                </Button>
+              </div>
+            )}
             <div className="p-8 bg-white rounded-[32px] border border-slate-100 shadow-sm space-y-6">
               <h4 className="font-bold text-slate-900">Need Help?</h4>
               <div className="space-y-4">

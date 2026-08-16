@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HomeMarketing from "@/components/marketing/HomeMarketing";
+import HomePage from "@/components/homepage/HomePage";
 
 export const metadata: Metadata = {
   title: "AUMVEDA — Mother–Daughter Neuro-Vedic Healing",
@@ -13,9 +13,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Marketing homepage — port of Lovable aesthetic.
+ * Cinematic scroll-driven marketing homepage — R3F scene + GSAP/Lenis
+ * choreography. See src/components/homepage/HomePage.tsx.
  * Primary CTAs open the portal at /step-1. Public layout hides site footer on home.
  */
-export default function HomePage() {
-  return <HomeMarketing />;
+export default function Page() {
+  return <HomePage />;
 }

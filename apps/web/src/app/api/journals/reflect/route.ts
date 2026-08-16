@@ -15,23 +15,26 @@ export async function POST(req: NextRequest) {
 
     let reflectionText = ''
 
-    // Attempt to connect to AHI Python microservice
-    try {
-      const response = await fetch('http://localhost:8000/ahi/pre-session-brief', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: session.user.id,
-          session_notes: [{ key_themes: body, practices: 'Reflection trigger' }],
-        }),
-      })
+    // Attempt to connect to the AHI microservice when AHI_URL is configured.
+    const ahiUrl = process.env.AHI_URL
+    if (ahiUrl) {
+      try {
+        const response = await fetch(`${ahiUrl}/ahi/pre-session-brief`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            client_id: session.user.id,
+            session_notes: [{ key_themes: body, practices: 'Reflection trigger' }],
+          }),
+        })
 
-      if (response.ok) {
-        const data = await response.json()
-        reflectionText = data.brief || ''
+        if (response.ok) {
+          const data = await response.json()
+          reflectionText = data.brief || ''
+        }
+      } catch (e) {
+        console.log('AHI service offline, executing premium local fallback...')
       }
-    } catch (e) {
-      console.log('FastAPI AHI service offline, executing premium local fallback...')
     }
 
     // Local Rules-based Somatic NLP Fallback

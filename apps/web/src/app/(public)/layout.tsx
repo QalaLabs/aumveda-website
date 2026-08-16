@@ -20,7 +20,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         isHome ? "bg-[hsl(var(--av-ink))]" : "bg-[hsl(var(--av-parchment))]"
       )}
     >
-      <PublicNavigation />
+      {/* Homepage renders its own floating glass nav (FloatingNav) inside HomePage */}
+      {!isHome && <PublicNavigation />}
       <main>{children}</main>
 
       {/* Homepage carries its own closing beat — no second marketing footer */}

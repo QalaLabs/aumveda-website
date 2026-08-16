@@ -10,8 +10,8 @@ import Topbar from '../../_components/Topbar'
 
 const INITIAL_ROUTINE = {
   morning: [
-    { id: 'm1', title: 'Wake up before Sunrise', time: '6:00 AM', description: 'Brahma Muhurta is the ideal time for spiritual practices and clarity.', completed: true },
-    { id: 'm2', title: 'Tongue Scraping', time: '6:15 AM', description: 'Removes toxins (Ama) accumulated overnight and stimulates digestion.', completed: true },
+    { id: 'm1', title: 'Wake up before Sunrise', time: '6:00 AM', description: 'Brahma Muhurta is the ideal time for spiritual practices and clarity.', completed: false },
+    { id: 'm2', title: 'Tongue Scraping', time: '6:15 AM', description: 'Removes toxins (Ama) accumulated overnight and stimulates digestion.', completed: false },
     { id: 'm3', title: 'Oil Pulling (Gandusha)', time: '6:20 AM', description: 'Strengthens teeth and gums while detoxifying the oral cavity.', completed: false },
     { id: 'm4', title: 'Morning Meditation', time: '6:45 AM', description: '15 minutes of silent reflection to ground your energy for the day.', completed: false },
   ],

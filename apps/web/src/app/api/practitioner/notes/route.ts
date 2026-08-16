@@ -1,15 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getApiPractitionerSession } from '@/lib/session'
+import { z } from 'zod'
+
+const createSchema = z.object({
+  userId: z.string().min(1),
+  practitioner: z.string().optional(),
+  keyThemes: z.array(z.string()).optional(),
+  practicesAssigned: z.array(z.string()).optional(),
+  nextSessionRecommendation: z.string().optional().nullable(),
+  distressFlag: z.boolean().optional(),
+})
 
 export async function POST(req: NextRequest) {
+  const session = await getApiPractitionerSession()
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { prisma } = await import('@aumveda/db')
     const body = await req.json()
-    const {
-      userId, practitioner, serviceType, keyThemes,
-      practicesAssigned, nextSessionRecommendation, distressFlag,
-    } = body
+    const parsed = createSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? 'Invalid input' },
+        { status: 400 }
+      )
+    }
 
-    const session = await prisma.therapySession.create({
+    const {
+      userId,
+      practitioner,
+      keyThemes,
+      practicesAssigned,
+      nextSessionRecommendation,
+      distressFlag,
+    } = parsed.data
+
+    const sessionNote = await prisma.therapySession.create({
       data: {
         userId,
         practitioner: practitioner || 'sejal',
@@ -22,8 +50,9 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ ok: true, data: session })
+    return NextResponse.json({ ok: true, data: sessionNote })
   } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 })
+    console.error('PRACTITIONER NOTES ERROR:', e)
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 })
   }
 }

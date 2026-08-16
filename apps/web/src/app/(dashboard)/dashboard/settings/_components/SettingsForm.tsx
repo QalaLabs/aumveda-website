@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Switch } from '@/components/ui/switch'
+import { showSuccess, showError } from '@/utils/toast'
 
 const TIMEZONES = [
   'Asia/Kolkata', 'Asia/Dubai', 'Asia/Singapore',
@@ -17,12 +19,66 @@ interface Props {
   bio: string
 }
 
+const NOTIFICATION_KEYS: { key: string; title: string; description: string }[] = [
+  {
+    key: 'notifications.email_progress',
+    title: 'Email Progress Reports',
+    description: 'Receive weekly summaries of completed practices and scores.',
+  },
+  {
+    key: 'notifications.whatsapp_daily',
+    title: 'WhatsApp Daily Ritual Prompts',
+    description: 'Receive reminders for daily breathing and meditation audio.',
+  },
+]
+
+const CONSENT_KEYS: { key: string; title: string; description: string }[] = [
+  {
+    key: 'therapeutic_sharing',
+    title: 'Therapeutic Data Sharing',
+    description: 'Allow Sejal Gala and Archana Jain to read journal entries marked visible.',
+  },
+  {
+    key: 'dpdp_2023_digital_consent',
+    title: 'DPDP Act 2023 Digital Consent',
+    description: 'Data processed locally within sovereign cloud clusters in Mumbai (ap-south-1).',
+  },
+]
+
+const DEFAULT_VALUES = Object.fromEntries(
+  [...NOTIFICATION_KEYS, ...CONSENT_KEYS].map(c => [c.key, false])
+)
+
 export default function SettingsForm({ name: initName, email, timezone: initTz, bio: initBio }: Props) {
   const [name, setName] = useState(initName)
   const [timezone, setTimezone] = useState(initTz)
   const [bio, setBio] = useState(initBio)
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [prefs, setPrefs] = useState<Record<string, boolean>>(DEFAULT_VALUES)
+  const [prefsLoaded, setPrefsLoaded] = useState(false)
+  const [savingKey, setSavingKey] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/consent')
+      .then(r => r.json())
+      .then(d => {
+        if (cancelled) return
+        if (d.consents) {
+          const mapped = d.consents.reduce((acc: Record<string, boolean>, c: any) => {
+            if (c.key in DEFAULT_VALUES) acc[c.key] = !!c.value
+            return acc
+          }, {} as Record<string, boolean>)
+          setPrefs(prev => ({ ...prev, ...mapped }))
+        }
+        setPrefsLoaded(true)
+      })
+      .catch(() => {
+        if (!cancelled) setPrefsLoaded(true)
+      })
+    return () => { cancelled = true }
+  }, [])
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -36,6 +92,25 @@ export default function SettingsForm({ name: initName, email, timezone: initTz, 
     setLoading(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
+  }
+
+  async function togglePref(key: string, value: boolean) {
+    setPrefs(prev => ({ ...prev, [key]: value }))
+    setSavingKey(key)
+    try {
+      const res = await fetch('/api/consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value, version: 'v1' }),
+      })
+      if (!res.ok) throw new Error()
+      showSuccess('Preference saved')
+    } catch {
+      showError('Failed to update preference')
+      setPrefs(prev => ({ ...prev, [key]: !value }))
+    } finally {
+      setSavingKey(null)
+    }
   }
 
   return (
@@ -108,43 +183,51 @@ export default function SettingsForm({ name: initName, email, timezone: initTz, 
       {/* Notifications */}
       <div className="bg-white border border-stone-100 rounded-2xl p-6 space-y-4">
         <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Notification Preferences</h2>
-        <div className="space-y-3">
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-stone-600 select-none">
-            <input type="checkbox" defaultChecked className="rounded border-stone-300 text-brand-600 focus:ring-brand-300 w-4 h-4 mt-0.5" />
-            <div>
-              <p className="font-semibold">Email Progress Reports</p>
-              <p className="text-stone-400">Receive weekly summaries of completed practices and scores.</p>
-            </div>
-          </label>
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-stone-600 select-none">
-            <input type="checkbox" defaultChecked className="rounded border-stone-300 text-brand-600 focus:ring-brand-300 w-4 h-4 mt-0.5" />
-            <div>
-              <p className="font-semibold">WhatsApp Daily Ritual Prompts</p>
-              <p className="text-stone-400">Receive reminders for daily breathing and meditation audio.</p>
-            </div>
-          </label>
-        </div>
+        {!prefsLoaded ? (
+          <div className="h-16 animate-pulse bg-stone-50 rounded-xl" />
+        ) : (
+          <div className="space-y-3">
+            {NOTIFICATION_KEYS.map((c) => (
+              <div key={c.key} className="flex items-start justify-between gap-4 py-2">
+                <div>
+                  <p className="text-sm font-semibold text-stone-700">{c.title}</p>
+                  <p className="text-xs text-stone-400">{c.description}</p>
+                </div>
+                <Switch
+                  checked={prefs[c.key]}
+                  disabled={savingKey === c.key}
+                  onCheckedChange={(val) => togglePref(c.key, val)}
+                  className="data-[state=checked]:bg-brand-500"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* HIPAA / DPDP Act Consents */}
       <div className="bg-white border border-stone-100 rounded-2xl p-6 space-y-4">
         <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Privacy & Consent Checklists</h2>
-        <div className="space-y-3">
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-stone-600 select-none">
-            <input type="checkbox" defaultChecked disabled className="rounded border-stone-150 text-brand-600 w-4 h-4 mt-0.5 cursor-not-allowed" />
-            <div>
-              <p className="font-semibold">Therapeutic Data Sharing</p>
-              <p className="text-stone-400">Allow Sejal Gala and Archana Jain to read journal entries marked visible.</p>
-            </div>
-          </label>
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-stone-600 select-none">
-            <input type="checkbox" defaultChecked disabled className="rounded border-stone-150 text-brand-600 w-4 h-4 mt-0.5 cursor-not-allowed" />
-            <div>
-              <p className="font-semibold">DPDP Act 2023 Digital Consent</p>
-              <p className="text-stone-400">Data processed locally within sovereign cloud clusters in Mumbai (ap-south-1).</p>
-            </div>
-          </label>
-        </div>
+        {!prefsLoaded ? (
+          <div className="h-16 animate-pulse bg-stone-50 rounded-xl" />
+        ) : (
+          <div className="space-y-3">
+            {CONSENT_KEYS.map((c) => (
+              <div key={c.key} className="flex items-start justify-between gap-4 py-2">
+                <div>
+                  <p className="text-sm font-semibold text-stone-700">{c.title}</p>
+                  <p className="text-xs text-stone-400">{c.description}</p>
+                </div>
+                <Switch
+                  checked={prefs[c.key]}
+                  disabled={savingKey === c.key}
+                  onCheckedChange={(val) => togglePref(c.key, val)}
+                  className="data-[state=checked]:bg-brand-500"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Delete Account Danger Zone */}
@@ -161,7 +244,6 @@ export default function SettingsForm({ name: initName, email, timezone: initTz, 
               if (confirm('Are you absolutely sure you want to delete your account? This action is permanent.')) {
                 const res = await fetch('/api/users/me', { method: 'DELETE' })
                 if (res.ok) {
-                  // Direct clean logout redirection
                   window.location.href = '/'
                 }
               }

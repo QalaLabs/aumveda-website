@@ -1,5 +1,52 @@
 # AGENTS.md — Aumveda Project Memory
 
+## Session Context (Aug 08, 2026 — Dashboard honesty pass / zero fabricated data)
+
+### What We Did
+- Removed the last production-facing hardcoded demo data in the dashboard:
+  - `/dashboard/activity` — fabricated `stats` (growthScore 84 / consistency 12 / milestones 5 / `events.length + 142`) replaced with real derived values (`ActivityStats` now takes `{total, activeDays, milestones, eventTypes}` computed via `useMemo` from loaded `/api/events`).
+  - `/dashboard/orders` — demo `RECOMMENDED_PRODUCT` (Unsplash journal, fake 4.8 rating) replaced with real first `Product` from `/api/products`; `QuickShopCard` rewritten to real shape (`title`, `priceInr`, `imageUrl`, no rating, `Browse Shop` link instead of 404 `/shop/[id]`).
+  - `/dashboard/shop` — removed fabricated `4.8` star rating chip.
+  - `/dashboard/routine` — m1/m2 no longer pre-marked `completed: true`.
+  - `/dashboard/programs` — "assigned practitioners" card softened (no fake per-user mapping claim).
+  - `ProfileHeader` — sparkline catch no longer seeds fake `[65,72,68,85,78,92,88]` (uses `[]`); removed fabricated "Last sync: 2 days ago" pill; removed no-op "Connect Google" button; Logout now wired to `signOut({ callbackUrl: '/auth/login' })`; removed unused `ShieldCheck`/`RefreshCw` imports.
+  - `/api/profile/progress` — no-snapshot `breakdown` fallback now zeros (`{sleep:0,activity:0,journal:0,wellbeing:0}`), not fake 50s.
+- **Consent fixes (DPDP opt-in):** `ConsentManager` no longer defaults toggles ON (`tracking/health_sync/ai_personalization` were `true` with no DB rows — now all `false` until user opts in); `SettingsForm` notification + consent checkboxes were decorative `defaultChecked`/`disabled` — now real `Switch`es bound to `/api/consent` (keys `notifications.email_progress`, `notifications.whatsapp_daily`, `therapeutic_sharing`, `dpdp_2023_digital_consent`), default off, persisted via POST.
+- Dashboard home (`/dashboard`), `TodayDoseCard`, `CosmicNoteCard`, `QuietGrounding` verified clean: all DB-derived with null-degrade, no fabricated metrics.
+- Known dead code (not production-facing, never imported): `NotificationCenter.tsx` (`MOCK_NOTIFICATIONS`), plus unused `RecentJournals`/`QuickActions`/`ProgressRing` under `dashboard/_components` — candidates for deletion later.
+
+### Verification
+- `pnpm --filter @aumveda/web typecheck` PASSES.
+- `pnpm --filter @aumveda/web lint` PASSES — only pre-existing warnings (`<img>` tags, `activity` page `useEffect` dep that predates this session).
+- `pnpm --filter @aumveda/web build` PASSES — 106 routes, all `/api/*` dynamic (ƒ), static prerender DB-free. `NotificationCenter` still bundled (unused import) — fine.
+
+## Session Context (Aug 08, 2026 — Dashboard APIs production-hardening)
+
+### What We Did
+- Implemented 14 missing `/api/*` route handlers that dashboard consumers referenced but were stubs/404: `/api/profile`, `/api/consent`, `/api/events`, `/api/health/metrics`, `/api/ai/tips`, `/api/orders` + `/api/orders/[id]` + `/reorder` + `/invoice`, `/api/user/export`, `/api/user/delete`, `/api/uploads/presign` + `/api/uploads/complete`, `/api/courses/progress`, `/api/courses/[courseId]/modules/[moduleId]/embed-token`, `/api/embed/config`.
+- All new routes: derive user from `getApiSession()` (never client `userId`), `export const dynamic = 'force-dynamic'`, Zod-validate input, write `Event` audit rows where meaningful. No mock data in any production path.
+- Fixed existing routes: `/api/profile/progress` returns `{success,current,average,history,trend,summary,breakdown}`; `/api/journals/reflect` uses `process.env.AHI_URL` (local rules fallback when unset); `/api/journals/upload` does real R2 PUT (max 25MB, 413/503/502 handling).
+- New libs: `apps/web/src/lib/r2.ts` (SigV4 presigned PUT for Cloudflare R2, `REGION='auto'`, `isR2Configured()`), `apps/web/src/lib/course-token.ts` (HMAC-SHA256 sign/verify with `COURSE_JWT_SECRET`, exp check).
+- `.env.example` gains: `AHI_URL`, `CRON_SECRET`, `COURSE_JWT_SECRET` (already had R2/health-sync blocks).
+- ImageUpload.tsx hardened: throws on failed presign so a broken avatar isn't saved.
+
+### Verification
+- `pnpm --filter @aumveda/web typecheck` PASSES.
+- `pnpm --filter @aumveda/web lint` PASSES (only pre-existing warnings: `<img>` tags, two useEffect deps).
+- `pnpm --filter @aumveda/web build` PASSES — 106 routes, all `/api/*` dynamic (ƒ), static prerender does NOT hit the DB (builds DB-less in Vercel). R2/Cashfree/email remain unverified without live keys.
+
+### Known Gaps (unchanged)
+- No live Postgres/Docker daemon → no DB smoke tests, no `prisma migrate`/seed locally.
+- `/dashboard/courses` + `/dashboard/learn` pages are still fully hardcoded demo data (COURSE array / Phase 8 placeholder) — not wired to course APIs yet.
+- Cashfree env vars still present (migration to Razorpay is docs-only).
+- `/api/embed/config` only verifies the token; it returns video metadata, not an actual stream.
+
+### Key Security Properties
+- Practitioner routes (`/api/practitioner/*`) are role-gated via `getApiPractitionerSession()` (practitioner/admin/super_admin), which is why the earlier DB-less static-prerender failure is gone.
+- `/api/portal` GET is owner-only (401/403); POST stays open (lead capture).
+- `/api/user/delete` requires `password: "confirm-delete"` string confirmation; `/api/uploads/presign` rejects non-image/audio (415), 503 if R2 unconfigured.
+- Identity always from session (`getApiSession()`); client-supplied `userId` is ignored.
+
 ## Portal Engine Architecture (Jun 28, 2026 — New)
 - Location: `apps/web/src/portal/` (22 files)
 - Engine: `portal/engine/` — PortalProvider, StateMachine, Context, Router, StepRegistry, ValidationEngine, AutosaveManager, SessionPersistence, AnimationManager, ProgressManager, PortalApiClient

@@ -47,7 +47,9 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' fonts.googleapis.com assets.calendly.com",
               "font-src 'self' fonts.gstatic.com assets.calendly.com",
               "img-src 'self' data: blob: *.r2.cloudflarestorage.com assets.aumveda.com lh3.googleusercontent.com images.unsplash.com *.unsplash.com *.googleusercontent.com maps.gstatic.com *.gstatic.com",
-              "media-src 'self' *.r2.cloudflarestorage.com assets.aumveda.com",
+              // blob: — the homepage's master film (MasterFilm.tsx) is fetched and
+              // played from a same-origin-created object URL for reliable scroll-seeking.
+              "media-src 'self' blob: *.r2.cloudflarestorage.com assets.aumveda.com",
               // Calendly booking embed lives in an iframe from calendly.com.
               "frame-src 'self' *.youtube.com *.youtube-nocookie.com calendly.com *.calendly.com",
               // Places autocomplete uses fetch to maps.googleapis.com; Calendly widget posts to calendly.com.

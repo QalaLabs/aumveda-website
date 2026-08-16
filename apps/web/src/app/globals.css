@@ -16,6 +16,16 @@
     --av-sage: 152 18% 35%;
     --av-rose: 0 21% 45%;
 
+    /* Cinematic world — travertine / copper / fog (homepage scroll experience) */
+    --av-travertine: 38 32% 90%;
+    --av-travertine-deep: 34 22% 74%;
+    --av-copper: 21 62% 48%;
+    --av-copper-soft: 24 68% 66%;
+    --av-fog: 220 14% 88%;
+    --av-dusk: 250 30% 12%;
+    --av-glass-border: 40 40% 96% / 0.14;
+    --av-glass-fill: 250 30% 10% / 0.32;
+
     --background: var(--av-parchment);
     --foreground: var(--av-ink-text);
     --card: 40 40% 97%;
@@ -102,6 +112,15 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Barely-there idle drift for cinematic headlines — reads as "in the scene,
+   breathing with the camera" rather than a fixed HTML overlay pasted on
+   top. Amplitude deliberately tiny (2px/0.006 opacity) — this is a held
+   film title, not a UI element animating for attention. */
+@keyframes av-title-drift {
+  0%, 100% { transform: translateY(0); opacity: 0.985; }
+  50% { transform: translateY(-2px); opacity: 1; }
+}
+
 @keyframes av-veil {
   from { clip-path: inset(0 0 100% 0); }
   to { clip-path: inset(0 0 0 0); }
@@ -158,6 +177,19 @@
     border-color: hsl(var(--av-gold));
     background-color: hsl(var(--av-gold));
     color: hsl(var(--av-ink));
+  }
+  /* Cinematic headline treatment: soft atmospheric depth (a wide, low text
+     shadow the color of the scene's own dark, not a hard drop shadow) plus
+     the barely-there drift above — separates the title from the film
+     without ever reading as a UI card or a caption box. */
+  .av-film-title {
+    text-shadow: 0 2px 28px hsl(var(--av-ink) / 0.55), 0 1px 2px hsl(var(--av-ink) / 0.35);
+    animation: av-title-drift 9s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .av-film-title {
+      animation: none;
+    }
   }
 }
 
@@ -220,7 +252,11 @@
     inset: 0;
     pointer-events: none;
     z-index: 1;
-    background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--av-ink) / 0.65) 100%);
+    /* Was 0.65 — combined with the R3F postprocessing Vignette pass this
+       stacked into a heavy edge-darkening that read as "fog"/haze over the
+       whole frame rather than a film's own light falloff. Cut roughly in
+       half; the environment (the master film) should stay legible behind it. */
+    background: radial-gradient(ellipse at center, transparent 55%, hsl(var(--av-ink) / 0.32) 100%);
   }
   .av-glow-gold {
     box-shadow: 0 30px 120px -40px hsl(var(--av-gold) / 0.35);
@@ -236,5 +272,29 @@
   }
   .animate-av-veil {
     animation: av-veil 1.6s cubic-bezier(0.7, 0, 0.2, 1) both;
+  }
+
+  /* Cinematic homepage — floating glass world */
+  .av-glass {
+    background: hsl(var(--av-glass-fill));
+    border: 1px solid hsl(var(--av-glass-border));
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+  .av-glass-light {
+    background: hsl(var(--av-travertine) / 0.55);
+    border: 1px solid hsl(0 0% 100% / 0.5);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+  }
+  .av-copper-text {
+    color: hsl(var(--av-copper-soft));
+  }
+  .av-fog-fade::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 60% at 50% 100%, hsl(var(--av-fog) / 0.5), transparent 70%);
   }
 }

@@ -17,7 +17,8 @@ out
 .env.production
 
 # Prisma
-packages/db/prisma/migrations/*.sql
+# Migration SQL must stay tracked — production deploys run them.
+# packages/db/prisma/migrations/*.sql
 
 # Logs
 *.log
