@@ -12,6 +12,7 @@ export interface OrderView {
   createdAt: string
   total: number
   status: string
+  paymentStatus: string
   shippingAddress: string
   paymentMethod: string
   items: OrderItemView[]
@@ -34,7 +35,8 @@ type OrderRow = {
   createdAt: Date
   totalCents: number
   status: string
-  cashfreePaymentId: string | null
+  paymentStatus?: string
+  eazebusPaymentId?: string | null
   shippingAddress: unknown
   trackingNumber: string | null
   items?: OrderItemRow[]
@@ -66,9 +68,10 @@ export function mapOrder(order: OrderRow): OrderView {
     createdAt: order.createdAt.toISOString(),
     total: order.totalCents / 100,
     status: order.status,
+    paymentStatus: order.paymentStatus ?? 'PENDING',
     shippingAddress:
       shipping ?? 'Digital content — delivered instantly to your account.',
-    paymentMethod: order.cashfreePaymentId ? 'Online payment' : 'Pending payment',
+    paymentMethod: order.eazebusPaymentId ? 'Online payment' : 'Pending payment',
     trackingNumber: order.trackingNumber ?? undefined,
     items: (order.items ?? []).map(mapOrderItem),
   }

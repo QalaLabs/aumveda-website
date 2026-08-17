@@ -5,6 +5,10 @@ import { isR2Configured, createPresignedPutUrl, r2PublicUrl } from '@/lib/r2'
 export const dynamic = 'force-dynamic'
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif',
+  'audio/mpeg', 'audio/wav', 'audio/webm', 'audio/ogg',
+]
 
 export async function POST(req: NextRequest) {
   const session = await getApiSession()
@@ -21,6 +25,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'File exceeds the 25MB upload limit' },
         { status: 413 },
+      )
+    }
+
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'File type not allowed. Accepted: images (JPEG, PNG, WebP, GIF, AVIF) and audio (MP3, WAV, WebM, OGG)' },
+        { status: 415 },
       )
     }
 

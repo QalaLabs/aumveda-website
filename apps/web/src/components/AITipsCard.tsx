@@ -17,7 +17,7 @@ const AITipsCard = () => {
       const res = await fetch('/api/ai/tips', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: 'mock-user-id' })
+        body: JSON.stringify({})
       });
       const data = await res.json();
       if (res.ok) {

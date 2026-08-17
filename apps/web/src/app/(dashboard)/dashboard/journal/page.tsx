@@ -22,21 +22,26 @@ export default async function JournalListPage({
   const session = await requireSession()
   const search = searchParams.search || ''
 
-  const journals = await prisma.journal.findMany({
-    where: {
-      userId: session.user.id,
-      isDeleted: false,
-      ...(search && {
-        OR: [
-          { title: { contains: search, mode: 'insensitive' } },
-          { body: { contains: search, mode: 'insensitive' } },
-          { tags: { has: search.toLowerCase().replace(/\s+/g, '-') } },
-        ],
-      }),
-    },
-    orderBy: { createdAt: 'desc' },
-    select: { id: true, title: true, mood: true, body: true, tags: true, createdAt: true },
-  })
+  let journals: { id: number; title: string | null; mood: number | null; body: string | null; tags: string[]; createdAt: Date }[] = []
+  try {
+    journals = await prisma.journal.findMany({
+      where: {
+        userId: session.user.id,
+        isDeleted: false,
+        ...(search && {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' } },
+            { body: { contains: search, mode: 'insensitive' } },
+            { tags: { has: search.toLowerCase().replace(/\s+/g, '-') } },
+          ],
+        }),
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, title: true, mood: true, body: true, tags: true, createdAt: true },
+    })
+  } catch {
+    journals = []
+  }
 
   return (
     <>

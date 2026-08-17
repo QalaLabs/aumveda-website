@@ -110,23 +110,27 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
         </DialogHeader>
 
         <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto">
-          {hasPhysicalItems && order.status === 'PAID' && (
+          {hasPhysicalItems && order.trackingNumber && (
             <div className="p-6 bg-blue-50 rounded-2xl border border-blue-100 space-y-4">
               <div className="flex justify-between items-center">
                 <h4 className="text-xs font-bold text-blue-900 flex items-center gap-2">
                   <Truck className="w-4 h-4" /> Shipment Tracking
                 </h4>
-                <Badge className="bg-blue-600 text-white border-none text-[9px]">In Transit</Badge>
+                {order.estimatedDelivery && (
+                  <Badge className="bg-blue-600 text-white border-none text-[9px]">In Transit</Badge>
+                )}
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex-1 space-y-1">
                   <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Tracking Number</p>
-                  <p className="text-sm font-mono font-bold text-blue-900">{order.trackingNumber || 'AUM-7721-X92'}</p>
+                  <p className="text-sm font-mono font-bold text-blue-900">{order.trackingNumber}</p>
                 </div>
-                <div className="flex-1 space-y-1 text-right">
-                  <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Est. Delivery</p>
-                  <p className="text-sm font-bold text-blue-900">{order.estimatedDelivery || 'Oct 24, 2023'}</p>
-                </div>
+                {order.estimatedDelivery && (
+                  <div className="flex-1 space-y-1 text-right">
+                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Est. Delivery</p>
+                    <p className="text-sm font-bold text-blue-900">{order.estimatedDelivery}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

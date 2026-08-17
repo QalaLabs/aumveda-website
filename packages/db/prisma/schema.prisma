@@ -275,41 +275,50 @@ model HealthMetric {
 // ─────────────────────────────────────────────────────────────
 
 model Product {
-  id             Int      @id @default(autoincrement())
-  sku            String   @unique
-  slug           String   @unique
-  title          String
-  description    String   @db.Text
-  priceCents     Int      // stored in paise (INR × 100)
-  currency       String   @default("INR")
-  images         String[] // R2 keys
-  inventoryCount Int      @default(0)
-  isActive       Boolean  @default(true)
-  productType    String   @default("physical") // "physical" | "course" | "digital"
-  referenceId    Int?     // courseId if productType === "course"
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               Int      @id @default(autoincrement())
+  sku              String   @unique
+  slug             String   @unique
+  title            String
+  shortDescription String?  @db.Text
+  description      String   @db.Text
+  category         String   @default("")          // e.g. "Bracelets", "Vastu", "Crystals", "Combos", "Healing"
+  priceCents       Int                                 // stored in paise (INR × 100)
+  compareAtPriceCents Int?                             // MRP in paise — null means no strikethrough
+  currency         String   @default("INR")
+  images           String[]                            // R2 keys or external URLs
+  inventoryCount   Int      @default(0)
+  isActive         Boolean  @default(true)
+  productType      String   @default("physical")      // "physical" | "course" | "digital"
+  referenceId      Int?                                // courseId if productType === "course"
+  tags             String[]                            // e.g. ["Bestseller", "Sale", "Bundle"]
+  metadata         Json?                               // flexible key-value store
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  orderItems     OrderItem[]
+  orderItems       OrderItem[]
 }
 
 model Order {
-  id               Int       @id @default(autoincrement())
-  userId           String?
-  user             User?     @relation(fields: [userId], references: [id])
-  status           String    @default("PENDING")
-  // PENDING → PAID → FULFILLED → SHIPPED → DELIVERED | CANCELLED | REFUNDED
-  totalCents       Int
-  currency         String    @default("INR")
-  cashfreeOrderId  String?   @unique
-  cashfreePaymentId String?
-  paymentMeta      Json?
-  shippingAddress  Json?
-  trackingNumber   String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  userId            String?
+  user              User?     @relation(fields: [userId], references: [id])
+  status            String    @default("PENDING")
+  // Fulfillment: PENDING → CONFIRMED → SHIPPED → DELIVERED | CANCELLED
+  paymentStatus     String    @default("PENDING")
+  // Payment:     PENDING → PAID | FAILED | REFUNDED
+  totalCents        Int
+  currency          String    @default("INR")
+  eazebusOrderId    String?   @unique
+  eazebusPaymentId  String?
+  paymentMeta       Json?
+  shippingAddress   Json?
+  trackingNumber    String?
+  customerEmail     String?
+  customerName      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  items            OrderItem[]
+  items             OrderItem[]
 }
 
 model OrderItem {

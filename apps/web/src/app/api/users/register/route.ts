@@ -128,9 +128,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('REGISTER ROUTE ERROR:', error)
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Internal server error',
-      },
+      { error: 'Registration failed. Please try again.' },
       { status: 500 }
     )
   }

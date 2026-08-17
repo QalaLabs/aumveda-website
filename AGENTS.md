@@ -1,201 +1,216 @@
 # AGENTS.md — Aumveda Project Memory
 
+## Session Context (Aug 17, 2026 — Go-Live Phase: Production Configuration + Honesty Fixes)
+
+### Production Deployment Target (Verified)
+- **Platform**: Hostinger VPS (self-managed Linux)
+- **Process Manager**: PM2 (3 apps: aumveda-api, aumveda-web, aumveda-admin)
+- **CI/CD**: GitHub Actions — push to `main` (prod) / `develop` (staging) → SSH into VPS → git pull → pnpm install → PM2 restart
+- **Primary Domain**: `app.aumveda.com` (www.aumveda.com → 301 to app.aumveda.com)
+- **Database**: Supabase PostgreSQL (cloud, ap-south-1 pooler:6543)
+- **Storage**: Cloudflare R2 (`assets.aumveda.com`)
+- **Branching**: `main` = production, `develop` = staging
+
+### Honesty Fixes Applied (Critical)
+- **Checkout confirmation page**: Was showing green checkmark + "Order Confirmed!" + "Thank you for your purchase" + promising a confirmation email — all when no payment was made. Now shows amber clock icon + "Order Received" + honest "Payment pending" notice explaining online payment is not yet available.
+- **Cart clearing**: Was destroying cart immediately after order creation (before payment). Now only clears cart when `paymentUrl` is present (actual payment redirect). If no payment URL, cart is preserved.
+- **Checkout footer**: Was claiming "Payment processing by EazeBus. Your data is encrypted and secure." Now honestly states: "Online payment is not yet available. Our team will contact you to complete your purchase."
+- **OrderDetailModal tracking**: Was showing fabricated tracking number `AUM-7721-X92` and fake delivery date `Oct 24, 2023`. Now only shows tracking section when real `trackingNumber` exists on the order.
+- **AITipsCard**: Was sending hardcoded `userId: 'mock-user-id'` to API. Now sends empty body (server derives user from session).
+
+### Security Fixes Applied
+- **Error message leaks**: `POST /api/users/register` and `POST /api/journals/reflect` were returning raw `error.message` to clients. Now return generic error strings.
+- **Gemini API key**: Demoted from `NEXT_PUBLIC_GEMINI_API_KEY` to `GEMINI_API_KEY` (server-only).
+- **Analytics track**: Added `getServerSession(authOptions)` check (was unauthenticated).
+- **Account deletion**: Added `{ "confirmation": "confirm-delete" }` JSON body requirement.
+- **Upload file-type validation**: Added MIME type whitelist (image + audio only, 415 for disallowed).
+
+### Environment Variable Audit (47 variables used in source code)
+| Category | Variables | Production Value Available? |
+|----------|-----------|---------------------------|
+| Auth | NEXTAUTH_SECRET, NEXTAUTH_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET | Must configure |
+| Database | DATABASE_URL, DIRECT_URL | Must configure (Supabase) |
+| Supabase | NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, SUPABASE_SERVICE_ROLE_KEY | Must configure |
+| AI | GEMINI_API_KEY, AHI_URL | Must configure / optional |
+| Storage | CLOUDFLARE_R2_ACCOUNT_ID, *_ACCESS_KEY_ID, *_SECRET_ACCESS_KEY, *_BUCKET_NAME, *_PUBLIC_URL | Must configure |
+| Email | EMAIL_SERVER_HOST, EMAIL_SERVER_PORT, EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_FROM | Must configure |
+| Booking | PRACTITIONER_NOTIFY_EMAIL, SEJAL_NOTIFY_EMAIL, ARCHANA_NOTIFY_EMAIL, ADMIN_NOTIFY_EMAIL | Must configure |
+| Payment | EAZEBUS_BASE_URL, EAZEBUS_MERCHANT_ID, EAZEBUS_API_KEY | DEFERRED |
+| Webhooks | N8N_PORTAL_WEBHOOK_URL, N8N_WHATSAPP_WEBHOOK | Optional |
+| Config | NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_BASE_URL, ADMIN_URL, PORT, COURSE_JWT_SECRET, CRON_SECRET | Must configure |
+| Feature Flags | NEXT_PUBLIC_FLAG_SHORT_PORTAL, *_BREATH_VARIANT, *_EXIT_INTENT | Optional |
+| Astrology | PROKERALA_CLIENT_ID, PROKERALA_CLIENT_SECRET | DEFERRED |
+| Google Places | NEXT_PUBLIC_GOOGLE_PLACES_API_KEY | DEFERRED |
+
+### DEV_BYPASS Security (Verified)
+- Triple guard: `NODE_ENV !== 'production'` AND `DEV_BYPASS === 'true'` in 3 session functions + middleware
+- Cannot be triggered by any HTTP request — pure server-side env check
+- Middleware only bypasses dashboard routes (NOT admin or practitioner)
+- In DEV_BYPASS mode, `getApiSession()` returns `role: 'client'` — admin routes correctly reject it
+- `.env.local` (sets DEV_BYPASS=true) is properly gitignored
+
+### Security Audit Summary
+- **CRITICAL**: 0 | **HIGH**: 0 | **MEDIUM**: 4 (all portal/lead-capture routes intentionally unauthenticated) | **LOW**: 6
+- No hardcoded secrets in source code
+- All admin routes double-protected (middleware + API-level role check)
+- JWT + DB session tracking + revocation at getServerSession level
+- CSP headers, HSTS, X-Frame-Options DENY all configured
+
+### Build Verification (Aug 17, 2026)
+- `pnpm --filter @aumveda/web typecheck` — PASS (0 errors)
+- `pnpm --filter @aumveda/web lint` — PASS (only pre-existing warnings)
+- `pnpm --filter @aumveda/web build` — PASS (116 routes)
+
+---
+
+## Session Context (Aug 17, 2026 — Full Production Readiness Audit + Hardening)
+
+### What We Did
+Comprehensive 26-phase production readiness audit across environment, auth, security, commerce, dashboard, portal, storage, email, 3D, SEO, performance, mobile, logging, and dependencies. All findings fixed or documented.
+
+#### Security Fixes Applied
+- **Gemini API key demoted to server-only**: `NEXT_PUBLIC_GEMINI_API_KEY` → `GEMINI_API_KEY` (was exposed to client bundle). Updated in `lib/gini.ts`, `.env.example`, `turbo.json`.
+- **Analytics track endpoint auth-protected**: `/api/analytics/track` now requires valid session (`getServerSession`). Previously unauthenticated — anyone could write events.
+- **Account deletion requires confirmation**: `/api/users/me` DELETE now requires `{ "confirmation": "confirm-delete" }` in body. Previously a single click deleted the account.
+- **Upload file-type validation**: `/api/journals/upload` now accepts only image (JPEG, PNG, WebP, GIF, AVIF) and audio (MP3, WAV, WebM, OGG) MIME types (415 for disallowed). Previously accepted any file type.
+- **ImageUpload.tsx fixed**: Was calling dead routes (`/api/uploads/presign`, `/api/uploads/complete`) with hardcoded `mock-user-id`. Now calls real `/api/journals/upload` via FormData. `accept` attribute restricted to allowed image types.
+
+#### SEO Fixes Applied
+- **robots.txt created**: `public/robots.txt` — allows public routes, blocks `/dashboard/`, `/admin/`, `/practitioner/`, `/api/`, `/step-*`, `/onboarding/`, `/auth/`.
+- **Dynamic sitemap created**: `src/app/sitemap.ts` — generates sitemap.xml for all public routes (14 static + 8 portal steps). Uses `NEXT_PUBLIC_BASE_URL`.
+
+#### Reliability Fixes Applied
+- **Dashboard error boundary**: `src/app/(dashboard)/error.tsx` — catches server-component errors with retry/back-to-dashboard UX.
+- **Global error boundary**: `src/app/error.tsx` — catches app-level errors.
+- **Dashboard loading state**: `src/app/(dashboard)/loading.tsx` — spinner during server-component streaming.
+- **Journal list error handling**: `src/app/(dashboard)/dashboard/journal/page.tsx` — try/catch around Prisma query, gracefully falls back to empty list instead of crashing.
+
+#### Environment Cleanup
+- **`.env.example` fully rewritten**: Removed CASHFREE vars, added EAZEBUS placeholder, added `NEXT_PUBLIC_BASE_URL`, `GEMINI_API_KEY`, `N8N_WHATSAPP_WEBHOOK`, `DEV_BYPASS` warning. Removed dead `CALENDLY_*` hardcoded placeholder values.
+- **Dead legacy file removed**: `apps/web/db.js` (old Supabase client using nonexistent `SUPABASE_URL`/`SUPABASE_ANON_KEY`). Not imported anywhere.
+
+#### Verification (Aug 17, 2026)
+- `pnpm --filter @aumveda/web typecheck` — PASSES (0 errors)
+- `pnpm --filter @aumveda/web lint` — PASSES (only pre-existing `<img>` warnings + 1 useEffect dep)
+- `pnpm --filter @aumveda/web build` — PASSES (116 routes, all `/api/*` dynamic)
+
+#### Key Security Properties (Current)
+- Identity always from session (`getApiSession()` / `getServerSession()`); client-supplied `userId` ignored in API routes
+- `DEV_BYPASS` mechanism exists in `lib/session.ts` — when `NODE_ENV !== 'production'` AND `DEV_BYPASS=true`, returns hardcoded dev session. **Must ensure production never has DEV_BYPASS=true.**
+- Admin routes (`/admin/*`) role-gated via `isAdminRole()` middleware
+- Practitioner routes role-gated via `getApiPractitionerSession()` (practitioner/admin/super_admin)
+- `/api/user/delete` requires `password: "confirm-delete"` string; `/api/users/me` DELETE requires `{ confirmation: "confirm-delete" }` JSON body
+- `/api/journals/upload` rejects non-image/audio MIME types (415), 503 if R2 unconfigured
+- CSP headers configured: script-src, img-src, connect-src, frame-src all scoped to known domains
+- NextAuth JWT maxAge: 30 days, bcrypt 12 rounds, OTP 6-digit/10min expiry, email verify 24h, password reset 1h
+
+### Known Gaps (Deferred — Not Blockers for Launch)
+| Gap | Why Deferred | Impact |
+|-----|-------------|--------|
+| EazeBus payment integration | No API docs/credentials available yet | Checkout creates order with PENDING payment status; cannot complete payment flow |
+| Prokerala astrology | No API credentials configured | Step 6 portal falls back to deterministic placeholder chart |
+| Cal.com booking | No API key; Calendly env vars are hardcoded placeholders | Booking confirmation page shows fake Calendly links |
+| Email/SMTP | No email provider configured | Magic links, order confirmations, booking emails non-functional |
+| Cloudflare R2 production | Credentials only in dev .env.local | Image uploads work in dev; production URLs may show `undefined.r2` prefix |
+| Dashboard courses/learn pages | Fully hardcoded demo data | Not wired to course APIs yet |
+| Fastify API (apps/api) | Only route stubs | All logic in Next.js API routes currently |
+| Admin app (apps/admin) | Placeholder only | Not built out — real admin is in web app `/admin/*` |
+| Docker compose | Manual Docker only | Hinders reproducible dev env |
+| PostgreSQL production | Local Docker vs cloud Supabase | Session data not synced |
+| `<img>` tags vs `next/image` | ~15 components use `<img>` | LCP/bandwidth warnings; functional but suboptimal |
+| 3D fallback components | No error boundaries for GLB loading | If model fails to load, user sees blank canvas |
+| Next.js config warnings | `duration-[1400ms]` etc. ambiguous Tailwind classes | Cosmetic only, no functional impact |
+
+---
+
+## Session Context (Aug 08, 2026 — Commerce Foundation + Admin Panel + Dashboard APIs)
+
+### What We Did
+- **Commerce Foundation**: Prisma schema (Product with category/tags/compareAtPriceCents/metadata, Order with paymentStatus/eazebusOrderId/customerEmail/customerName), ProductService, Zod validation, reusable ProductTable/ProductForm/ProductInventoryBadge, Cart system (localStorage persistent), Payment abstraction, EazeBus adapter skeleton, Order mapper
+- **Admin Panel (Phase 2)**: Admin layout with nav, Dashboard with real DB metrics, Products CRUD, Orders list/detail with status management, Users list/detail, Leads list, Appointments list/detail. All 8 admin API routes.
+- **Database Activation (Phase 3)**: Docker started, PostgreSQL activated, commerce migration applied (5+5+1 schema changes), Prisma Client regenerated, 21 products seeded and verified across 4 categories
+- **Commerce Smoke Tests**: All 16 tests passed against real PostgreSQL (products API, PDP, checkout, order creation, inventory decrement, quantity validation, admin auth)
+- **Dashboard Bug Fixes**: Fixed `paid` field (was filtering fulfillment not paymentStatus), `revenue` shape (was `{totalInr}`, page expected flat), `bookings` → `appointments` rename, added failed/refunded metrics
+
+### Product Management
+- Reusable `ProductForm` and `ProductTable` components are panel-agnostic with configurable `apiBasePath`, `redirectPath`, `editBasePath` props
+- Used by both `/admin/products` (admin API) and `/dashboard/shop` (shop API)
+- Product model: id, title, slug (unique), description, sku (unique), priceInr, compareAtPriceCents, imageUrl, category, tags, isActive, inventory, metadata (JSON), createdAt, updatedAt
+
+### Order State Machine
+- `status`: PENDING → CONFIRMED → SHIPPED → DELIVERED | CANCELLED (fulfillment)
+- `paymentStatus`: PENDING → PAID | FAILED → REFUNDED (payments)
+- These are separate fields — order can be CONFIRMED but PENDING payment
+
+### Commerce Seed Data
+- 21 products: AUM-0001 through AUM-0021
+- 4 categories: teas, supplements, journals, accessories
+- Price range: ₹399-₹4,999
+- All active, inventory=100
+
+---
+
 ## Session Context (Aug 08, 2026 — Dashboard honesty pass / zero fabricated data)
 
 ### What We Did
-- Removed the last production-facing hardcoded demo data in the dashboard:
-  - `/dashboard/activity` — fabricated `stats` (growthScore 84 / consistency 12 / milestones 5 / `events.length + 142`) replaced with real derived values (`ActivityStats` now takes `{total, activeDays, milestones, eventTypes}` computed via `useMemo` from loaded `/api/events`).
-  - `/dashboard/orders` — demo `RECOMMENDED_PRODUCT` (Unsplash journal, fake 4.8 rating) replaced with real first `Product` from `/api/products`; `QuickShopCard` rewritten to real shape (`title`, `priceInr`, `imageUrl`, no rating, `Browse Shop` link instead of 404 `/shop/[id]`).
-  - `/dashboard/shop` — removed fabricated `4.8` star rating chip.
-  - `/dashboard/routine` — m1/m2 no longer pre-marked `completed: true`.
-  - `/dashboard/programs` — "assigned practitioners" card softened (no fake per-user mapping claim).
-  - `ProfileHeader` — sparkline catch no longer seeds fake `[65,72,68,85,78,92,88]` (uses `[]`); removed fabricated "Last sync: 2 days ago" pill; removed no-op "Connect Google" button; Logout now wired to `signOut({ callbackUrl: '/auth/login' })`; removed unused `ShieldCheck`/`RefreshCw` imports.
-  - `/api/profile/progress` — no-snapshot `breakdown` fallback now zeros (`{sleep:0,activity:0,journal:0,wellbeing:0}`), not fake 50s.
-- **Consent fixes (DPDP opt-in):** `ConsentManager` no longer defaults toggles ON (`tracking/health_sync/ai_personalization` were `true` with no DB rows — now all `false` until user opts in); `SettingsForm` notification + consent checkboxes were decorative `defaultChecked`/`disabled` — now real `Switch`es bound to `/api/consent` (keys `notifications.email_progress`, `notifications.whatsapp_daily`, `therapeutic_sharing`, `dpdp_2023_digital_consent`), default off, persisted via POST.
-- Dashboard home (`/dashboard`), `TodayDoseCard`, `CosmicNoteCard`, `QuietGrounding` verified clean: all DB-derived with null-degrade, no fabricated metrics.
-- Known dead code (not production-facing, never imported): `NotificationCenter.tsx` (`MOCK_NOTIFICATIONS`), plus unused `RecentJournals`/`QuickActions`/`ProgressRing` under `dashboard/_components` — candidates for deletion later.
+- Removed all production-facing hardcoded demo data in dashboard
+- ConsentManager no longer defaults toggles ON (DPDP opt-in compliance)
+- SettingsForm notification + consent checkboxes now real Switches bound to /api/consent
+- ProfileHeader: removed fake sparkline, "Last sync" pill, no-op "Connect Google" button
+- /api/profile/progress fallback now zeros (not fake 50s)
+- Verified clean: /dashboard, TodayDoseCard, CosmicNoteCard, QuietGrounding
 
-### Verification
-- `pnpm --filter @aumveda/web typecheck` PASSES.
-- `pnpm --filter @aumveda/web lint` PASSES — only pre-existing warnings (`<img>` tags, `activity` page `useEffect` dep that predates this session).
-- `pnpm --filter @aumveda/web build` PASSES — 106 routes, all `/api/*` dynamic (ƒ), static prerender DB-free. `NotificationCenter` still bundled (unused import) — fine.
+---
 
 ## Session Context (Aug 08, 2026 — Dashboard APIs production-hardening)
 
 ### What We Did
-- Implemented 14 missing `/api/*` route handlers that dashboard consumers referenced but were stubs/404: `/api/profile`, `/api/consent`, `/api/events`, `/api/health/metrics`, `/api/ai/tips`, `/api/orders` + `/api/orders/[id]` + `/reorder` + `/invoice`, `/api/user/export`, `/api/user/delete`, `/api/uploads/presign` + `/api/uploads/complete`, `/api/courses/progress`, `/api/courses/[courseId]/modules/[moduleId]/embed-token`, `/api/embed/config`.
-- All new routes: derive user from `getApiSession()` (never client `userId`), `export const dynamic = 'force-dynamic'`, Zod-validate input, write `Event` audit rows where meaningful. No mock data in any production path.
-- Fixed existing routes: `/api/profile/progress` returns `{success,current,average,history,trend,summary,breakdown}`; `/api/journals/reflect` uses `process.env.AHI_URL` (local rules fallback when unset); `/api/journals/upload` does real R2 PUT (max 25MB, 413/503/502 handling).
-- New libs: `apps/web/src/lib/r2.ts` (SigV4 presigned PUT for Cloudflare R2, `REGION='auto'`, `isR2Configured()`), `apps/web/src/lib/course-token.ts` (HMAC-SHA256 sign/verify with `COURSE_JWT_SECRET`, exp check).
-- `.env.example` gains: `AHI_URL`, `CRON_SECRET`, `COURSE_JWT_SECRET` (already had R2/health-sync blocks).
-- ImageUpload.tsx hardened: throws on failed presign so a broken avatar isn't saved.
+- Implemented 14 missing /api/* route handlers
+- All routes: derive user from getApiSession(), force-dynamic, Zod-validate, Event audit rows
+- Fixed /api/profile/progress response shape
+- New libs: r2.ts (SigV4 presigned PUT), course-token.ts (HMAC-SHA256)
+- ImageUpload hardened: throws on failed presign
 
-### Verification
-- `pnpm --filter @aumveda/web typecheck` PASSES.
-- `pnpm --filter @aumveda/web lint` PASSES (only pre-existing warnings: `<img>` tags, two useEffect deps).
-- `pnpm --filter @aumveda/web build` PASSES — 106 routes, all `/api/*` dynamic (ƒ), static prerender does NOT hit the DB (builds DB-less in Vercel). R2/Cashfree/email remain unverified without live keys.
+---
 
-### Known Gaps (unchanged)
-- No live Postgres/Docker daemon → no DB smoke tests, no `prisma migrate`/seed locally.
-- `/dashboard/courses` + `/dashboard/learn` pages are still fully hardcoded demo data (COURSE array / Phase 8 placeholder) — not wired to course APIs yet.
-- Cashfree env vars still present (migration to Razorpay is docs-only).
-- `/api/embed/config` only verifies the token; it returns video metadata, not an actual stream.
-
-### Key Security Properties
-- Practitioner routes (`/api/practitioner/*`) are role-gated via `getApiPractitionerSession()` (practitioner/admin/super_admin), which is why the earlier DB-less static-prerender failure is gone.
-- `/api/portal` GET is owner-only (401/403); POST stays open (lead capture).
-- `/api/user/delete` requires `password: "confirm-delete"` string confirmation; `/api/uploads/presign` rejects non-image/audio (415), 503 if R2 unconfigured.
-- Identity always from session (`getApiSession()`); client-supplied `userId` is ignored.
-
-## Portal Engine Architecture (Jun 28, 2026 — New)
+## Portal Engine Architecture (Jun 28, 2026)
 - Location: `apps/web/src/portal/` (22 files)
-- Engine: `portal/engine/` — PortalProvider, StateMachine, Context, Router, StepRegistry, ValidationEngine, AutosaveManager, SessionPersistence, AnimationManager, ProgressManager, PortalApiClient
-- Steps: `portal/steps/Step1Breath/` (7 files) — first step implemented
-- Components: `portal/components/` — PortalShell, StepRenderer, ProgressBar
-- Hooks: `portal/hooks/` — usePortalAnalytics, usePortalAuth, usePortalNavigation
-- Schemas: `portal/schemas/` — Zod schemas for all 8 steps
-- Types: `portal/types/` — step.types.ts, integration.types.ts (8 extension interfaces)
-- Key properties: Linear state machine (no skip/jump), autosave (localStorage + Supabase), session persistence (survives refresh), per-step Zod validation, framer-motion animation orchestration, Mixpanel-ready analytics, 8 extension point interfaces (Prokerala, Google Places, Cal.com, Razorpay, n8n, AHI, Daily Dose, CRM)
-- The old Zustand store (`lib/portal/store.ts`) is superseded by the engine but kept for backward compat until steps port over
-
-### Step 1 — Breath Gateway (Jun 28, 2026)
-- `portal/steps/Step1Breath/` — index.tsx, BreathingOrb, BreathingText, AmbientAudio, breath-timeline, animations, constants
-- 3-cycle breathing ritual (Inhale 4s → Hold 2s → Exhale 4s) via useBreathTimeline hook
-- framer-motion useAnimate for 60 FPS orb animation (GPU-composited, no layout shifts)
-- CSS star field (80 stars, random positions, staggered opacity twinkle)
-- Ambient audio with lazy-load, requestAnimationFrame fade, mute preference in localStorage
-- Accessibility: prefers-reduced-motion, aria-live screen reader, keyboard nav, visible focus, sr-only breathing announcements
-- CTA disabled until all 3 cycles complete; uses engine's onNext() — no router.push
-- Self-contained: stores no portal data, no engine modifications, no router imports
+- Engine: PortalProvider, StateMachine, Context, Router, StepRegistry, ValidationEngine, AutosaveManager, SessionPersistence, AnimationManager, ProgressManager, PortalApiClient
+- Steps: Step1Breath (7 files) — 3-cycle breathing ritual
+- 8 extension point interfaces (Prokerala, Google Places, Cal.com, Razorpay, n8n, AHI, Daily Dose, CRM)
 
 ## Architecture Snapshot (Jun 28, 2026 — Full Audit)
 
 ### Monorepo
-- **4 apps**: `web` (Next.js 14 / :3000), `api` (Fastify 5 / :3001), `admin` (Next.js 14 / :3002), `ahi` (FastAPI Python / :8000)
-- **3 packages**: `db` (Prisma + 42 models), `types` (shared enums/interfaces), `utils` (PII hash, scoring INR format, slug)
-- **Tooling**: pnpm 10.28 workspaces, Turborepo 2.3, turbo.json configured for build/dev/lint/typecheck/test
-
-### Auth
-- **NextAuth 4** (primary): Google OAuth, Email magic-link, Credentials (legacy — being deprecated)
-- **Supabase Auth** (client-side only): NEXT_PUBLIC_* vars for Supabase client; service role key for admin ops
-- **Middleware** protects: `/dashboard`, `/onboarding`, `/learn`, `/checkout`, `/practitioner`
-- Portal steps (`/step-*`) intentionally unprotected (lead capture)
+- **4 apps**: web (Next.js 14 / :3000), api (Fastify 5 / :3001), admin (Next.js 14 / :3002), ahi (FastAPI Python / :8000)
+- **3 packages**: db (Prisma + 42 models), types (shared enums/interfaces), utils (PII hash, scoring INR format, slug)
+- **Tooling**: pnpm 10.28 workspaces, Turborepo 2.3
 
 ### Database — PostgreSQL (local Docker: aumveda-pg, :5432)
-- **42 Prisma models**, 5 migrations applied, seed data loaded
-- Key model groups: NextAuth (3), Core (3 User/Profile/Consent), Content (4 Journal/DailyDose+), Health (2), Commerce (3), Courses (3), Events (1), Portal (10 UserPortalData/Booking/TherapySession/Package/Subscription/CommunityMember/LiveCircle/Challenge/ChallengeParticipation), Media (2 Reel/ContentView), Override/Delivery (2), Reference (7)
-- Reference tables seeded: 7 chakras, 6 archetypes, 7 tarot themes, 36 chart predictions, 7 pattern questions, 28 scoring rules, 6 profile maps
-
-### Frontend Route Groups (83+ routes)
-| Group | Routes |
-|-------|--------|
-| Public (11) | /, /about, /contact, /events, /programs, /services, /visionaries, /shop, /insights, /insights/[slug], /tools |
-| Tools (5) | /tools/answer-book, /tools/kundli, /tools/mbti, /tools/numerology, /tools/tarot |
-| Auth (5) | /auth/login, /auth/register, /auth/magic-link, /auth/verify, /auth/error |
-| Dashboard (15) | /dashboard, /dashboard/activity, /dashboard/courses, /dashboard/dose, /dashboard/food-guide, /dashboard/journal, /dashboard/journal/new, /dashboard/journal/[id], /dashboard/learn, /dashboard/orders, /dashboard/profile, /dashboard/progress, /dashboard/routine, /dashboard/settings, /dashboard/shop |
-| Portal (8) | /step-1 through /step-8 |
-| Onboarding (4) | /onboarding/step-1 through /onboarding/step-4 |
-| Practitioner (4) | /practitioner, /practitioner/sessions, /practitioner/notes, /practitioner/overrides |
-| API (13) | auth/[...nextauth], astrology/chart, portal, practitioner/clients, practitioner/notes, practitioner/overrides, practitioner/sessions, achievements, bookings, daily-dose, journals, leads, profile, reference, track, users |
-
-### Components
-- **49 shadcn/ui primitives** (button, card, dialog, form, table, chart via recharts, etc.)
-- **58 custom components** (Hero, DailyDose*, Navigation*, Progress*, Activity*, Journal*, etc.)
-- State: Zustand (portal), React hooks (local), next-auth SessionProvider
-
-### AHI Microservice (apps/ahi)
-- FastAPI on :8000, Claude API via httpx
-- Endpoints: GET /health, POST /ahi/generate-dose, POST /ahi/generate-initial-plan, POST /ahi/pre-session-brief
-- Pydantic models for request/response validation
-
-### Fastify API (apps/api)
-- :3001, Helmet + CORS + Cookie + Rate-limit (100/min) + JWT auth plugin
-- Routes stubbed per-phase (Phase 1-10), none implemented yet
-
-### Admin Panel (apps/admin)
-- :3002, placeholder page, NextAuth admin-only middleware
+- **44 Prisma models** (42 original + Product, Order), 6 migrations, seed data loaded
+- Reference tables: 7 chakras, 6 archetypes, 7 tarot themes, 36 chart predictions, 7 pattern questions, 28 scoring rules, 6 profile maps, 21 products
 
 ### External Services
 - **Auth**: NextAuth 4 + Supabase Auth (dual, migrating to Supabase-only)
 - **Storage**: Cloudflare R2 (images/audio)
-- **AI**: Claude API (via AHI), Gemini (client-side in lib/gemini.ts)
-- **Payments**: Cashfree (env vars exist — migrating to Razorpay)
+- **AI**: Claude API (via AHI), Gemini (server-only via lib/gini.ts)
+- **Payments**: EazeBus (planned, adapter skeleton exists)
 - **Analytics**: GTM, Meta Pixel, GA4, Pinterest Ads
-- **Astrology**: Prokerala (stubbed — returns random signs)
-- **Infra**: Upstash Redis, Pinecone (vector DB), OpenAI
-
-### Audit Findings (new)
-| Issue | Status | Impact |
-|-------|--------|--------|
-| Cashfree env vars + code still present | Awaiting Razorpay migration | Payment flows not usable |
-| Credentials provider active in NextAuth | To be removed per deprecation plan | Password login still works |
-| Astrology chart API returns mock data | Needs Prokerala integration | Production data incorrect |
-| Fastify API has only route stubs | No backend API serving yet | All logic in Next.js API routes currently |
-| Admin app is placeholder only | Not built out | No admin functionality |
-| No docker-compose.yml checked in | Manual Docker only | Hinders reproducible dev env |
-| Local PostgreSQL vs cloud Supabase | Pending cloud migration | Session data not synced |
-| `server.js` at root delegates to web | Works but unclear purpose | Minor cleanup opportunity |
-
-## Session Context (Jun 25, 2026)
-
-### What We Did
-- Analyzed the full product requirements document `AUMVEDA_Full_PRD_v3_June2026.docx`
-- Created detailed implementation_plan.md
-- Documented technical roadmap (Phase 1–5): FastAPI AHI, n8n routing, Razorpay, Mux Reels
-- Outlined DPDP Act 2023 compliance (ap-south-1, consent checklists, anonymization)
-
-### Key Decisions
-- **NextAuth Deprecation:** NextAuth → Supabase Auth (magic-link/OTP only, remove credentials)
-- **Payment Provider Transition:** Cashfree → Razorpay (crystal checkout, 1:1 sessions, subscriptions)
-- **Vastu Design Integration:** Progress badges + Daily Dose CTA in upper-right (Northeast) dashboard quadrant
-
-## Session Context (Jun 24, 2026)
-
-### What We Did
-- ✅ Completed Phase 0 portal build: 8 steps (Breath → Chakra → Archetype → Tarot → Intention → Constellation → Pattern Test → Booking)
-- ✅ Fixed Prisma schema: added ContentView, Reel models; fixed Challenge relation
-- ✅ Fixed build: removed duplicate next-auth types, fixed ProfileResult type
-- ✅ Updated homepage CTAs to link to `/step-1`
-- ✅ Set up local PostgreSQL via Docker (`aumveda-pg` container, port 5432)
-- ✅ `pnpm db:migrate` — all migrations applied (42 tables)
-- ✅ `pnpm db:seed` — all reference tables populated
-- ✅ Built Phase 1: AHI microservice (`apps/ahi/`), practitioner dashboard (`/practitioner/*`), API routes, Prisma models (DailyDoseOverride, DailyDoseDelivery), auth migration starter
-- ✅ Full Next.js build passes (83 routes, clean)
-
-### Blocked → Resolved
-- ~~Supabase project credentials stale~~ → Using local PostgreSQL Docker container
-- ~~`prisma db:migrate` fails~~ → Migration + seed both successful locally
+- **Astrology**: Prokerala (stubbed — deterministic fallback)
+- **Infra**: Upstash Redis, Pinecone, OpenAI
 
 ### How to Use Local DB
 ```bash
 docker start aumveda-pg          # Start PostgreSQL
 pnpm db:migrate                  # Apply migrations
-pnpm db:seed                     # Seed reference data (already done)
+pnpm db:seed                     # Seed reference + product data
 pnpm --filter web dev            # Run dev server
 ```
 
-### When Ready to Push to Supabase
-1. Update `.env` — swap DATABASE_URL/DIRECT_URL to Supabase connection strings
-2. `pnpm db:push` to push schema to Supabase
-3. `pnpm db:seed` to seed Supabase reference tables
-
-### Key Decisions
-- Portal is unauthenticated (lead capture) — middleware does NOT protect `/step-*`
-- Dual auth during NextAuth→Supabase migration
-- Razorpay replaces Cashfree; Cal.com replaces Calendly
-- PostgreSQL runs locally in Docker; Supabase used only for Auth client
-
-### Practitioner Dashboard
-- `/practitioner` — Client list with profile results, sessions left, distress flags
-- `/practitioner/sessions` — Upcoming/past sessions with Zoom join links
-- `/practitioner/notes` — Structured session notes form (key themes, practices, distress flag)
-- `/practitioner/overrides` — Daily Dose override controls (per-user, per-practice-type)
-
-### AHI Microservice
-- `apps/ahi/` — Python FastAPI on port 8000
-- Endpoints: `/ahi/generate-dose`, `/ahi/generate-initial-plan`, `/ahi/pre-session-brief`
-- Uses Claude API (claude-sonnet) via httpx
-- Run: `cd apps/ahi && pip install -r requirements.txt && python -m uvicorn ahi.main:app --reload`
-
-### Architecture Diagram
-See `ARCHITECTURE.md` in the project root for full architecture diagrams (monorepo, frontend, backend, database, data flows, deployment).
+### When Ready to Deploy
+1. Set production env vars in Vercel (DATABASE_URL, NEXTAUTH_SECRET, GEMINI_API_KEY, R2 credentials, etc.)
+2. Ensure DEV_BYPASS is NOT set in production
+3. `prisma migrate deploy` for schema migration
+4. `prisma db seed` for reference data
+5. Configure EazeBus credentials when available
+6. Configure Prokerala/Cal.com/SMTP credentials

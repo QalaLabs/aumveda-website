@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, reflection: reflectionText })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Failed to generate reflection' }, { status: 500 })
   }
 }

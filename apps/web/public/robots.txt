@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /practitioner/
+Disallow: /api/
+Disallow: /step-*
+Disallow: /onboarding/
+Disallow: /auth/
+
+Sitemap: https://app.aumveda.com/sitemap.xml

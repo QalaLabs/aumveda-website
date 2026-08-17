@@ -1,42 +1,30 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getApiSession } from '@/lib/session'
-import { prisma } from '@aumveda/db'
-import { r2PublicUrl } from '@/lib/r2'
+import { getActiveProducts, listProducts } from '@/lib/product-service'
+import { productListQuerySchema } from '@/lib/product-schemas'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
-  const session = await getApiSession()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getApiSession()
+    const { searchParams } = new URL(request.url)
+
+    if (session?.user?.id) {
+      const query = productListQuerySchema.parse({
+        search: searchParams.get('search') ?? undefined,
+        category: searchParams.get('category') ?? undefined,
+        page: searchParams.get('page') ?? '1',
+        limit: searchParams.get('limit') ?? '50',
+      })
+      const result = await listProducts(query)
+      return NextResponse.json({ success: true, products: result.products, total: result.total })
+    }
+
+    const products = await getActiveProducts()
+    return NextResponse.json({ success: true, products })
+  } catch (err: unknown) {
+    console.error('[api/products] Error:', err)
+    return NextResponse.json({ error: 'Failed to load products' }, { status: 500 })
   }
-
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      description: true,
-      priceCents: true,
-      images: true,
-      inventoryCount: true,
-      productType: true,
-    },
-  })
-
-  return NextResponse.json({
-    success: true,
-    products: products.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      title: p.title,
-      description: p.description,
-      priceInr: p.priceCents / 100,
-      imageUrl: p.images[0] ? r2PublicUrl(p.images[0]) : null,
-      inventoryCount: p.inventoryCount,
-      productType: p.productType,
-    })),
-  })
 }

@@ -23,28 +23,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
 
     setIsUploading(true);
     try {
-      const presignRes = await fetch('/api/uploads/presign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: file.name,
-          contentType: file.type,
-          userId: 'mock-user-id'
-        })
-      });
-      if (!presignRes.ok) throw new Error('presign failed');
-      const { signedUrl, publicUrl, key } = await presignRes.json();
+      const formData = new FormData();
+      formData.append('file', file);
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      await fetch('/api/uploads/complete', {
+      const res = await fetch('/api/journals/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, publicUrl, journalId: 'temp-id' })
+        body: formData,
       });
 
-      showSuccess("Image uploaded and processing started");
-      onUploadComplete(publicUrl);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Upload failed');
+      }
+
+      const { url } = await res.json();
+      showSuccess("Image uploaded successfully");
+      onUploadComplete(url);
     } catch (err) {
       showError("Failed to upload image");
       setPreview(null);
@@ -59,7 +53,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
         type="file"
         className="hidden"
         ref={fileInputRef}
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
         onChange={handleFileChange}
       />
 
