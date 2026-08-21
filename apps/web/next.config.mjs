@@ -16,6 +16,14 @@ const nextConfig = {
     workerThreads: false,
     cpus: 1,
     outputFileTracingRoot: path.join(__dirname, '../../'),
+    // pnpm's symlinked layout hides Prisma query engines from Next.js file
+    // tracing — explicitly include them so serverless functions can load the
+    // rhel-openssl-3.0.x engine on Vercel.
+    outputFileTracingIncludes: {
+      '/api/**': [
+        path.join(__dirname, '../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/**'),
+      ],
+    },
   },
 
   images: {
