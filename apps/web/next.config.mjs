@@ -21,7 +21,7 @@ const nextConfig = {
     // rhel-openssl-3.0.x engine on Vercel.
     outputFileTracingIncludes: {
       '/api/**': [
-        path.join(__dirname, '../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/**'),
+        '../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/**',
       ],
     },
   },
