@@ -115,6 +115,7 @@ model User {
   packages              Package[]
   communityMember       CommunityMember?
   subscription          Subscription?
+  liveCircleRSVPs       LiveCircleRSVP[]
   challengeParticipations ChallengeParticipation[]
   contentViews          ContentView[]
   dailyCheckIns         DailyCheckIn[]
@@ -292,6 +293,8 @@ model Product {
   referenceId      Int?                                // courseId if productType === "course"
   tags             String[]                            // e.g. ["Bestseller", "Sale", "Bundle"]
   metadata         Json?                               // flexible key-value store
+  chakraAssociation String?                             // e.g. "heart", "root", "throat" — matches UserPortalData.chakraSelected
+  healingProperties Json?                               // freeform properties, e.g. { "intent": ["calm", "focus"], "element": "earth" }
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -547,6 +550,19 @@ model LiveCircle {
   recordingUrl         String?
   recordingAvailableAt DateTime?
   createdAt            DateTime  @default(now())
+  rsvps                LiveCircleRSVP[]
+}
+
+// Per-user RSVP record — makes circle RSVP idempotent (one row per user+circle).
+model LiveCircleRSVP {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  circleId  String
+  circle    LiveCircle @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+
+  @@unique([userId, circleId])
 }
 
 model Challenge {
@@ -561,14 +577,15 @@ model Challenge {
 }
 
 model ChallengeParticipation {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id])
-  challengeId   String
-  challenge     Challenge @relation(fields: [challengeId], references: [id])
-  enrolledAt    DateTime  @default(now())
-  daysCompleted Int       @default(0)
-  completedAt   DateTime?
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  challengeId    String
+  challenge      Challenge @relation(fields: [challengeId], references: [id])
+  enrolledAt     DateTime  @default(now())
+  daysCompleted  Int       @default(0)
+  lastCheckInAt  DateTime? @db.Date // calendar date of the most recent check-in — guards one check-in per day
+  completedAt    DateTime?
 
   @@unique([userId, challengeId])
 }

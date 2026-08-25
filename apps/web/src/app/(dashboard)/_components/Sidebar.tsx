@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/progress', label: 'Progress' },
   { href: '/dashboard/journey', label: 'Journey' },
   { href: '/dashboard/appointments', label: 'Sessions' },
+  { href: '/community', label: 'Community' },
 ]
 
 export default function Sidebar() {

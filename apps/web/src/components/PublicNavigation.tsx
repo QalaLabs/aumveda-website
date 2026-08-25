@@ -11,8 +11,10 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { label: "About", path: "/about" },
   { label: "Services", path: "/services" },
+  { label: "Shop", path: "/shop" },
   { label: "Programmes", path: "/programs" },
   { label: "Insights", path: "/insights" },
+  { label: "Contact", path: "/contact" },
 ];
 
 const PublicNavigation = () => {

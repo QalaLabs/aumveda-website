@@ -5,10 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ShoppingBag, ArrowLeft, Package, Loader2, ShieldCheck, Truck, RotateCcw } from 'lucide-react'
+import { ShoppingBag, ArrowLeft, Package, Loader2, ShieldCheck, Truck, RotateCcw, Sparkles } from 'lucide-react'
 import { showSuccess, showError } from '@/utils/toast'
 import { useCart } from '@/lib/cart'
 import type { ProductView } from '@/lib/product-service'
+import { getBundleInfo } from '@/lib/product-service'
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -16,6 +17,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<ProductView | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [userChakra, setUserChakra] = useState<string | null>(null)
   const { addItem, isInCart, totalItems } = useCart()
 
   useEffect(() => {
@@ -31,6 +33,13 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false))
   }, [params.slug, router])
 
+  useEffect(() => {
+    fetch('/api/user/chakra')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => setUserChakra(data?.chakra ?? null))
+      .catch(() => {})
+  }, [])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white pt-32 flex items-center justify-center">
@@ -40,6 +49,10 @@ export default function ProductDetailPage() {
   }
 
   if (!product) return null
+
+  const bundle = getBundleInfo(product.metadata)
+  const matchesChakra =
+    !!userChakra && !!product.chakraAssociation && userChakra === product.chakraAssociation
 
   const handleAddToCart = () => {
     if (product.inventoryCount === 0) {
@@ -55,6 +68,7 @@ export default function ProductDetailPage() {
       imageUrl: product.imageUrl,
       inventoryCount: product.inventoryCount,
       productType: product.productType,
+      bundle,
     })
     showSuccess(`${product.title} added to cart!`)
   }
@@ -109,12 +123,17 @@ export default function ProductDetailPage() {
 
           <div className="space-y-6">
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-widest">{product.category}</Badge>
                 {product.tags?.map(tag => (
                   <Badge key={tag} variant="outline" className="text-[10px] font-bold uppercase tracking-widest">{tag}</Badge>
                 ))}
               </div>
+              {matchesChakra && (
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-[10px] font-bold uppercase tracking-widest gap-1.5 w-fit">
+                  <Sparkles className="w-3 h-3" /> Perfect for your <span className="capitalize">{product.chakraAssociation?.replace(/_/g, ' ')}</span> profile
+                </Badge>
+              )}
               <h1 className="text-3xl md:text-4xl font-serif font-bold text-slate-900">{product.title}</h1>
               {product.shortDescription && (
                 <p className="text-lg text-slate-500">{product.shortDescription}</p>
@@ -134,6 +153,24 @@ export default function ProductDetailPage() {
             <div className="space-y-4">
               <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{product.description}</p>
             </div>
+
+            {bundle && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 space-y-2">
+                <Badge className="bg-slate-900 text-amber-400 border-none text-[10px] font-black uppercase tracking-widest w-fit">
+                  Crystal + Session Bundle
+                </Badge>
+                <p className="text-sm text-slate-700">
+                  Pair this piece with a <span className="font-semibold">{bundle.sessionLabel}</span> ({bundle.serviceType}).
+                </p>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-xl font-black text-slate-900">
+                    ₹{(bundle.bundlePriceCents / 100).toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Bundle price</span>
+                </div>
+                <p className="text-[11px] text-slate-500">Book the session separately to redeem this price; it isn&apos;t applied automatically at checkout.</p>
+              </div>
+            )}
 
             <div className="space-y-3">
               {product.inventoryCount > 0 ? (

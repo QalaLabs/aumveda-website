@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-  LayoutDashboard, Package, ShoppingCart, Users, 
-  MessageSquare, Calendar, Settings, Menu, X 
+import {
+  LayoutDashboard, Package, ShoppingCart, Users,
+  MessageSquare, Calendar, Settings, Menu, X, Film
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/leads', label: 'Leads', icon: MessageSquare },
   { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
+  { href: '/admin/reels', label: 'Reels', icon: Film },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

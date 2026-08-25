@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getApiPractitionerSession } from '@/lib/session'
+import { canPublishAs } from '@/lib/content-publishing'
 import { z } from 'zod'
 
 const createSchema = z.object({
@@ -37,10 +38,18 @@ export async function POST(req: NextRequest) {
       distressFlag,
     } = parsed.data
 
+    const publishAs = practitioner || 'sejal'
+    if (!canPublishAs(session, publishAs)) {
+      return NextResponse.json(
+        { error: `You are not authorized to publish session notes as "${publishAs}".` },
+        { status: 403 }
+      )
+    }
+
     const sessionNote = await prisma.therapySession.create({
       data: {
         userId,
-        practitioner: practitioner || 'sejal',
+        practitioner: publishAs,
         sessionDate: new Date(),
         keyThemes: keyThemes || [],
         practicesAssigned: practicesAssigned || [],

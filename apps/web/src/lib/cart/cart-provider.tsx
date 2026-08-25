@@ -5,6 +5,16 @@ import type { CartItem, CartContextValue } from '@/lib/cart/types'
 
 const CART_KEY = 'aumveda_cart'
 
+function isValidBundle(bundle: unknown): bundle is NonNullable<CartItem['bundle']> {
+  return (
+    typeof bundle === 'object' &&
+    bundle !== null &&
+    typeof (bundle as Record<string, unknown>).serviceType === 'string' &&
+    typeof (bundle as Record<string, unknown>).sessionLabel === 'string' &&
+    typeof (bundle as Record<string, unknown>).bundlePriceCents === 'number'
+  )
+}
+
 function loadCart(): CartItem[] {
   if (typeof window === 'undefined') return []
   try {
@@ -12,13 +22,17 @@ function loadCart(): CartItem[] {
     if (!raw) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (item: unknown): item is CartItem =>
-        typeof item === 'object' &&
-        item !== null &&
-        'productId' in item &&
-        'quantity' in item
-    )
+    return parsed
+      .filter(
+        (item: unknown): item is CartItem =>
+          typeof item === 'object' &&
+          item !== null &&
+          'productId' in item &&
+          'quantity' in item
+      )
+      // A malformed `bundle` (stale localStorage, manual edit) must not survive restore —
+      // checkout renders it without further shape checks.
+      .map((item) => (item.bundle && !isValidBundle(item.bundle) ? { ...item, bundle: null } : item))
   } catch {
     return []
   }

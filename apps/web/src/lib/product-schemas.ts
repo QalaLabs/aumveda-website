@@ -33,6 +33,8 @@ export const createProductSchema = z.object({
   referenceId: z.number().int().positive().optional().nullable(),
   tags: z.array(z.string()).default([]),
   metadata: z.record(z.unknown()).optional().nullable(),
+  chakraAssociation: z.string().max(32).optional().nullable(),
+  healingProperties: z.record(z.unknown()).optional().nullable(),
 })
 
 export const updateProductSchema = createProductSchema.partial().extend({

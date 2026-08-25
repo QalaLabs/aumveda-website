@@ -212,7 +212,7 @@ export async function getApiSession() {
   return session
 }
 
-const PRACTITIONER_ROLES = new Set(['practitioner', 'admin', 'super_admin'])
+const PRACTITIONER_ROLES = new Set(['practitioner', 'admin', 'super_admin', 'archana', 'sejal'])
 
 /**
  * API-route session helper for practitioner-only endpoints. Same DEV_BYPASS

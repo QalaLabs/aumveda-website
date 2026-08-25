@@ -23,6 +23,10 @@ export function RescheduleForm({
   const [datetime, setDatetime] = useState('')
   const [error, setError] = useState<string | null>(null)
 
+  const hoursUntil = (new Date(currentIso).getTime() - Date.now()) / 3600_000
+  const isPast = hoursUntil <= 0
+  const within24h = hoursUntil > 0 && hoursUntil < 24
+
   const currentLabel = new Date(currentIso).toLocaleString('en-IN', {
     weekday: 'long',
     day: 'numeric',
@@ -68,6 +72,30 @@ export function RescheduleForm({
         </p>
         <p className="font-serif text-xl text-[hsl(var(--av-night))]">{currentLabel}</p>
         <p className="font-body text-sm text-[hsl(var(--av-mute))]">With {practitionerLabel}</p>
+      </div>
+
+      <div
+        className={`rounded-2xl border p-4 space-y-1 ${
+          isPast || within24h
+            ? 'border-amber-800/20 bg-amber-50/60'
+            : 'border-[hsl(var(--av-stone))] bg-[hsl(var(--av-stone))]/20'
+        }`}
+        role="note"
+      >
+        <p className="font-body text-sm font-medium text-[hsl(var(--av-night))]">
+          {isPast
+            ? 'This session time has passed'
+            : within24h
+              ? 'Within 24 hours — reschedule may be forfeited'
+              : 'Free reschedule'}
+        </p>
+        <p className="font-body text-xs text-[hsl(var(--av-mute))] leading-relaxed">
+          {isPast
+            ? 'This appointment is already past its scheduled time and was inside the 24-hour cutoff, so it is considered forfeited under our policy — we still honour your request when we can, so let us know if anything comes up.'
+            : within24h
+              ? 'You are inside the 24-hour window for this session. Our policy is that reschedules within 24 hours are forfeited — we still honour your request when we can, so let us know if anything comes up.'
+              : 'You can reschedule free of charge any time up to 24 hours before your session. Inside that window, the session is considered forfeited.'}
+        </p>
       </div>
 
       <CalendarSelector

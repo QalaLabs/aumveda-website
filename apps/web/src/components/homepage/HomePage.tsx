@@ -9,6 +9,7 @@ import { Hero } from "./sections/Hero";
 import { Journey } from "./sections/Journey";
 import { Science } from "./sections/Science";
 import { Programs } from "./sections/Programs";
+import { Crystals } from "./sections/Crystals";
 import { Journal } from "./sections/Journal";
 import { Testimonials } from "./sections/Testimonials";
 import { CTA } from "./sections/CTA";
@@ -47,6 +48,7 @@ export default function HomePage() {
           <Journey />
           <Science />
           <Programs />
+          <Crystals />
           <Journal />
           <Testimonials />
           <CTA />

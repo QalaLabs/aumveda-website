@@ -11,6 +11,7 @@ const PUBLIC_ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap['0']
   { path: '/events', changeFrequency: 'weekly', priority: 0.7 },
   { path: '/shop', changeFrequency: 'weekly', priority: 0.9 },
   { path: '/insights', changeFrequency: 'weekly', priority: 0.7 },
+  { path: '/reels', changeFrequency: 'daily', priority: 0.7 },
   { path: '/tools', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/tools/numerology', changeFrequency: 'monthly', priority: 0.5 },
   { path: '/tools/tarot', changeFrequency: 'monthly', priority: 0.5 },

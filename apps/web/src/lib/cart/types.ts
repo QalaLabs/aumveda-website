@@ -8,6 +8,8 @@ export interface CartItem {
   quantity: number
   inventoryCount: number
   productType: string
+  /** "Crystal + Session" bundle info, if this product carries one — surfaced in the cart summary. */
+  bundle?: { serviceType: string; sessionLabel: string; bundlePriceCents: number } | null
 }
 
 export interface CartState {

@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { usePortal } from '../engine/PortalContext'
 import { ProgressBar } from './ProgressBar'
 import { RedirectGuard } from '../engine/PortalRouter'
@@ -25,11 +26,23 @@ export function PortalShell({
       <div className="min-h-screen bg-[hsl(var(--av-night))] text-[hsl(var(--av-parchment))]">
         {showProgress && (
           <div className="fixed top-0 left-0 right-0 z-50 px-4 py-4">
-            <ProgressBar
-              currentStep={state.currentStep}
-              completedSteps={state.completedSteps}
-              labels={true}
-            />
+            <div className="flex items-center gap-4 max-w-xl mx-auto">
+              <div className="flex-1">
+                <ProgressBar
+                  currentStep={state.currentStep}
+                  completedSteps={state.completedSteps}
+                  labels={true}
+                />
+              </div>
+              {state.currentStep >= 2 && (
+                <Link
+                  href="/"
+                  className="flex-shrink-0 font-body text-[10px] uppercase tracking-widest text-[hsl(var(--av-parchment)/0.45)] underline underline-offset-4 hover:text-[hsl(var(--av-gold-soft))] transition-colors"
+                >
+                  Skip for now
+                </Link>
+              )}
+            </div>
           </div>
         )}
 

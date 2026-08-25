@@ -47,6 +47,10 @@ export default async function ReschedulePage({ params }: Props) {
               Your calendar invite will update automatically. We will email you and your
               practitioner.
             </p>
+            <p className="font-body text-sm text-[hsl(var(--av-mute))] max-w-[55ch] leading-relaxed">
+              Free to reschedule up to 24 hours before your session. Within 24 hours, the session
+              is forfeited.
+            </p>
           </header>
 
           <RescheduleForm

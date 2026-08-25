@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { Users, Calendar, FileText, Sliders, Home } from 'lucide-react'
+import { Users, Calendar, FileText, Sliders, Home, IndianRupee, AlertTriangle } from 'lucide-react'
 
 const SIDEBAR = [
   { href: '/practitioner', icon: Users, label: 'Clients' },
   { href: '/practitioner/sessions', icon: Calendar, label: 'Sessions' },
   { href: '/practitioner/notes', icon: FileText, label: 'Session Notes' },
   { href: '/practitioner/overrides', icon: Sliders, label: 'Overrides' },
+  { href: '/practitioner/revenue', icon: IndianRupee, label: 'Revenue' },
+  { href: '/practitioner/alerts', icon: AlertTriangle, label: 'Distress Alerts' },
 ]
 
 export default function PractitionerLayout({ children }: { children: ReactNode }) {

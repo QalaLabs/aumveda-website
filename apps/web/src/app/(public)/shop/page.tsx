@@ -9,6 +9,7 @@ import { ShoppingBag, Search, ArrowRight, Sparkles, ShieldCheck, Package, Loader
 import { showSuccess, showError } from '@/utils/toast'
 import { useCart } from '@/lib/cart'
 import type { ProductView } from '@/lib/product-service'
+import { getBundleInfo } from '@/lib/product-service'
 import { PRODUCT_CATEGORIES } from '@/lib/product-schemas'
 
 export default function ShopPage() {
@@ -50,6 +51,7 @@ export default function ShopPage() {
       imageUrl: product.imageUrl,
       inventoryCount: product.inventoryCount,
       productType: product.productType,
+      bundle: getBundleInfo(product.metadata),
     })
     showSuccess(`${product.title} added to cart!`)
   }

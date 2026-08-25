@@ -21,6 +21,8 @@ export interface ProductView {
   isActive: boolean
   productType: string
   tags: string[]
+  chakraAssociation: string | null
+  metadata: unknown
   createdAt: Date
   updatedAt: Date
 }
@@ -40,6 +42,8 @@ function toProductView(p: {
   isActive: boolean
   productType: string
   tags: string[]
+  chakraAssociation: string | null
+  metadata: unknown
   createdAt: Date
   updatedAt: Date
 }): ProductView {
@@ -73,6 +77,8 @@ const SELECT = {
   isActive: true,
   productType: true,
   tags: true,
+  chakraAssociation: true,
+  metadata: true,
   createdAt: true,
   updatedAt: true,
 } as const
@@ -112,6 +118,38 @@ export async function listProducts(query: ProductListQuery) {
   }
 }
 
+export interface BundleInfo {
+  serviceType: string
+  sessionLabel: string
+  bundlePriceCents: number
+}
+
+/**
+ * Reads the "Crystal + Session" bundle off a product's metadata JSON, if
+ * present. Bundles reference a service type rather than a real Service
+ * record — deliberately loose, matching how `metadata` is used elsewhere on
+ * Product. Returns null on any malformed/missing shape rather than throwing,
+ * since metadata is untyped storage.
+ */
+export function getBundleInfo(metadata: unknown): BundleInfo | null {
+  if (!metadata || typeof metadata !== 'object') return null
+  const bundle = (metadata as Record<string, unknown>).bundle
+  if (!bundle || typeof bundle !== 'object') return null
+  const b = bundle as Record<string, unknown>
+  if (
+    typeof b.serviceType !== 'string' ||
+    typeof b.sessionLabel !== 'string' ||
+    typeof b.bundlePriceCents !== 'number'
+  ) {
+    return null
+  }
+  return {
+    serviceType: b.serviceType,
+    sessionLabel: b.sessionLabel,
+    bundlePriceCents: b.bundlePriceCents,
+  }
+}
+
 export async function getProductBySlug(slug: string) {
   const product = await prisma.product.findUnique({ where: { slug }, select: SELECT })
   if (!product) return null
@@ -129,6 +167,16 @@ export async function getActiveProducts() {
     where: { isActive: true },
     select: SELECT,
     orderBy: { createdAt: 'desc' },
+  })
+  return products.map(toProductView)
+}
+
+export async function getActiveProductsByChakra(chakra: string, limit = 2) {
+  const products = await prisma.product.findMany({
+    where: { isActive: true, chakraAssociation: chakra },
+    select: SELECT,
+    orderBy: { createdAt: 'desc' },
+    take: limit,
   })
   return products.map(toProductView)
 }
@@ -161,6 +209,10 @@ export async function createProduct(input: CreateProductInput) {
       referenceId: input.referenceId ?? null,
       tags: input.tags ?? [],
       metadata: input.metadata ? JSON.parse(JSON.stringify(input.metadata)) : undefined,
+      chakraAssociation: input.chakraAssociation ?? null,
+      healingProperties: input.healingProperties
+        ? JSON.parse(JSON.stringify(input.healingProperties))
+        : undefined,
     },
     select: SELECT,
   })
@@ -185,6 +237,8 @@ export async function updateProduct(input: UpdateProductInput) {
   if (data.referenceId !== undefined) updateData.referenceId = data.referenceId
   if (data.tags !== undefined) updateData.tags = data.tags
   if (data.metadata !== undefined) updateData.metadata = data.metadata
+  if (data.chakraAssociation !== undefined) updateData.chakraAssociation = data.chakraAssociation
+  if (data.healingProperties !== undefined) updateData.healingProperties = data.healingProperties
 
   const product = await prisma.product.update({
     where: { id },
