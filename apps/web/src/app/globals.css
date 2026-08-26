@@ -186,6 +186,11 @@
     text-shadow: 0 2px 28px hsl(var(--av-ink) / 0.55), 0 1px 2px hsl(var(--av-ink) / 0.35);
     animation: av-title-drift 9s ease-in-out infinite;
   }
+  /* Soft ink halo for body/footer copy over bright sunrise film frames —
+     keeps parchment readable without a card or opaque panel. */
+  .av-cta-copy {
+    text-shadow: 0 1px 14px hsl(var(--av-ink) / 0.65), 0 0 2px hsl(var(--av-ink) / 0.4);
+  }
   @media (prefers-reduced-motion: reduce) {
     .av-film-title {
       animation: none;

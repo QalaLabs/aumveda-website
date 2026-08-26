@@ -5,10 +5,6 @@ import { useScrollProgress } from "./useScrollProgress";
 
 const FILM_SRC = "/story/master-film.mp4";
 const FILM_DURATION = 30; // seconds — confirmed via the file's mvhd atom (timescale 1000, duration 30000)
-// Atmospheric still from the same Flow render pipeline. Only shown while the
-// film loads, or in the (rare) case the film itself is unreachable — never a
-// blank background.
-const FILM_POSTER = "/story/beat5-ritual.jpg";
 
 /**
  * MasterFilm — the 30s Flow-rendered cinematic (`aumveedaa.mp4`) as the
@@ -33,9 +29,10 @@ const FILM_POSTER = "/story/beat5-ritual.jpg";
  * The target time itself is damped (not assigned raw) so normal scroll
  * reads as a camera drifting through the film, not a slideshow of frames.
  *
- * Failure behavior: a non-OK response (e.g. 404 if the film is missing) or a
- * decode error swaps the background to a static still. Visitors never see a
- * blank background, a broken video icon, or a raw error.
+ * Load / failure behavior: no mid-film still as `poster` (that flashed a
+ * warm ritual photo over the cold opening and read as a glitch). Until the
+ * first decoded frame is ready — or if the film is unreachable — the
+ * parent SceneCanvas ink fill holds the frame. Video fades in once ready.
  */
 export function MasterFilm() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -43,6 +40,7 @@ export function MasterFilm() {
   const rafRef = useRef<number>(0);
   const blobUrlRef = useRef<string | null>(null);
   const [filmUnavailable, setFilmUnavailable] = useState(false);
+  const [frameReady, setFrameReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,10 +62,9 @@ export function MasterFilm() {
       })
       .catch((err) => {
         // Network hiccup, dev-server restart mid-fetch, or a missing film —
-        // fall back to the atmospheric still. Never leave the background
-        // blank, never surface an error to the visitor.
+        // keep the ink stage (parent SceneCanvas). Never flash a wrong-beat still.
         if (process.env.NODE_ENV !== "production") {
-          console.warn("[MasterFilm] blob fetch failed, using static fallback:", err);
+          console.warn("[MasterFilm] blob fetch failed, holding ink stage:", err);
         }
         if (!cancelled) setFilmUnavailable(true);
       });
@@ -101,20 +98,31 @@ export function MasterFilm() {
 
   const handleError = () => {
     if (process.env.NODE_ENV !== "production") {
-      console.warn("[MasterFilm] film failed to decode, using static fallback");
+      console.warn("[MasterFilm] film failed to decode, holding ink stage");
     }
     setFilmUnavailable(true);
   };
 
+  const handleLoadedData = () => {
+    // Seek to the current scroll position before revealing so we never flash
+    // an intermediate decoder frame over the hero.
+    const video = videoRef.current;
+    if (video) {
+      const progress = useScrollProgress.getState().progress;
+      const t = progress * FILM_DURATION;
+      smoothedTime.current = t;
+      try {
+        video.currentTime = t;
+      } catch {
+        // Some browsers reject seeks before HAVE_METADATA; loadeddata means
+        // we usually have it — ignore and let the rAF loop catch up.
+      }
+    }
+    setFrameReady(true);
+  };
+
   if (filmUnavailable) {
-    return (
-      <img
-        src={FILM_POSTER}
-        alt=""
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 h-[100svh] w-full object-cover"
-      />
-    );
+    return null;
   }
 
   return (
@@ -124,9 +132,11 @@ export function MasterFilm() {
       muted
       playsInline
       preload="auto"
-      poster={FILM_POSTER}
+      onLoadedData={handleLoadedData}
       onError={handleError}
-      className="pointer-events-none fixed inset-0 z-0 h-[100svh] w-full object-cover"
+      className={`pointer-events-none fixed inset-0 z-0 h-[100svh] w-full object-cover transition-opacity duration-700 ease-out ${
+        frameReady ? "opacity-100" : "opacity-0"
+      }`}
     />
   );
 }
