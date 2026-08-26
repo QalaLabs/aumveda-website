@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ProductForm } from '@/components/product'
 import { Loader2, AlertTriangle } from 'lucide-react'
-import type { ProductView } from '@/lib/product-service'
+import type { ProductView } from '@/lib/product-types'
 
 export default function AdminProductEditPage() {
   const params = useParams()

@@ -10,8 +10,8 @@ const require = createRequire(import.meta.url)
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    // Prevent Next.js from bundling Prisma — let Node.js require it at runtime
-    serverComponentsExternalPackages: ['@prisma/client', '@aumveda/db'],
+    // Prevent Next.js from bundling Prisma/pg — let Node.js require them at runtime
+    serverComponentsExternalPackages: ['@prisma/client', '@aumveda/db', 'pg', '@prisma/adapter-pg', 'pg-connection-string'],
     // Limit worker processes — prevents EAGAIN on shared hosting
     workerThreads: false,
     cpus: 1,

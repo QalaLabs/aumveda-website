@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSectionReveal } from "../useSectionReveal";
-import type { ProductView } from "@/lib/product-service";
+import type { ProductView } from "@/lib/product-types";
 
 /**
  * Featured-crystals teaser — the one cross-link from the cinematic homepage

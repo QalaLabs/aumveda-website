@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { ShoppingBag, ArrowLeft, Package, Loader2, ShieldCheck, Truck, RotateCcw, Sparkles } from 'lucide-react'
 import { showSuccess, showError } from '@/utils/toast'
 import { useCart } from '@/lib/cart'
-import type { ProductView } from '@/lib/product-service'
-import { getBundleInfo } from '@/lib/product-service'
+import type { ProductView, BundleInfo } from '@/lib/product-types'
+import { getBundleInfo } from '@/lib/product-types'
 
 export default function ProductDetailPage() {
   const params = useParams()

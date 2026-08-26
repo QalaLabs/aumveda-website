@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ProductTable } from '@/components/product'
 import { Search, Plus, Loader2, AlertTriangle } from 'lucide-react'
 import { showError, showSuccess } from '@/utils/toast'
-import type { ProductView } from '@/lib/product-service'
+import type { ProductView } from '@/lib/product-types'
 import { PRODUCT_CATEGORIES } from '@/lib/product-schemas'
 
 export default function AdminProductsPage() {

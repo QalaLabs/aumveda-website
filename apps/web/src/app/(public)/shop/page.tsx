@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input'
 import { ShoppingBag, Search, ArrowRight, Sparkles, ShieldCheck, Package, Loader2 } from 'lucide-react'
 import { showSuccess, showError } from '@/utils/toast'
 import { useCart } from '@/lib/cart'
-import type { ProductView } from '@/lib/product-service'
-import { getBundleInfo } from '@/lib/product-service'
+import type { ProductView, BundleInfo } from '@/lib/product-types'
+import { getBundleInfo } from '@/lib/product-types'
 import { PRODUCT_CATEGORIES } from '@/lib/product-schemas'
 
 export default function ShopPage() {
