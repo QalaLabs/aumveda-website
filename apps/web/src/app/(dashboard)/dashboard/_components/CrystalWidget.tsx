@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { ProductView } from '@/lib/product-service'
+import type { ProductView } from '@/lib/product-types'
 
 interface Props {
   chakra: string

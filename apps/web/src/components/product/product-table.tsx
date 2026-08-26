@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Pencil, Eye, EyeOff, Package } from 'lucide-react'
-import type { ProductView } from '@/lib/product-service'
+import type { ProductView } from '@/lib/product-types'
 import { ProductInventoryBadge } from '@/components/product/product-inventory-badge'
 
 interface ProductTableProps {

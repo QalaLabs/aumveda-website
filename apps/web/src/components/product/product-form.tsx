@@ -15,7 +15,7 @@ import { showSuccess, showError } from '@/utils/toast'
 import { Loader2, Plus, X } from 'lucide-react'
 import { createProductSchema, updateProductSchema, PRODUCT_CATEGORIES } from '@/lib/product-schemas'
 import type { CreateProductInput, UpdateProductInput } from '@/lib/product-schemas'
-import type { ProductView } from '@/lib/product-service'
+import type { ProductView } from '@/lib/product-types'
 import { z } from 'zod'
 
 interface ProductFormProps {

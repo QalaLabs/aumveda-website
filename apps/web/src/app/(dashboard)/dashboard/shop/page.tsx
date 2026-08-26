@@ -9,7 +9,7 @@ import { Search, ShoppingCart, Loader2, PackageSearch, AlertTriangle } from 'luc
 import { showSuccess, showError } from '@/utils/toast'
 import { useCart } from '@/lib/cart'
 import Topbar from '../../_components/Topbar'
-import type { ProductView } from '@/lib/product-service'
+import type { ProductView } from '@/lib/product-types'
 
 export default function ShopPage() {
   const [products, setProducts] = useState<ProductView[]>([])
