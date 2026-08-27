@@ -25,13 +25,34 @@
 - **Selection State & Locking**: `SelectionProvider` accepts optional item `id` in `lock(id)` to prevent async state race conditions during immediate click-to-lock interactions.
 - **Theme & Toasts**: App defaults to parchment light aesthetic (`--av-parchment`). UI components such as Sonner Toaster must stay pinned to `theme="light"` unless a full dark token system is explicitly mounted.
 
+## Core Security & Architecture Rules
+- **Cryptographic Auth & Tokens**:
+  - OTP generation must use `crypto.randomInt(100000, 1000000)` (never `Math.random()`).
+  - `emailVerified` is stamped only when OTP / token is successfully submitted (never during unverified OTP generation).
+  - Password reset tokens use `crypto.timingSafeEqual` for constant-time comparison to prevent timing attacks.
+  - Lead-to-client upgrades in `register-lead` cannot hijack verified accounts.
+  - Portal updates in `POST /api/portal` enforce authenticated user ownership when mutating existing records.
+  - User role defaults (`user`) normalize to `client` in `middleware.ts`; admin checks support `super_admin`.
+- **Commerce & Inventory**:
+  - Stock decrements in `POST /api/checkout` must be atomic and guarded inside transactions via `where: { id, inventoryCount: { gte: quantity } }` to prevent negative stock counts.
+  - `deleteProduct(id)` must soft-deactivate (`isActive: false`) when historical `OrderItem` rows exist, preserving foreign key integrity.
+- **Timezone Standardization**:
+  - Date helpers in `@aumveda/utils` use `Intl.DateTimeFormat` with explicit `+05:30` IST offset (never `new Date(toLocaleString())`).
+- **Database & Query Performance**:
+  - High-frequency event logs in `Event` are indexed by `(eventName, createdAt)` and `(userId, eventName)`.
+  - Client journals are indexed by `(userId, isDeleted, createdAt)`.
+  - Serverless background computations (achievements, progress scores) in route handlers must be awaited via `Promise.allSettled`.
+
 ## Infrastructure & Hosting
 - **Runtime DB Adapter**: `@prisma/adapter-pg` over SSL port `5432` (`DIRECT_URL`) for Hostinger shared/cloud hosting compatibility (avoids Linux kernel `timer_create` panic).
 - **Process Manager**: PM2 cluster mode via `ecosystem.config.js` or hPanel Node.js Application Manager with startup file `server.js`.
 - **Git Repositories**:
   - Primary: `https://github.com/QalaLabs/aumveda-website.git`
+  - SHA2: `https://github.com/QalaLabs/SHA2.git` (synchronized on `main` and `master`)
   - Upstream / UI: `https://github.com/aumvedabyarchanajain-ui/Spiritual-Healing-App.git`
+  - Origin: `https://github.com/QalaLabs/crispy-doodle.git`
 
 ## Visual (PRD + Design)
 - Night `#1A0F3C` · Gold `#C9A84C` · Parchment warmth
 - Feel: digital luxury retreat / Sacred Luxury × Clinical Confidence
+
