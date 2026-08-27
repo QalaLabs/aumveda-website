@@ -32,8 +32,21 @@
 - **Git Repositories**:
   - Primary: `https://github.com/QalaLabs/aumveda-website.git`
   - Upstream / UI: `https://github.com/aumvedabyarchanajain-ui/Spiritual-Healing-App.git`
-  - SHA 2: `https://github.com/QalaLabs/SHA2.git`
+  - SHA 2: `https://github.com/aumvedabyarchanajain-ui/SHA2.git`
 - **Branch Strategy & Alignment**: All feature/deployment branches (`main`, `master`, `phase/1-auth-onboarding`, `claude/peaceful-napier-c7867e`) merged and aligned to `main`.
+
+## Authentication & User Portals
+- **Unified Login (`/auth/login`)**: Supports seamless tab-switching between **Client Portal** and **Coach / Practitioner Portal** via URL query param (`?portal=client` vs `?portal=coach`).
+- **Client Auth Methods**:
+  - Email + Password (bcrypt hashed, requires email verification)
+  - One-Time Password (OTP) login via direct email code
+  - Google OAuth (`next-auth`)
+  - Magic Link (`/auth/magic-link`)
+- **Client Onboarding & Routing**:
+  - Sign-up (`/auth/register`) defaults to role `'client'`
+  - Post-auth redirect for clients leads to `/dashboard` (Sanctuary, Appointments, Courses, Astrology, Community, Dose, Activity)
+  - Post-auth redirect for coaches/practitioners/admins leads to `/practitioner`
+- **Session & Device Security**: Custom UUID database session tracking via Prisma for session revocation and device management across logins.
 
 ## Visual (PRD + Design)
 - Night `#1A0F3C` · Gold `#C9A84C` · Parchment warmth
