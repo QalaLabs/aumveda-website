@@ -22,17 +22,26 @@ const FAQ = [
   },
 ]
 
+interface Practitioner {
+  id: 'archana' | 'sejal'
+  name: string
+  role: string
+  bio: string
+}
+
 /** Founder + expectations + privacy — answers "Am I ready?" / "Am I safe?" */
 export function TrustInvite({
-  therapistName,
-  therapistRole,
-  therapistBio,
+  practitioners,
+  selectedId,
+  recommendedId,
+  onSelect,
   onContinue,
   onBack,
 }: {
-  therapistName: string
-  therapistRole: string
-  therapistBio: string
+  practitioners: Practitioner[]
+  selectedId: 'archana' | 'sejal'
+  recommendedId: 'archana' | 'sejal'
+  onSelect: (id: 'archana' | 'sejal') => void
   onContinue: () => void
   onBack: () => void
 }) {
@@ -66,22 +75,51 @@ export function TrustInvite({
             aria-hidden
           />
         </div>
-        <div className="p-6 md:p-8 space-y-4 -mt-8 relative">
-          <div className="flex items-center gap-4">
-            <div
-              className="w-14 h-14 rounded-full bg-[hsl(var(--av-gold)/0.15)] border border-[hsl(var(--av-gold)/0.4)] flex items-center justify-center font-serif text-xl text-[hsl(var(--av-gold-soft))]"
-              aria-hidden
-            >
-              {therapistName.charAt(0)}
-            </div>
-            <div>
-              <h3 className="font-serif text-xl text-[hsl(var(--av-parchment))]">{therapistName}</h3>
-              <p className="font-body text-sm text-[hsl(var(--av-gold))]">{therapistRole}</p>
-            </div>
-          </div>
-          <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.7)] leading-relaxed">
-            {therapistBio}
+        <div className="p-6 md:p-8 space-y-3 -mt-8 relative">
+          <p className="font-body text-[11px] uppercase tracking-[0.2em] text-[hsl(var(--av-gold))]">
+            Choose your practitioner
           </p>
+          <div className="grid sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Choose your practitioner">
+            {practitioners.map((p) => {
+              const isSelected = selectedId === p.id
+              const isRecommended = recommendedId === p.id
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => onSelect(p.id)}
+                  className={`text-left rounded-xl border p-4 space-y-3 transition-colors duration-150 ${
+                    isSelected
+                      ? 'bg-[hsl(var(--av-gold)/0.12)] border-[hsl(var(--av-gold))]'
+                      : 'border-[hsl(var(--av-parchment)/0.15)] hover:border-[hsl(var(--av-parchment)/0.3)]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 shrink-0 rounded-full bg-[hsl(var(--av-gold)/0.15)] border border-[hsl(var(--av-gold)/0.4)] flex items-center justify-center font-serif text-lg text-[hsl(var(--av-gold-soft))]"
+                      aria-hidden
+                    >
+                      {p.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-lg text-[hsl(var(--av-parchment))]">{p.name}</h3>
+                      {isRecommended && (
+                        <p className="font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--av-gold))]">
+                          Recommended for you
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <p className="font-body text-xs text-[hsl(var(--av-gold))]">{p.role}</p>
+                  <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.7)] leading-relaxed">
+                    {p.bio}
+                  </p>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
 
