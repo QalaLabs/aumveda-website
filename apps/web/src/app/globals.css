@@ -66,11 +66,16 @@
   }
 
   body {
-    @apply font-body text-base leading-relaxed bg-background text-foreground;
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.625;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif font-normal;
+    font-family: var(--font-serif), Georgia, serif;
+    font-weight: 400;
     text-wrap: balance;
   }
 
@@ -290,11 +295,10 @@
   .av-copper-text {
     color: hsl(var(--av-copper-soft));
   }
-  .av-fog-fade::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(ellipse 80% 60% at 50% 100%, hsl(var(--av-fog) / 0.5), transparent 70%);
+  .font-body {
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+  .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
   }
 }

@@ -21,7 +21,7 @@ export interface SelectionContextValue {
   phase: SelectionPhase
   locked: boolean
   select: (id: string) => void
-  lock: () => void
+  lock: (id?: string) => void
   confirm: () => void
   reset: () => void
   isSelected: (id: string) => boolean

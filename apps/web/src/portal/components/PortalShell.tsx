@@ -34,14 +34,14 @@ export function PortalShell({
                   labels={true}
                 />
               </div>
-              {state.currentStep >= 2 && (
-                <Link
-                  href="/"
-                  className="flex-shrink-0 font-body text-[10px] uppercase tracking-widest text-[hsl(var(--av-parchment)/0.45)] underline underline-offset-4 hover:text-[hsl(var(--av-gold-soft))] transition-colors"
-                >
-                  Skip for now
-                </Link>
-              )}
+              <Link
+                href="/"
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[hsl(var(--av-stone)/0.3)] bg-[hsl(var(--av-ink)/0.6)] backdrop-blur-sm font-body text-xs text-[hsl(var(--av-parchment)/0.75)] hover:text-[hsl(var(--av-gold))] hover:border-[hsl(var(--av-gold)/0.5)] transition-all"
+                title="Skip to Homepage"
+              >
+                <span>Skip to Home</span>
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
             </div>
           </div>
         )}

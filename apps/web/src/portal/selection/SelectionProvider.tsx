@@ -22,11 +22,16 @@ export function SelectionProvider({ children, items, onSelect, onConfirm }: Sele
     onSelect?.(id)
   }, [onSelect])
 
-  const lock = useCallback(() => {
-    if (!selectedId) return
+  const lock = useCallback((id?: string) => {
+    const targetId = id ?? selectedId
+    if (!targetId) return
+    if (id && id !== selectedId) {
+      setSelectedId(id)
+      onSelect?.(id)
+    }
     setLocked(true)
     setPhase('locked')
-  }, [selectedId])
+  }, [selectedId, onSelect])
 
   const confirm = useCallback(() => {
     if (!selectedId) return

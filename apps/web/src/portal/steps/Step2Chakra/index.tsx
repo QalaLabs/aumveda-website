@@ -45,7 +45,7 @@ function Step2Content({
   const handleSelect = useCallback(
     (id: string) => {
       select(id)
-      lock()
+      lock(id)
     },
     [select, lock],
   )

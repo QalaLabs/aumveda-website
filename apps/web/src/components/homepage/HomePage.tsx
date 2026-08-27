@@ -13,6 +13,8 @@ import { Crystals } from "./sections/Crystals";
 import { Journal } from "./sections/Journal";
 import { Testimonials } from "./sections/Testimonials";
 import { CTA } from "./sections/CTA";
+import HealersSection from "@/components/HealersSection";
+import { CinematicPreloader } from "./CinematicPreloader";
 
 // The R3F canvas is client-only and non-trivial to construct — load it
 // lazily so it never blocks first paint or ships into the server bundle.
@@ -39,6 +41,7 @@ export default function HomePage() {
 
   return (
     <>
+      <CinematicPreloader />
       <SceneCanvas />
       <ScrollProvider rootRef={rootRef}>
         <FloatingNav />
@@ -46,6 +49,7 @@ export default function HomePage() {
         <main className="relative z-10 text-[hsl(var(--av-parchment))]">
           <Hero />
           <Journey />
+          <HealersSection />
           <Science />
           <Programs />
           <Crystals />
