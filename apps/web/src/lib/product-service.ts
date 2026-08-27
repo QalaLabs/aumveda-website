@@ -1,11 +1,12 @@
+import 'server-only'
+
 import { prisma } from '@aumveda/db'
 import { r2PublicUrl } from '@/lib/r2'
 import type { CreateProductInput, UpdateProductInput, ProductListQuery } from '@/lib/product-schemas'
-import type { ProductView, BundleInfo } from '@/lib/product-types'
-import { getBundleInfo } from '@/lib/product-types'
+import type { ProductView } from '@/lib/product-types'
 
-export type { ProductView, BundleInfo }
-export { getBundleInfo }
+export type { ProductView, BundleInfo } from '@/lib/product-types'
+export { getBundleInfo } from '@/lib/product-types'
 
 function toProductView(p: {
   id: number

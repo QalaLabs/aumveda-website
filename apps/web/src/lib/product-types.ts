@@ -1,3 +1,7 @@
+/**
+ * Client-safe product view types + pure helpers.
+ * Keep Prisma / Node-only code out of this module — shop pages are `'use client'`.
+ */
 export interface ProductView {
   id: number
   sku: string
