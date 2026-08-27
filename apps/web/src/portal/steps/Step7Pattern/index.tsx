@@ -152,8 +152,9 @@ function Step7Pattern({ data, onNext, onDataChange, onPrevious }: StepProps<Port
 function Step7Wrapper(props: StepProps<PortalData>) {
   return (
     <AudioProvider>
-      <BackgroundEngine theme={getTheme('pattern')} />
-      <Step7Pattern {...props} />
+      <BackgroundEngine theme={getTheme('pattern')}>
+        <Step7Pattern {...props} />
+      </BackgroundEngine>
     </AudioProvider>
   )
 }

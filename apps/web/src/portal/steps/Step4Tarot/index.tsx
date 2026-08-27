@@ -118,10 +118,13 @@ function TarotContent({ onNext, onDataChange }: StepProps) {
 export default function Step4Tarot(props: StepProps) {
   return (
     <AudioProvider>
-      <BackgroundEngine theme={getTheme('tarot')} />
-      <CardDrawProvider cards={TAROT_CARDS}>
-        <TarotContent {...props} />
-      </CardDrawProvider>
+      <BackgroundEngine theme={getTheme('tarot')}>
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-16">
+          <CardDrawProvider cards={TAROT_CARDS}>
+            <TarotContent {...props} />
+          </CardDrawProvider>
+        </div>
+      </BackgroundEngine>
     </AudioProvider>
   )
 }

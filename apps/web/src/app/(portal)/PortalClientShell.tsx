@@ -22,7 +22,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
   const { state } = usePortal()
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen bg-[#0B0720] text-white">
       <nav aria-label="Portal progress" className="fixed left-0 right-0 top-0 z-50 px-4 py-4">
         <div className="mx-auto flex max-w-xl items-center gap-4">
           <div className="flex-1">

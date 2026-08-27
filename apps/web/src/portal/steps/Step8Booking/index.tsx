@@ -552,8 +552,9 @@ function Step8Booking({ data }: StepProps<PortalData>) {
 function Step8Wrapper(props: StepProps<PortalData>) {
   return (
     <AudioProvider>
-      <BackgroundEngine theme={getTheme('booking')} />
-      <Step8Booking {...props} />
+      <BackgroundEngine theme={getTheme('booking')}>
+        <Step8Booking {...props} />
+      </BackgroundEngine>
     </AudioProvider>
   )
 }

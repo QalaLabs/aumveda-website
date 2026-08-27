@@ -65,7 +65,7 @@ const PublicNavigation = () => {
           <span className="font-serif text-lg md:text-xl tracking-tight">AUMVEDA</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {NAV.map((item) => (
             <Link
               key={item.path}
@@ -84,6 +84,34 @@ const PublicNavigation = () => {
               {item.label}
             </Link>
           ))}
+
+          {/* Interconnected Portal Links */}
+          <div className="flex items-center gap-3 pl-2 border-l border-[hsl(var(--av-stone)/0.4)]">
+            <Link
+              href="/auth/login?portal=client"
+              className={cn(
+                "font-body text-[12px] tracking-[0.02em] font-medium transition-colors",
+                homeScrolledInk
+                  ? "text-[hsl(var(--av-parchment)/0.8)] hover:text-[hsl(var(--av-gold-soft))]"
+                  : "text-[hsl(var(--av-mute))] hover:text-[hsl(var(--av-night))]"
+              )}
+            >
+              Client Login
+            </Link>
+            <span className={cn("text-xs opacity-30", homeScrolledInk ? "text-[hsl(var(--av-parchment))]" : "text-[hsl(var(--av-mute))]")}>·</span>
+            <Link
+              href="/auth/login?portal=coach"
+              className={cn(
+                "font-body text-[12px] tracking-[0.02em] font-medium transition-colors",
+                homeScrolledInk
+                  ? "text-[hsl(var(--av-parchment)/0.8)] hover:text-[hsl(var(--av-gold-soft))]"
+                  : "text-[hsl(var(--av-mute))] hover:text-[hsl(var(--av-night))]"
+              )}
+            >
+              Coach Login
+            </Link>
+          </div>
+
           <Link
             href="/step-1"
             className={cn(
@@ -142,16 +170,35 @@ const PublicNavigation = () => {
           >
             Begin Your Journey
           </Link>
-          <Link
-            href="/auth/login"
-            onClick={() => setOpen(false)}
-            className={cn(
-              "text-center font-body text-sm py-2",
-              isHome ? "text-[hsl(var(--av-parchment)/0.55)]" : "text-[hsl(var(--av-mute))]"
-            )}
-          >
-            Client login
-          </Link>
+
+          <div className="pt-3 mt-1 border-t border-[hsl(var(--av-stone)/0.3)] flex flex-col gap-2">
+            <Link
+              href="/auth/login?portal=client"
+              onClick={() => setOpen(false)}
+              className={cn(
+                "font-body text-sm py-2 px-3 rounded-xl flex items-center justify-between transition-colors",
+                isHome
+                  ? "text-[hsl(var(--av-parchment)/0.8)] bg-white/5 hover:bg-white/10"
+                  : "text-[hsl(var(--av-night))] bg-[hsl(var(--av-stone)/0.3)] hover:bg-[hsl(var(--av-stone)/0.5)]"
+              )}
+            >
+              <span>Client Sanctuary Login</span>
+              <span className="text-xs text-[hsl(var(--av-gold))]">→</span>
+            </Link>
+            <Link
+              href="/auth/login?portal=coach"
+              onClick={() => setOpen(false)}
+              className={cn(
+                "font-body text-sm py-2 px-3 rounded-xl flex items-center justify-between transition-colors",
+                isHome
+                  ? "text-[hsl(var(--av-parchment)/0.8)] bg-white/5 hover:bg-white/10"
+                  : "text-[hsl(var(--av-night))] bg-[hsl(var(--av-stone)/0.3)] hover:bg-[hsl(var(--av-stone)/0.5)]"
+              )}
+            >
+              <span>Coach & Practitioner Login</span>
+              <span className="text-xs text-[hsl(var(--av-gold))]">→</span>
+            </Link>
+          </div>
         </div>
       )}
     </nav>

@@ -137,12 +137,19 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
                 </motion.div>
               )}
 
-              <motion.div variants={staggerItem} className="flex justify-center pt-2">
+              <motion.div variants={staggerItem} className="flex flex-col items-center gap-3 pt-2">
                 <PortalContinueButton
                   onClick={requestChart}
                   disabled={!canSubmit || phase === 'loading'}
                   label={phase === 'loading' ? 'Calculating...' : phase === 'error' ? 'Retry' : 'Reveal My Birth Chart'}
                 />
+                <button
+                  type="button"
+                  onClick={onNext}
+                  className="mt-1 text-xs uppercase tracking-widest text-white/40 hover:text-[#C9A84C] underline underline-offset-4 transition-colors"
+                >
+                  Skip this step &amp; continue →
+                </button>
               </motion.div>
             </motion.div>
           )}
@@ -155,14 +162,23 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com"
                   className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-center text-white placeholder:text-white/20 focus:border-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-400/20" />
               </PortalCard>
-              <PortalContinueButton onClick={handleEmailSubmit} disabled={!email.includes('@')} label="Reveal My Chart" />
+              <div className="flex flex-col items-center gap-3">
+                <PortalContinueButton onClick={handleEmailSubmit} disabled={!email.includes('@')} label="Reveal My Chart" />
+                <button
+                  type="button"
+                  onClick={onNext}
+                  className="mt-1 text-xs uppercase tracking-widest text-white/40 hover:text-[#C9A84C] underline underline-offset-4 transition-colors"
+                >
+                  Skip for now →
+                </button>
+              </div>
             </motion.div>
           )}
 
           {(phase === 'revealing' || phase === 'revealed') && (
             <motion.div key="reveal" variants={staggerContainer} initial="hidden" animate="visible" exit="exit" className="space-y-6 text-center">
               <div className="relative mb-4 h-48 w-full overflow-hidden rounded-2xl bg-gradient-to-b from-[#050510] via-[#0A0A20] to-[#050510]">
-                <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(1px 1px at 20px 30px, white, transparent), radial-gradient(1px 1px at 40px 70px, white, transparent), radial-gradient(1px 1px at 80px 40px, white, transparent), radial-gradient(1px 1px at 120px 80px, white, transparent)' }} />
+                <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(1px 1px at 20px 30px, white, transparent), radial-gradient(1px 1px at 40px 70px, white, transparent), radial-gradient(1px 1px at 80px 40px, white, transparent), radial-gradient(1px 120px 80px, white, transparent)' }} />
                 <p className="relative flex h-full items-center justify-center text-sm text-white/30">✦ Your birth sky ✦</p>
               </div>
               <p className="text-sm italic text-white/40">This was your sky — the moment you took your first breath.</p>
@@ -187,8 +203,9 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
 function Step6Wrapper(props: StepProps<PortalData>) {
   return (
     <AudioProvider>
-      <BackgroundEngine theme={getTheme('constellation')} />
-      <Step6Constellation {...props} />
+      <BackgroundEngine theme={getTheme('constellation')}>
+        <Step6Constellation {...props} />
+      </BackgroundEngine>
     </AudioProvider>
   )
 }

@@ -51,8 +51,11 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                 <Link href="/contact" className="hover:text-[hsl(var(--av-gold-soft))]">
                   Contact
                 </Link>
-                <Link href="/auth/login" className="hover:text-[hsl(var(--av-gold-soft))]">
+                <Link href="/auth/login?portal=client" className="hover:text-[hsl(var(--av-gold-soft))]">
                   Client login
+                </Link>
+                <Link href="/auth/login?portal=coach" className="hover:text-[hsl(var(--av-gold-soft))]">
+                  Coach login
                 </Link>
               </nav>
             </div>

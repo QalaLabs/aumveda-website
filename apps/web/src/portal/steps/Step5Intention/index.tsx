@@ -188,8 +188,9 @@ function Step5Intention({ data, onNext, onDataChange }: StepProps) {
 export default function Step5IntentionWrapper(props: StepProps) {
   return (
     <AudioProvider>
-      <BackgroundEngine theme={getTheme('intention')} />
-      <Step5Intention {...props} />
+      <BackgroundEngine theme={getTheme('intention')}>
+        <Step5Intention {...props} />
+      </BackgroundEngine>
     </AudioProvider>
   )
 }

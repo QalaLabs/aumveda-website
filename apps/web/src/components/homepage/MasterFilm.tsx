@@ -45,6 +45,11 @@ export function MasterFilm() {
   useEffect(() => {
     let cancelled = false;
 
+    // Set direct source as instant fallback while blob is fetching
+    if (videoRef.current) {
+      videoRef.current.src = FILM_SRC;
+    }
+
     fetch(FILM_SRC)
       .then((res) => {
         if (!res.ok) {
@@ -61,12 +66,9 @@ export function MasterFilm() {
         }
       })
       .catch((err) => {
-        // Network hiccup, dev-server restart mid-fetch, or a missing film —
-        // keep the ink stage (parent SceneCanvas). Never flash a wrong-beat still.
         if (process.env.NODE_ENV !== "production") {
-          console.warn("[MasterFilm] blob fetch failed, holding ink stage:", err);
+          console.warn("[MasterFilm] blob fetch fallback active:", err);
         }
-        if (!cancelled) setFilmUnavailable(true);
       });
 
     return () => {

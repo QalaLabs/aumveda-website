@@ -26,13 +26,26 @@ export default function Topbar({ title }: TopbarProps) {
           </p>
         )}
       </div>
-      <Link
-        href="/dashboard/settings"
-        aria-label="Settings"
-        className="w-9 h-9 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] flex items-center justify-center font-body text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))]"
-      >
-        {session?.user?.name?.[0]?.toUpperCase() ?? 'U'}
-      </Link>
+      <div className="flex items-center gap-3">
+        {(session?.user?.role === 'practitioner' ||
+          session?.user?.role === 'admin' ||
+          session?.user?.role === 'super_admin') && (
+          <Link
+            href="/practitioner"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-body text-xs font-semibold bg-[hsl(var(--av-gold)/0.15)] text-[hsl(var(--av-night))] border border-[hsl(var(--av-gold)/0.3)] hover:bg-[hsl(var(--av-gold)/0.25)] transition-colors"
+          >
+            <span>Coach Portal</span>
+            <span>→</span>
+          </Link>
+        )}
+        <Link
+          href="/dashboard/settings"
+          aria-label="Settings"
+          className="w-9 h-9 rounded-full bg-[hsl(var(--av-night))] text-[hsl(var(--av-gold-soft))] flex items-center justify-center font-body text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--av-gold))]"
+        >
+          {session?.user?.name?.[0]?.toUpperCase() ?? 'U'}
+        </Link>
+      </div>
     </header>
   )
 }

@@ -53,6 +53,19 @@ export default function Sidebar() {
         <p className="px-3 font-body text-sm text-[hsl(var(--av-night))] truncate">
           {session?.user?.name ?? 'You'}
         </p>
+
+        {(session?.user?.role === 'practitioner' ||
+          session?.user?.role === 'admin' ||
+          session?.user?.role === 'super_admin') && (
+          <Link
+            href="/practitioner"
+            className="flex items-center justify-between px-3 py-2 rounded-xl font-body text-xs font-semibold bg-[hsl(var(--av-gold)/0.15)] text-[hsl(var(--av-night))] border border-[hsl(var(--av-gold)/0.3)] hover:bg-[hsl(var(--av-gold)/0.25)] transition-colors"
+          >
+            <span>Coach Workspace</span>
+            <span>→</span>
+          </Link>
+        )}
+
         <Link
           href="/dashboard/settings"
           className="block px-3 py-2 rounded-xl font-body text-sm text-[hsl(var(--av-mute))] hover:text-[hsl(var(--av-night))]"
