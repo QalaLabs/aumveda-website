@@ -179,6 +179,87 @@ export default function ProgramsPage() {
         </section>
       ))}
 
+      {/* Structured Transformation Tiers from Previous Site */}
+      <EditorialSection
+        id="protocols"
+        eyebrow="Structured Arcs"
+        title="Core Synthesis Protocols"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+          {[
+            {
+              title: "The 21-Day Synthesis",
+              desc: "A rapid immersion into the Aumveda methodology for immediate nervous system and karmic reset.",
+              price: "₹45,000",
+              tag: "Most Popular",
+              features: [
+                "Daily 1:1 sessions with Sejal & Archana",
+                "Custom 528 Hz binaural audio protocol",
+                "Astrology & chart decode",
+                "Journal & daily progress score",
+              ],
+            },
+            {
+              title: "The Cosmic Alignment",
+              desc: "A 3-month deep dive into your psychological, somatic, and celestial architecture.",
+              price: "₹1,20,000",
+              tag: "Deep Transformation",
+              features: [
+                "90-day guided transformation",
+                "Residential/commercial Vastu audit",
+                "Kundli + Tarot deep analysis",
+                "Monthly retreats & direct access",
+              ],
+            },
+            {
+              title: "Executive Sanctuary",
+              desc: "Bespoke high-performance wellness and spatial energetics for founders and leaders.",
+              price: "Custom",
+              tag: "Elite",
+              features: [
+                "Executive neuro-somatic coaching",
+                "Workspace Vastu restructuring",
+                "Bioresonance frequency harmonization",
+                "Stamina & focus metrics",
+              ],
+            },
+          ].map((program) => (
+            <div
+              key={program.title}
+              className="rounded-3xl border border-stone bg-sand/30 p-8 flex flex-col justify-between space-y-6 hover:border-gold transition-all duration-300 shadow-sm"
+            >
+              <div className="space-y-4">
+                <div className="inline-block px-3 py-1 rounded-full bg-gold/10 text-gold text-[10px] font-black uppercase tracking-widest">
+                  {program.tag}
+                </div>
+                <h3 className="font-serif text-2xl text-night">{program.title}</h3>
+                <p className="text-sm text-mute leading-relaxed">{program.desc}</p>
+                <ul className="space-y-2 pt-2 text-xs text-ink-text border-t border-stone/50">
+                  {program.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <span className="text-gold font-bold">✓</span>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="pt-6 border-t border-stone flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase tracking-widest text-mute block">Starting at</span>
+                  <span className="font-serif text-2xl font-bold text-night">{program.price}</span>
+                </div>
+                <Link
+                  href="/contact"
+                  className="rounded-xl px-4 py-2 bg-night hover:bg-black text-parchment text-xs font-bold transition-all"
+                >
+                  Inquire →
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </EditorialSection>
+
       <BeginCtaBand
         title="Programmes follow fit — not impulse."
         body="Decode in the portal. Meet on a Discovery Call. Then we place you in the right arc."

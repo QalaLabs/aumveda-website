@@ -3,13 +3,27 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Settings, ShieldCheck, Lock } from 'lucide-react'
+import { ArrowLeft, Settings, ShieldCheck, Lock, Sparkles, ShoppingBag } from 'lucide-react'
 import ConsentManager from '@/components/ConsentManager'
 import ProfileHeader from '@/components/ProfileHeader'
 import BadgeShelf from '@/components/BadgeShelf'
 import Topbar from '../../_components/Topbar'
+import { useEffect, useState } from 'react'
+import type { ProductView } from '@/lib/product-types'
 
 export default function ProfilePage() {
+  const [recommendedProducts, setRecommendedProducts] = useState<ProductView[]>([])
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(async res => {
+        if (!res.ok) return
+        const data = await res.json()
+        setRecommendedProducts((data.products ?? []).slice(0, 3))
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <>
       <Topbar title="Profile" />
@@ -29,6 +43,45 @@ export default function ProfilePage() {
         </div>
 
         <ProfileHeader />
+
+        {recommendedProducts.length > 0 && (
+          <Card className="border-none shadow-lg rounded-[32px] bg-white overflow-hidden">
+            <CardHeader className="border-b border-slate-100 bg-slate-50/50 p-6 md:p-8">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2 font-serif">
+                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  Your Energetic Tools & Crystal Recommendations
+                </CardTitle>
+                <Button asChild variant="ghost" size="sm" className="text-xs font-bold text-amber-700 hover:text-amber-800">
+                  <Link href="/shop">
+                    <ShoppingBag className="w-3.5 h-3.5 mr-1" /> Visit Apothecary &rarr;
+                  </Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 md:p-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {recommendedProducts.map(p => (
+                  <Link
+                    key={p.id}
+                    href={`/shop/${p.slug}`}
+                    className="flex flex-col rounded-2xl border border-slate-100 p-4 hover:shadow-md hover:border-amber-200 transition-all group"
+                  >
+                    <div className="aspect-square w-full rounded-xl overflow-hidden bg-slate-50 mb-3">
+                      {p.imageUrl ? (
+                        <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      ) : (
+                        <div className="w-full h-full bg-amber-50 flex items-center justify-center text-amber-300">ॐ</div>
+                      )}
+                    </div>
+                    <p className="font-serif text-sm font-bold text-slate-900 truncate group-hover:text-amber-700">{p.title}</p>
+                    <p className="text-xs font-black text-amber-700 mt-1">₹{p.priceInr.toLocaleString('en-IN')}</p>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-none shadow-lg rounded-[32px] bg-white">
           <CardContent className="p-8">

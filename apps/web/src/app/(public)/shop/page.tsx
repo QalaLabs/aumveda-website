@@ -14,28 +14,44 @@ import { PRODUCT_CATEGORIES } from '@/lib/product-schemas'
 
 export default function ShopPage() {
   const [products, setProducts] = useState<ProductView[]>([])
+  const [userChakra, setUserChakra] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('All')
   const [search, setSearch] = useState('')
   const { addItem, isInCart, totalItems } = useCart()
 
   useEffect(() => {
-    fetch('/api/products')
-      .then(async res => {
+    Promise.all([
+      fetch('/api/products').then(async res => {
         if (!res.ok) throw new Error('Failed to load')
-        const data = await res.json()
-        setProducts(data.products ?? [])
+        return res.json()
+      }),
+      fetch('/api/user/chakra').then(async res => {
+        if (res.ok) {
+          const data = await res.json()
+          return data.chakra ?? null
+        }
+        return null
+      }).catch(() => null)
+    ])
+      .then(([productsData, chakra]) => {
+        setProducts(productsData.products ?? [])
+        setUserChakra(chakra)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
+  const recommendedProducts = userChakra
+    ? products.filter(p => p.chakraAssociation?.toLowerCase() === userChakra.toLowerCase() || p.tags?.some(t => t.toLowerCase() === userChakra.toLowerCase()))
+    : products.slice(0, 3)
+
   const filtered = products.filter(p =>
-    (category === 'All' || p.category === category) &&
+    (category === 'All' || (category === 'Recommended' ? recommendedProducts.some(r => r.id === p.id) : p.category === category)) &&
     (!search || p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase()))
   )
 
-  const categories = ['All', ...PRODUCT_CATEGORIES.filter(c => products.some(p => p.category === c))]
+  const categories = ['All', 'Recommended', ...PRODUCT_CATEGORIES.filter(c => products.some(p => p.category === c))]
 
   const handleAddToCart = (product: ProductView) => {
     if (product.inventoryCount === 0) {
@@ -87,6 +103,62 @@ export default function ShopPage() {
             )}
           </div>
         </div>
+
+        {/* Profile-Matched Recommendations */}
+        {recommendedProducts.length > 0 && category === 'All' && (
+          <div className="bg-gradient-to-r from-amber-50/80 via-rose-50/40 to-emerald-50/60 rounded-[32px] p-8 border border-amber-200/50 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-amber-700">
+                  <Sparkles className="w-3.5 h-3.5" /> Matched for Your Energy Profile {userChakra && `• ${userChakra.toUpperCase()}`}
+                </div>
+                <h2 className="text-2xl font-serif font-bold text-slate-900">
+                  Personalized Energetic Alignment
+                </h2>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCategory('Recommended')}
+                className="rounded-xl border-amber-300 text-amber-800 hover:bg-amber-100/50 text-xs font-bold"
+              >
+                View All Recommendations &rarr;
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {recommendedProducts.slice(0, 3).map(p => (
+                <div
+                  key={p.id}
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-amber-100 flex items-center gap-4 hover:shadow-md transition-all group"
+                >
+                  <Link href={`/shop/${p.slug}`} className="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 shrink-0 block">
+                    {p.imageUrl ? (
+                      <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    ) : (
+                      <div className="w-full h-full bg-amber-50 flex items-center justify-center">
+                        <Package className="w-6 h-6 text-amber-300" />
+                      </div>
+                    )}
+                  </Link>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <Link href={`/shop/${p.slug}`} className="block">
+                      <p className="font-serif text-sm font-bold text-slate-900 truncate hover:text-amber-700">{p.title}</p>
+                    </Link>
+                    <p className="text-xs font-black text-amber-700">₹{p.priceInr.toLocaleString('en-IN')}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleAddToCart(p)}
+                    className="rounded-lg h-8 px-3 text-xs bg-slate-900 hover:bg-black font-bold shrink-0"
+                  >
+                    Add
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-3">
           {categories.map(cat => (
