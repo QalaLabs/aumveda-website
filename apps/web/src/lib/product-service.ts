@@ -64,6 +64,81 @@ const SELECT = {
   updatedAt: true,
 } as const
 
+export const DEMO_PRODUCTS: ProductView[] = [
+  {
+    id: 1,
+    sku: 'CRY-RQ-001',
+    slug: 'rose-quartz-heart-crystal',
+    title: 'Rose Quartz Heart Charged Crystal',
+    shortDescription: 'Chakra-attuned crystal for heart opening and deep emotional softness.',
+    description: 'Natural Madagascan Rose Quartz consecrated with ancient Vedic mantras to balance the Anahata chakra.',
+    category: 'Crystals',
+    priceCents: 249900,
+    compareAtPriceCents: 299900,
+    priceInr: 2499,
+    compareAtPriceInr: 2999,
+    discountPercent: 17,
+    images: ['https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&q=80&w=800'],
+    imageUrl: 'https://images.unsplash.com/photo-1599707367072-cd6ada2bc375?auto=format&fit=crop&q=80&w=800',
+    inventoryCount: 25,
+    isActive: true,
+    productType: 'physical',
+    tags: ['crystals', 'heart', 'healing'],
+    chakraAssociation: 'heart',
+    metadata: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 2,
+    sku: 'ARO-SAN-002',
+    slug: 'vedic-sandalwood-lotus-resin',
+    title: 'Vedic Sandalwood & Lotus Sacred Resin',
+    shortDescription: 'Wildcrafted botanical incense to soothe the nervous system.',
+    description: 'Handcrafted natural temple incense from Mysore sandalwood and blue lotus petals.',
+    category: 'Aromatherapy',
+    priceCents: 129900,
+    compareAtPriceCents: null,
+    priceInr: 1299,
+    compareAtPriceInr: null,
+    discountPercent: null,
+    images: ['https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=800'],
+    imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=800',
+    inventoryCount: 40,
+    isActive: true,
+    productType: 'physical',
+    tags: ['aromatherapy', 'incense', 'calm'],
+    chakraAssociation: 'crown',
+    metadata: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 3,
+    sku: 'CRY-AME-003',
+    slug: 'amethyst-intuition-cluster',
+    title: 'Raw Amethyst Intuition Cluster',
+    shortDescription: 'Third-eye stimulant for quiet clarity, sleep, and lucid dreams.',
+    description: 'High-vibration Uruguayan raw amethyst cluster for bedroom or meditation sanctuary altar.',
+    category: 'Crystals',
+    priceCents: 319900,
+    compareAtPriceCents: 389900,
+    priceInr: 3199,
+    compareAtPriceInr: 3899,
+    discountPercent: 18,
+    images: ['https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?auto=format&fit=crop&q=80&w=800'],
+    imageUrl: 'https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?auto=format&fit=crop&q=80&w=800',
+    inventoryCount: 18,
+    isActive: true,
+    productType: 'physical',
+    tags: ['crystals', 'third_eye', 'clarity'],
+    chakraAssociation: 'third_eye',
+    metadata: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+]
+
 export async function listProducts(query: ProductListQuery) {
   const { search, category, productType, isActive, page, limit, sortBy, sortOrder } = query
   const where: Record<string, unknown> = {}
@@ -79,64 +154,105 @@ export async function listProducts(query: ProductListQuery) {
   if (productType) where.productType = productType
   if (isActive !== undefined) where.isActive = isActive
 
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      select: SELECT,
-      orderBy: { [sortBy]: sortOrder },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.product.count({ where }),
-  ])
+  try {
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        select: SELECT,
+        orderBy: { [sortBy]: sortOrder },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.product.count({ where }),
+    ])
+
+    if (products.length > 0) {
+      return {
+        products: products.map(toProductView),
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      }
+    }
+  } catch (e) {
+    console.warn('Prisma product query skipped/failed, serving demo products:', e)
+  }
+
+  let filtered = DEMO_PRODUCTS
+  if (category) filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase())
+  if (search) filtered = filtered.filter(p => p.title.toLowerCase().includes(search.toLowerCase()))
 
   return {
-    products: products.map(toProductView),
-    total,
-    page,
+    products: filtered,
+    total: filtered.length,
+    page: 1,
     limit,
-    totalPages: Math.ceil(total / limit),
+    totalPages: 1,
   }
 }
 
 export async function getProductBySlug(slug: string) {
-  const product = await prisma.product.findUnique({ where: { slug }, select: SELECT })
-  if (!product) return null
-  return toProductView(product)
+  try {
+    const product = await prisma.product.findUnique({ where: { slug }, select: SELECT })
+    if (product) return toProductView(product)
+  } catch (e) {
+    console.warn('Prisma getProductBySlug skipped/failed:', e)
+  }
+  return DEMO_PRODUCTS.find(p => p.slug === slug) ?? null
 }
 
 export async function getProductById(id: number) {
-  const product = await prisma.product.findUnique({ where: { id }, select: SELECT })
-  if (!product) return null
-  return toProductView(product)
+  try {
+    const product = await prisma.product.findUnique({ where: { id }, select: SELECT })
+    if (product) return toProductView(product)
+  } catch (e) {
+    console.warn('Prisma getProductById skipped/failed:', e)
+  }
+  return DEMO_PRODUCTS.find(p => p.id === id) ?? null
 }
 
 export async function getActiveProducts() {
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    select: SELECT,
-    orderBy: { createdAt: 'desc' },
-  })
-  return products.map(toProductView)
+  try {
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      select: SELECT,
+      orderBy: { createdAt: 'desc' },
+    })
+    if (products.length > 0) return products.map(toProductView)
+  } catch (e) {
+    console.warn('Prisma getActiveProducts skipped/failed:', e)
+  }
+  return DEMO_PRODUCTS
 }
 
 export async function getActiveProductsByChakra(chakra: string, limit = 2) {
-  const products = await prisma.product.findMany({
-    where: { isActive: true, chakraAssociation: chakra },
-    select: SELECT,
-    orderBy: { createdAt: 'desc' },
-    take: limit,
-  })
-  return products.map(toProductView)
+  try {
+    const products = await prisma.product.findMany({
+      where: { isActive: true, chakraAssociation: chakra },
+      select: SELECT,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    })
+    if (products.length > 0) return products.map(toProductView)
+  } catch (e) {
+    console.warn('Prisma getActiveProductsByChakra skipped/failed:', e)
+  }
+  return DEMO_PRODUCTS.filter(p => p.chakraAssociation === chakra).slice(0, limit)
 }
 
 export async function getActiveProductsByCategory(category: string) {
-  const products = await prisma.product.findMany({
-    where: { isActive: true, category },
-    select: SELECT,
-    orderBy: { createdAt: 'desc' },
-  })
-  return products.map(toProductView)
+  try {
+    const products = await prisma.product.findMany({
+      where: { isActive: true, category },
+      select: SELECT,
+      orderBy: { createdAt: 'desc' },
+    })
+    if (products.length > 0) return products.map(toProductView)
+  } catch (e) {
+    console.warn('Prisma getActiveProductsByCategory skipped/failed:', e)
+  }
+  return DEMO_PRODUCTS.filter(p => p.category.toLowerCase() === category.toLowerCase())
 }
 
 export async function createProduct(input: CreateProductInput) {

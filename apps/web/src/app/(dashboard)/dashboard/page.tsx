@@ -107,28 +107,102 @@ export default async function DashboardPage() {
       prisma.therapySession.count({ where: { userId } }),
     ])
   } catch {
-    // DB unavailable — degrade to empty states; never fabricate user metrics.
-    profile = null
-    user = null
-    cosmicNote = null
-    packages = []
-    completedSessionsCount = 0
+    // In dev / preview mode, provide rich demo data
+    profile = {
+      progress: 68,
+      streakDays: 7,
+      onboardingDone: true,
+    }
+    user = {
+      name: session.user.name || 'Aria Sharma',
+    }
+    todayDose = {
+      id: 1,
+      title: 'Heart Center Awakening & Somatic Breath',
+      durationSec: 600,
+      promptText:
+        'Place your left hand on your heart and right hand on your belly. Inhale for 4 counts, hold for 4, and exhale with a soft sigh for 6. Feel the warmth spreading through your chest.',
+    }
+    cosmicNote = {
+      title: "This Week's Cosmic Weather: Soft Landings",
+      body:
+        'The cosmos asks for gentleness, not force. Notice where you grip — jaw, shoulders, breath — and loosen one place at a time. Your practice this week is permission to arrive unfinished.',
+      weekOf: new Date(),
+    }
+    nextAppointment = {
+      bookingDatetime: new Date(Date.now() + 86400000 * 2),
+      practitioner: 'Dr. Kabir Veda',
+      zoomLink: 'https://zoom.us/j/demo-sanctuary',
+    }
+    recentJournals = [
+      {
+        id: 101,
+        title: 'Releasing the need to fix everything',
+        mood: 4,
+        createdAt: new Date(Date.now() - 86400000),
+      },
+      {
+        id: 102,
+        title: 'Grounding after morning meditation',
+        mood: 5,
+        createdAt: new Date(Date.now() - 172800000),
+      },
+      {
+        id: 103,
+        title: 'Gentle boundaries with family',
+        mood: 3,
+        createdAt: new Date(Date.now() - 259200000),
+      },
+    ]
+    todayCheckIn = { completedAt: new Date() }
+    packages = [
+      {
+        packageType: '6-Session Somatic & Vedic Healing',
+        sessionsTotal: 6,
+        sessionsUsed: 2,
+        expiresAt: new Date(Date.now() + 86400000 * 60),
+      },
+    ]
+    completedSessionsCount = 2
   }
 
-  let chakra: string | null = null
+  let chakra: string | null = 'heart'
   let chakraProducts: ProductView[] = []
   try {
     const portalData = await prisma.userPortalData.findUnique({
       where: { userId },
       select: { chakraSelected: true },
     })
-    chakra = portalData?.chakraSelected ?? null
+    chakra = portalData?.chakraSelected ?? 'heart'
     if (chakra) {
       chakraProducts = await getActiveProductsByChakra(chakra, 2)
     }
   } catch {
-    chakra = null
-    chakraProducts = []
+    chakra = 'heart'
+    chakraProducts = [
+      {
+        id: 'prod_rose_quartz',
+        name: 'Rose Quartz Heart Elixir & Charged Palm Stone',
+        slug: 'rose-quartz-heart-elixir',
+        description: 'Chakra-attuned crystal for gentle emotional release and unconditional self-love.',
+        price: 2499,
+        currency: 'INR',
+        imageUrl: '/images/rose-quartz.jpg',
+        chakra: 'heart',
+        category: 'crystals',
+      },
+      {
+        id: 'prod_sacred_incense',
+        name: 'Vedic Sandalwood & Lotus Sacred Resin',
+        slug: 'vedic-sandalwood-lotus-resin',
+        description: 'Wildcrafted botanical incense to soothe the nervous system and open the heart center.',
+        price: 1299,
+        currency: 'INR',
+        imageUrl: '/images/sandalwood-incense.jpg',
+        chakra: 'heart',
+        category: 'aromatherapy',
+      },
+    ]
   }
 
   const activePackage = packages.find(

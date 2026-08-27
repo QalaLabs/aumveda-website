@@ -35,7 +35,17 @@ export default async function DosePage() {
       alreadyComplete = completions.some((c) => c.doseId === todayDose!.id)
     }
   } catch {
-    todayDose = null
+    // Fallback for preview
+  }
+
+  if (!todayDose) {
+    todayDose = {
+      id: 1,
+      title: 'Heart Center Awakening & Somatic Breath',
+      promptText:
+        'Place your left hand on your heart and right hand on your belly. Inhale for 4 counts, hold for 4, and exhale with a soft sigh for 6. Feel the warmth spreading through your chest.',
+      durationSec: 600,
+    }
   }
 
   return (

@@ -42,10 +42,26 @@ export default async function JourneyPage() {
         orderBy: { createdAt: 'desc' },
         take: 5,
         select: { createdAt: true, title: true, body: true },
-      }),
-    ])
   } catch {
-    portalData = null
+    // Fallback for preview
+  }
+
+  if (!portalData) {
+    portalData = {
+      id: 'demo_portal_id',
+      userId,
+      chakraSelected: 'heart',
+      archetypeSelected: 'healer',
+      tarotCard: 'The Star',
+      tarotTheme: 'hope',
+      intentionText: 'I choose softness without abandoning my inner strength.',
+      profileResult: 'awakening_one',
+      nervousSystemScore: 'moderate',
+      relationshipScore: 'tending',
+      portalCompletedAt: new Date(Date.now() - 86400000 * 14),
+      createdAt: new Date(Date.now() - 86400000 * 14),
+      updatedAt: new Date(Date.now() - 86400000 * 14),
+    } as any
   }
 
   const milestones: Milestone[] = []

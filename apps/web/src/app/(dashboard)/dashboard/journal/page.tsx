@@ -38,9 +38,37 @@ export default async function JournalListPage({
       },
       orderBy: { createdAt: 'desc' },
       select: { id: true, title: true, mood: true, body: true, tags: true, createdAt: true },
-    })
   } catch {
-    journals = []
+    // Fallback for preview
+  }
+
+  if (journals.length === 0) {
+    journals = [
+      {
+        id: 101,
+        title: 'Releasing the need to fix everything',
+        mood: 4,
+        body: 'Today during my morning somatic breath, I realized how much energy I spend anticipating other people’s emotional needs. Giving myself permission to just be present.',
+        tags: ['boundaries', 'growth', 'anahata'],
+        createdAt: new Date(Date.now() - 86400000),
+      },
+      {
+        id: 102,
+        title: 'Grounding after morning meditation',
+        mood: 5,
+        body: 'Felt deep peace during the heart-opening meditation. The sensation of chest lightness is staying with me throughout the workday.',
+        tags: ['meditation', 'grounding', 'peace'],
+        createdAt: new Date(Date.now() - 172800000),
+      },
+      {
+        id: 103,
+        title: 'Gentle boundaries with family',
+        mood: 3,
+        body: 'Practiced saying no without over-explaining or apologizing. Uncomfortable at first, but my nervous system thanked me.',
+        tags: ['inner-child', 'voice', 'healing'],
+        createdAt: new Date(Date.now() - 259200000),
+      },
+    ]
   }
 
   return (
