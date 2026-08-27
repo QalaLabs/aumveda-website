@@ -20,8 +20,8 @@ const ActivityStats: React.FC<ActivityStatsProps> = ({ stats }) => {
       label: "Activities",
       value: stats.total,
       icon: Star,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      color: "text-night",
+      bg: "bg-gold/10",
       description: "Events in this timeline"
     },
     {
@@ -44,8 +44,8 @@ const ActivityStats: React.FC<ActivityStatsProps> = ({ stats }) => {
       label: "Types Tracked",
       value: stats.eventTypes,
       icon: TrendingUp,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-night",
+      bg: "bg-gold/10",
       description: "Kinds of activities"
     },
   ];

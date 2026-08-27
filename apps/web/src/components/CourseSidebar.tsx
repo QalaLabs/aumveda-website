@@ -42,17 +42,17 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
     <div className="flex flex-col h-full border-l border-slate-100 bg-white">
       <div className="p-6 border-b border-slate-100 bg-slate-50/50">
         <h3 className="font-bold text-slate-900 flex items-center gap-2">
-          <PlayCircle className="w-5 h-5 text-blue-500" />
+          <PlayCircle className="w-5 h-5 text-night" />
           {courseTitle}
         </h3>
         <div className="mt-4">
           <div className="flex justify-between items-end mb-2">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Course Progress</span>
-            <span className="text-[10px] font-bold text-blue-600">{overallProgress}%</span>
+            <span className="text-[10px] font-bold text-night">{overallProgress}%</span>
           </div>
           <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-500 transition-all duration-500 ease-out"
+              className="h-full bg-night transition-all duration-500 ease-out"
               style={{ width: `${overallProgress}%` }}
             />
           </div>
@@ -69,28 +69,28 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
               className={cn(
                 "w-full text-left p-4 rounded-xl transition-all duration-200 group relative border",
                 isActive
-                  ? "bg-blue-50 border-blue-100 shadow-sm"
+                  ? "bg-gold/10 border-gold/20 shadow-sm"
                   : "hover:bg-slate-50 border-transparent"
               )}
             >
               <div className="flex justify-between items-start mb-1">
                 <span className={cn(
                   "text-[10px] font-bold uppercase tracking-wider",
-                  isActive ? "text-blue-600" : "text-slate-400"
+                  isActive ? "text-night" : "text-slate-400"
                 )}>
                   Lesson {index + 1}{mod.durationSec != null ? ` • ${formatDuration(mod.durationSec)}` : ''}
                 </span>
                 {mod.completed ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 ) : isActive ? (
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-night animate-pulse" />
                 ) : (
                   <Clock className="w-3.5 h-3.5 text-slate-300" />
                 )}
               </div>
               <h4 className={cn(
                 "font-semibold text-sm leading-tight",
-                isActive ? "text-blue-900" : "text-slate-700"
+                isActive ? "text-ink" : "text-slate-700"
               )}>
                 {mod.title}
               </h4>

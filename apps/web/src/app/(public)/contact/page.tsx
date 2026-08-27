@@ -127,8 +127,8 @@ const Contact = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-6">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
-                    <Phone className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center shrink-0">
+                    <Phone className="w-6 h-6 text-night" />
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900">Call Us</h4>

@@ -52,7 +52,7 @@ const ArchitectModal: React.FC<ArchitectModalProps> = ({ architect, isOpen, onCl
           {/* Right: Content */}
           <div className="md:col-span-8 p-8 md:p-12 space-y-10">
             <section className="space-y-4">
-              <div className="flex items-center gap-2 text-blue-600">
+              <div className="flex items-center gap-2 text-night">
                 <Quote className="w-5 h-5 fill-blue-600/10" />
                 <span className="text-[10px] font-black uppercase tracking-widest">Philosophy Statement</span>
               </div>
@@ -80,7 +80,7 @@ const ArchitectModal: React.FC<ArchitectModalProps> = ({ architect, isOpen, onCl
 
               <section className="space-y-4">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                  <Target className="w-3 h-3 text-blue-500" /> Signature Approach
+                  <Target className="w-3 h-3 text-night" /> Signature Approach
                 </h4>
                 <p className="text-sm text-slate-500 leading-relaxed">
                   {architect.approach}

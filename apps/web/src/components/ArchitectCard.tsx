@@ -21,7 +21,7 @@ const ArchitectCard: React.FC<ArchitectCardProps> = ({ architect, onClick, varia
       {/* Dynamic Glow Effect */}
       <div className={cn(
         "absolute -inset-4 rounded-[60px] opacity-0 group-hover:opacity-20 blur-3xl transition-all duration-700 -z-10",
-        variant === 'blue' ? "bg-blue-500" : "bg-amber-500"
+        variant === 'blue' ? "bg-night" : "bg-amber-500"
       )} />
 
       <div className="aspect-[4/5] rounded-[60px] overflow-hidden mb-8 relative border border-slate-100 shadow-sm group-hover:shadow-2xl transition-all duration-500">
@@ -38,7 +38,7 @@ const ArchitectCard: React.FC<ArchitectCardProps> = ({ architect, onClick, varia
           <div className="flex items-center justify-between mb-4">
             <div className={cn(
               "flex items-center gap-2",
-              variant === 'blue' ? "text-blue-400" : "text-amber-400"
+              variant === 'blue' ? "text-gold" : "text-amber-400"
             )}>
               {variant === 'blue' ? <ShieldCheck className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
               <span className="text-[10px] font-black uppercase tracking-widest">System Designer</span>
@@ -57,7 +57,7 @@ const ArchitectCard: React.FC<ArchitectCardProps> = ({ architect, onClick, varia
         </h4>
         <p className={cn(
           "font-black uppercase tracking-[0.3em] text-[10px]",
-          variant === 'blue' ? "text-blue-600" : "text-amber-600"
+          variant === 'blue' ? "text-night" : "text-amber-600"
         )}>
           {architect.role}
         </p>

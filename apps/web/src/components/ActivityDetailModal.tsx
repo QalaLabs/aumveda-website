@@ -58,14 +58,14 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({ event, isOpen
                 {copied ? "Copied" : "Copy JSON"}
               </Button>
             </div>
-            <pre className="text-[11px] font-mono text-blue-300 overflow-x-auto max-h-[400px] scrollbar-hide">
+            <pre className="text-[11px] font-mono text-gold-soft overflow-x-auto max-h-[400px] scrollbar-hide">
               {JSON.stringify(event, null, 2)}
             </pre>
           </div>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100 flex gap-3">
-            <Code className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-            <p className="text-[10px] text-blue-700 leading-relaxed">
+          <div className="mt-6 p-4 bg-gold/10 rounded-xl border border-gold/20 flex gap-3">
+            <Code className="w-4 h-4 text-night shrink-0 mt-0.5" />
+            <p className="text-[10px] text-night leading-relaxed">
               This is an immutable record of the system event. Use this data for auditing or debugging purposes.
               PII is redacted based on your current privacy settings.
             </p>

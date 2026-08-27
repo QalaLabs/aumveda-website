@@ -306,4 +306,56 @@
   .font-serif {
     font-family: var(--font-serif), Georgia, serif;
   }
+
+  /* Luxury shadow/hairline system — quiet, tactile depth. No heavy drop
+     shadows: warm gold floor reflections on dark surfaces, soft parchment
+     lift on light ones. */
+  .av-shadow-luxury {
+    box-shadow:
+      0 1px 2px hsl(var(--av-ink) / 0.24),
+      0 18px 48px -24px hsl(var(--av-ink) / 0.45),
+      0 2px 24px -8px hsl(var(--av-gold) / 0.12);
+  }
+  .av-shadow-parchment {
+    box-shadow:
+      0 1px 2px hsl(var(--av-ink-text) / 0.06),
+      0 12px 32px -16px hsl(var(--av-ink-text) / 0.14);
+  }
+  .av-hairline-dark {
+    border: 1px solid hsl(var(--av-parchment) / 0.14);
+  }
+  .av-hairline-light {
+    border: 1px solid hsl(var(--av-ink-text) / 0.1);
+  }
+  /* Standardized focus ring — pair with focus-visible:outline-none */
+  .av-focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  /* Gold shimmer hairline hover — a thin gold underline/border that fades
+     in on hover/focus, breath-timed. Apply to links, list rows, nav items. */
+  .av-gold-shimmer {
+    position: relative;
+    transition: color var(--duration-ui) var(--ease-out-av);
+  }
+  .av-gold-shimmer::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: -2px;
+    height: 1px;
+    background: hsl(var(--av-gold));
+    transition: right var(--duration-ritual) var(--ease-out-av);
+  }
+  .av-gold-shimmer:hover::after,
+  .av-gold-shimmer:focus-visible::after {
+    right: 0;
+  }
+  /* Press feedback for interactive luxury controls */
+  .av-press {
+    transition: transform var(--duration-micro) var(--ease-out-av);
+  }
+  .av-press:active {
+    transform: scale(0.98);
+  }
 }

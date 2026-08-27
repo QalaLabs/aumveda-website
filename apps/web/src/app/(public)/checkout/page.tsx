@@ -196,7 +196,7 @@ export default function CheckoutPage() {
                             <Button type="button" variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
                               <Plus className="w-3 h-3" />
                             </Button>
-                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6 ml-auto text-slate-400 hover:text-red-500" onClick={() => removeItem(item.productId)}>
+                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6 ml-auto text-slate-400 hover:text-destructive" onClick={() => removeItem(item.productId)}>
                               <Trash2 className="w-3 h-3" />
                             </Button>
                           </div>

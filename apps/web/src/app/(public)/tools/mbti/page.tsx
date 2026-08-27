@@ -24,17 +24,17 @@ const QUESTIONS = [
 
 const TYPES: Record<string, { title: string; desc: string; traits: string[]; color: string }> = {
   INTJ: { title: "The Architect", desc: "Imaginative and strategic thinkers with a plan for everything.", traits: ["Strategic", "Independent", "Determined", "Private"], color: "bg-violet-900 text-white" },
-  INTP: { title: "The Logician", desc: "Innovative inventors with an unquenchable thirst for knowledge.", traits: ["Analytical", "Curious", "Objective", "Flexible"], color: "bg-blue-900 text-white" },
-  ENTJ: { title: "The Commander", desc: "Bold, imaginative and strong-willed leaders.", traits: ["Decisive", "Ambitious", "Strategic", "Charismatic"], color: "bg-red-900 text-white" },
+  INTP: { title: "The Logician", desc: "Innovative inventors with an unquenchable thirst for knowledge.", traits: ["Analytical", "Curious", "Objective", "Flexible"], color: "bg-ink text-white" },
+  ENTJ: { title: "The Commander", desc: "Bold, imaginative and strong-willed leaders.", traits: ["Decisive", "Ambitious", "Strategic", "Charismatic"], color: "bg-destructive/20 text-white" },
   ENTP: { title: "The Debater", desc: "Smart and curious thinkers who love intellectual challenges.", traits: ["Inventive", "Enthusiastic", "Outspoken", "Clever"], color: "bg-orange-700 text-white" },
   INFJ: { title: "The Advocate", desc: "Quiet visionaries with an idealistic, principled nature.", traits: ["Insightful", "Principled", "Compassionate", "Private"], color: "bg-teal-900 text-white" },
   INFP: { title: "The Mediator", desc: "Poetic, kind and altruistic people guided by values.", traits: ["Empathetic", "Creative", "Idealistic", "Flexible"], color: "bg-emerald-800 text-white" },
   ENFJ: { title: "The Protagonist", desc: "Charismatic and inspiring leaders who love helping others.", traits: ["Charismatic", "Empathetic", "Organised", "Reliable"], color: "bg-amber-700 text-white" },
-  ENFP: { title: "The Campaigner", desc: "Enthusiastic, creative and sociable free spirits.", traits: ["Enthusiastic", "Creative", "Sociable", "Optimistic"], color: "bg-yellow-700 text-white" },
+  ENFP: { title: "The Campaigner", desc: "Enthusiastic, creative and sociable free spirits.", traits: ["Enthusiastic", "Creative", "Sociable", "Optimistic"], color: "bg-gold text-white" },
   ISTJ: { title: "The Logistician", desc: "Practical and fact-minded individuals with great reliability.", traits: ["Organised", "Loyal", "Responsible", "Traditional"], color: "bg-slate-800 text-white" },
   ISFJ: { title: "The Defender", desc: "Very dedicated and warm protectors, always ready to defend.", traits: ["Supportive", "Reliable", "Patient", "Imaginative"], color: "bg-cyan-800 text-white" },
-  ESTJ: { title: "The Executive", desc: "Excellent administrators with a firm grasp on what matters.", traits: ["Organised", "Loyal", "Dedicated", "Direct"], color: "bg-indigo-800 text-white" },
-  ESFJ: { title: "The Consul", desc: "Extraordinarily caring, social and popular people.", traits: ["Caring", "Social", "Loyal", "Sensitive"], color: "bg-pink-800 text-white" },
+  ESTJ: { title: "The Executive", desc: "Excellent administrators with a firm grasp on what matters.", traits: ["Organised", "Loyal", "Dedicated", "Direct"], color: "bg-ink text-white" },
+  ESFJ: { title: "The Consul", desc: "Extraordinarily caring, social and popular people.", traits: ["Caring", "Social", "Loyal", "Sensitive"], color: "bg-ink text-white" },
   ISTP: { title: "The Virtuoso", desc: "Bold, practical experimenters who master tools of all kinds.", traits: ["Bold", "Practical", "Observant", "Calm"], color: "bg-stone-800 text-white" },
   ISFP: { title: "The Adventurer", desc: "Flexible, charming artists always ready to explore new things.", traits: ["Artistic", "Observant", "Passionate", "Curious"], color: "bg-rose-800 text-white" },
   ESTP: { title: "The Entrepreneur", desc: "Smart, energetic and perceptive people who enjoy risks.", traits: ["Bold", "Rational", "Original", "Perceptive"], color: "bg-lime-800 text-white" },
@@ -87,7 +87,7 @@ export default function MBTIPage() {
                 <span>{progress}% complete</span>
               </div>
               <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${progress}%` }} />
+                <div className="h-full bg-night transition-all duration-500" style={{ width: `${progress}%` }} />
               </div>
             </div>
 
@@ -99,8 +99,8 @@ export default function MBTIPage() {
                     key={choice}
                     onClick={() => answer(choice)}
                     className={cn(
-                      "w-full text-left p-6 rounded-2xl border-2 transition-all duration-200 font-medium text-slate-700 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-900",
-                      answers[question.id] === choice ? "border-indigo-500 bg-indigo-50 text-indigo-900" : "border-slate-200 bg-white"
+                      "w-full text-left p-6 rounded-2xl border-2 transition-all duration-200 font-medium text-slate-700 hover:border-gold/40 hover:bg-gold/10 hover:text-ink",
+                      answers[question.id] === choice ? "border-night/40 bg-gold/10 text-ink" : "border-slate-200 bg-white"
                     )}
                   >
                     {question[choice]}

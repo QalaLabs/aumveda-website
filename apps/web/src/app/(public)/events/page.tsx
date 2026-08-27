@@ -93,7 +93,7 @@ function EventLeadForm({ eventTitle }: { eventTitle: string }) {
         type="text" readOnly value={eventTitle}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-amber-300 text-sm font-bold"
       />
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-destructive text-xs">{error}</p>}
       <Button
         type="submit" disabled={loading}
         className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-white rounded-xl font-bold"
@@ -183,7 +183,7 @@ const Events = () => {
             </div>
             <div className="lg:col-span-5 space-y-12">
               <div className="space-y-6">
-                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">The Workshop Series</h2>
+                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-night">The Workshop Series</h2>
                 <h3 className="text-4xl font-serif font-bold text-slate-900">Micro-Immersions</h3>
                 <p className="text-slate-500 leading-relaxed">
                   Single-day intensive protocols focusing on specific modalities of the Aumveda synthesis.
@@ -192,7 +192,7 @@ const Events = () => {
 
               <div className="space-y-6">
                 {[
-                  { title: "Vibrational Medicine", icon: Waves, color: "text-blue-500", bg: "bg-blue-50" },
+                  { title: "Vibrational Medicine", icon: Waves, color: "text-night", bg: "bg-gold/10" },
                   { title: "Breath Mastery", icon: Wind, color: "text-emerald-500", bg: "bg-emerald-50" },
                   { title: "Subconscious Audit", icon: Flame, color: "text-rose-500", bg: "bg-rose-50" }
                 ].map((w, i) => (

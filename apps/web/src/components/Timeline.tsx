@@ -10,8 +10,8 @@ const EVENTS = [
     title: "The Clinical Foundation",
     desc: "Dr. Sejal Jain begins her doctoral research into the limitations of traditional CBT in treating deep-seated subconscious trauma.",
     icon: Brain,
-    color: "text-blue-500",
-    bg: "bg-blue-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   },
   {
     year: "2015",
@@ -34,8 +34,8 @@ const EVENTS = [
     title: "Aumveda Digital Sanctuary",
     desc: "Launch of the proprietary AI-driven platform, ensuring forensic-level data security and personalized wellness protocols.",
     icon: ShieldCheck,
-    color: "text-indigo-500",
-    bg: "bg-indigo-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   }
 ];
 

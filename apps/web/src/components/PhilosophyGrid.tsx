@@ -9,15 +9,15 @@ const PILLARS = [
     title: "Mind (CBT)",
     desc: "We utilize Cognitive Behavioral Re-architecture to identify and restructure the conscious mental frameworks that dictate your emotional reality.",
     icon: BrainCircuit,
-    color: "text-blue-600",
-    bg: "bg-blue-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   },
   {
     title: "Subconscious (Hypnosis)",
     desc: "Bypassing the critical conscious mind to plant seeds of transformation directly into the subconscious, resolving deep-seated patterns.",
     icon: Moon,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   },
   {
     title: "Space (Vastu)",
@@ -30,8 +30,8 @@ const PILLARS = [
     title: "Energy (Sound)",
     desc: "Utilizing Solfeggio frequencies and bioresonance to entrain the nervous system into states of deep cellular coherence.",
     icon: Music,
-    color: "text-purple-600",
-    bg: "bg-purple-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   },
   {
     title: "Destiny (Astrology)",

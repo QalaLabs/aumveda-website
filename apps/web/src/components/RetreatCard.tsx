@@ -51,7 +51,7 @@ const RetreatCard: React.FC<RetreatCardProps> = ({
               {location}
             </div>
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-blue-500" />
+              <Calendar className="w-3.5 h-3.5 text-night" />
               {date}
             </div>
             <div className="flex items-center gap-1.5">
