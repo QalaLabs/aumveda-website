@@ -39,7 +39,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
-    const role = token.role || 'client'
+    const rawRole = (token.role as string) || 'client'
+    const role = rawRole === 'user' ? 'client' : rawRole
 
     // Admin Route Protection: Admin & Super Admin only
     if (isAdminRoute && role !== 'admin' && role !== 'super_admin') {

@@ -102,25 +102,29 @@ export async function POST(req: NextRequest) {
 
   const uid = session.user.id
 
-  // Fire event + achievement check in background
-  Promise.all([
-    prisma.event.create({
-      data: {
-        userId: uid,
-        eventName: 'journal.created',
-        payload: { journalId: journal.id },
-        source: 'server',
-      },
-    }),
-    // FIRST_JOURNAL achievement
-    prisma.achievement.upsert({
-      where: { userId_key: { userId: uid, key: 'FIRST_JOURNAL' } },
-      create: { userId: uid, key: 'FIRST_JOURNAL' },
-      update: {},
-    }),
-    // Recalculate progress
-    recalculateProgress(uid),
-  ]).catch(() => null)
+  // Await event logging, achievement check, and progress recalculation
+  try {
+    await Promise.allSettled([
+      prisma.event.create({
+        data: {
+          userId: uid,
+          eventName: 'journal.created',
+          payload: { journalId: journal.id },
+          source: 'server',
+        },
+      }),
+      // FIRST_JOURNAL achievement
+      prisma.achievement.upsert({
+        where: { userId_key: { userId: uid, key: 'FIRST_JOURNAL' } },
+        create: { userId: uid, key: 'FIRST_JOURNAL' },
+        update: {},
+      }),
+      // Recalculate progress
+      recalculateProgress(uid),
+    ])
+  } catch (err) {
+    console.error('[journals] Background processing error:', err)
+  }
 
   return NextResponse.json({ ok: true, data: journal }, { status: 201 })
 }

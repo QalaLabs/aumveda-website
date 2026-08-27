@@ -172,6 +172,8 @@ model Journal {
   isDeleted           Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+
+  @@index([userId, isDeleted, createdAt])
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -408,6 +410,9 @@ model Event {
   source    String   @default("server") // "client" | "server"
   forwarded Boolean  @default(false)    // true once relayed to GTM/ad platforms
   createdAt DateTime @default(now())
+
+  @@index([eventName, createdAt])
+  @@index([userId, eventName])
 }
 
 // ─────────────────────────────────────────────────────────────

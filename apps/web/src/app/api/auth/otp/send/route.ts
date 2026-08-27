@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@aumveda/db'
 import { sendEmail } from '@/lib/email'
 import { z } from 'zod'
+import crypto from 'crypto'
 
 const schema = z.object({
   email: z.string().email(),
@@ -17,8 +18,8 @@ export async function POST(req: NextRequest) {
 
     const email = parsed.data.email.toLowerCase().trim()
 
-    // Generate 6-digit OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+    // Generate cryptographically secure 6-digit OTP
+    const otpCode = crypto.randomInt(100000, 1000000).toString()
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
     // Upsert User (creates client profile if it doesn't exist)
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       create: {
         email,
         role: 'client',
-        emailVerified: new Date(), // OTP verify automatically verifies email
+        emailVerified: null, // Email is verified only after valid OTP submission
         otpCode,
         otpExpires,
         profile: {

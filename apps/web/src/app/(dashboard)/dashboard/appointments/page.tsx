@@ -259,7 +259,7 @@ export default async function AppointmentsPage() {
                                     Practices
                                   </p>
                                   <ul className="font-body text-sm text-[hsl(var(--av-ink-text))] leading-relaxed space-y-1">
-                                    {notes.practicesAssigned.map((pr, i) => (
+                                    {notes.practicesAssigned.map((pr: string, i: number) => (
                                       <li key={i}>{pr}</li>
                                     ))}
                                   </ul>

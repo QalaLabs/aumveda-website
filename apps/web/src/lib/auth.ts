@@ -93,10 +93,14 @@ export const authOptions: NextAuthOptions = {
               throw new Error('Invalid OTP code')
             }
 
-            // Clear OTP to prevent reuse
+            // Clear OTP to prevent reuse and ensure emailVerified is set
             await prisma.user.update({
               where: { id: user.id },
-              data: { otpCode: null, otpExpires: null },
+              data: {
+                otpCode: null,
+                otpExpires: null,
+                emailVerified: new Date(),
+              },
             })
 
             return {

@@ -7,7 +7,7 @@ import TodayDoseCard from './_components/TodayDoseCard'
 import CosmicNoteCard, { QuietGrounding } from './_components/CosmicNoteCard'
 import ProgressRing from './_components/ProgressRing'
 import CrystalWidget from './_components/CrystalWidget'
-import { getActiveProductsByChakra } from '@/lib/product-service'
+import { getActiveProductsByChakra, DEMO_PRODUCTS } from '@/lib/product-service'
 import type { ProductView } from '@/lib/product-service'
 import PackageStatusCard from './_components/PackageStatusCard'
 
@@ -179,30 +179,7 @@ export default async function DashboardPage() {
     }
   } catch {
     chakra = 'heart'
-    chakraProducts = [
-      {
-        id: 'prod_rose_quartz',
-        name: 'Rose Quartz Heart Elixir & Charged Palm Stone',
-        slug: 'rose-quartz-heart-elixir',
-        description: 'Chakra-attuned crystal for gentle emotional release and unconditional self-love.',
-        price: 2499,
-        currency: 'INR',
-        imageUrl: '/images/rose-quartz.jpg',
-        chakra: 'heart',
-        category: 'crystals',
-      },
-      {
-        id: 'prod_sacred_incense',
-        name: 'Vedic Sandalwood & Lotus Sacred Resin',
-        slug: 'vedic-sandalwood-lotus-resin',
-        description: 'Wildcrafted botanical incense to soothe the nervous system and open the heart center.',
-        price: 1299,
-        currency: 'INR',
-        imageUrl: '/images/sandalwood-incense.jpg',
-        chakra: 'heart',
-        category: 'aromatherapy',
-      },
-    ]
+    chakraProducts = DEMO_PRODUCTS.slice(0, 2)
   }
 
   const activePackage = packages.find(

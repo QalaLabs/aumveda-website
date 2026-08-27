@@ -42,6 +42,8 @@ export default async function JourneyPage() {
         orderBy: { createdAt: 'desc' },
         take: 5,
         select: { createdAt: true, title: true, body: true },
+      }),
+    ])
   } catch {
     // Fallback for preview
   }

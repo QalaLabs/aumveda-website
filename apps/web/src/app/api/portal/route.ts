@@ -190,6 +190,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, userId: null })
     }
 
+    // Verify the target user exists
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    })
+
+    if (!targetUser) {
+      return NextResponse.json({ ok: false, error: 'User not found' }, { status: 404 })
+    }
+
+    // If caller has an active session, ensure they are not mutating another user's portal data
+    const { getServerSession } = await import('next-auth')
+    const { authOptions } = await import('@/lib/auth')
+    const session = await getServerSession(authOptions)
+    if (session?.user?.id && session.user.id !== userId && session.user.role !== 'admin' && session.user.role !== 'super_admin') {
+      return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 })
+    }
+
     const updateData = projectPortalData(portalData)
 
     await prisma.userPortalData.upsert({

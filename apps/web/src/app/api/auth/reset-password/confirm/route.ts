@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@aumveda/db'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import crypto from 'crypto'
 
 const schema = z.object({
   email: z.string().email(),
@@ -37,7 +38,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Password reset link has expired' }, { status: 400 })
     }
 
-    if (user.resetToken !== token) {
+    const storedBuffer = Buffer.from(user.resetToken)
+    const tokenBuffer = Buffer.from(token)
+    const isValidToken =
+      storedBuffer.length === tokenBuffer.length &&
+      crypto.timingSafeEqual(storedBuffer, tokenBuffer)
+
+    if (!isValidToken) {
       return NextResponse.json({ error: 'Password reset link is invalid' }, { status: 400 })
     }
 

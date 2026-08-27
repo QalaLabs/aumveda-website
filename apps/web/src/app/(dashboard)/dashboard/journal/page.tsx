@@ -38,6 +38,7 @@ export default async function JournalListPage({
       },
       orderBy: { createdAt: 'desc' },
       select: { id: true, title: true, mood: true, body: true, tags: true, createdAt: true },
+    })
   } catch {
     // Fallback for preview
   }

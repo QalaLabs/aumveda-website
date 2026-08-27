@@ -314,7 +314,16 @@ export async function updateProduct(input: UpdateProductInput) {
 }
 
 export async function deleteProduct(id: number) {
-  await prisma.product.delete({ where: { id } })
+  const orderCount = await prisma.orderItem.count({ where: { productId: id } })
+  if (orderCount > 0) {
+    // Preserve order history: deactivate instead of hard-deleting
+    await prisma.product.update({
+      where: { id },
+      data: { isActive: false },
+    })
+  } else {
+    await prisma.product.delete({ where: { id } })
+  }
 }
 
 export async function adjustInventory(productId: number, delta: number) {

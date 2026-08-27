@@ -99,10 +99,18 @@ export async function POST(request: NextRequest) {
       })
 
       for (const item of items) {
-        await tx.product.update({
-          where: { id: item.productId },
+        const updateRes = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            inventoryCount: { gte: item.quantity },
+          },
           data: { inventoryCount: { decrement: item.quantity } },
         })
+
+        if (updateRes.count === 0) {
+          const prod = products.find(p => p.id === item.productId)
+          throw new Error(`INSUFFICIENT_STOCK:${prod?.title ?? item.productId}`)
+        }
       }
 
       return o
@@ -142,6 +150,13 @@ export async function POST(request: NextRequest) {
       note: 'Payment gateway not configured. Order saved as PENDING.',
     })
   } catch (err: unknown) {
+    if (err instanceof Error && err.message.startsWith('INSUFFICIENT_STOCK:')) {
+      const itemTitle = err.message.replace('INSUFFICIENT_STOCK:', '')
+      return NextResponse.json(
+        { error: `"${itemTitle}" is out of stock or does not have enough inventory.` },
+        { status: 400 }
+      )
+    }
     console.error('[checkout] Unexpected error:', err)
     return NextResponse.json(
       { error: 'An unexpected error occurred. Please try again.' },

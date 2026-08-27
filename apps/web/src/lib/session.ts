@@ -119,13 +119,15 @@ export async function getSupabaseSession() {
   return session
 }
 
+import { isAdminRole } from '@/lib/admin-auth'
+
 /**
  * Requires an admin/practitioner session. Checks NextAuth first, then Supabase.
  */
 export async function requireAdminSession() {
   // Try NextAuth first (current auth)
   const nextAuthSession = await getServerSession(authOptions)
-  if (nextAuthSession?.user?.role === 'admin') {
+  if (isAdminRole(nextAuthSession?.user?.role)) {
     return nextAuthSession
   }
 
@@ -137,10 +139,10 @@ export async function requireAdminSession() {
     where: { email: supabaseSession.user.email! },
     select: { id: true, role: true },
   })
-  if (user?.role !== 'admin') redirect('/auth/login')
+  if (!isAdminRole(user?.role)) redirect('/auth/login')
 
   return {
-    user: { id: user.id, email: supabaseSession.user.email!, name: supabaseSession.user.user_metadata?.name ?? null, role: user.role as 'user' | 'admin' },
+    user: { id: user!.id, email: supabaseSession.user.email!, name: supabaseSession.user.user_metadata?.name ?? null, role: user!.role as 'user' | 'admin' },
     expires: supabaseSession.expires_at ? new Date(supabaseSession.expires_at * 1000).toISOString() : '',
   }
 }

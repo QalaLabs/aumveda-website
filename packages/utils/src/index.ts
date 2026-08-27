@@ -75,14 +75,16 @@ export function formatINR(paise: number): string {
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 export function toISTDateString(date: Date = new Date()): string {
-  return new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
-    .toISOString()
-    .split('T')[0]
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  return formatter.format(date)
 }
 
 export function startOfDayIST(date: Date = new Date()): Date {
-  const istString = date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })
-  const istDate = new Date(istString)
-  istDate.setHours(0, 0, 0, 0)
-  return istDate
+  const istDateStr = toISTDateString(date)
+  return new Date(`${istDateStr}T00:00:00.000+05:30`)
 }
