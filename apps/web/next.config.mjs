@@ -8,6 +8,7 @@ const require = createRequire(import.meta.url)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   experimental: {
     // Prevent Next.js from bundling Prisma / pg — Node.js requires them at runtime.

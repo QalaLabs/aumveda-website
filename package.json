@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "prisma generate --schema=packages/db/prisma/schema.prisma && cd apps/web && npx next build",
-    "start": "cd apps/web && npx next start",
+    "start": "cd apps/web && node server.js",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
