@@ -112,29 +112,32 @@ function Step8Booking({ data }: StepProps<PortalData>) {
     }
   }
 
-  const getRecommendedTherapist = () => {
-    const isSomatic =
-      data.profileResult === 'wounded_warrior' ||
-      data.profileResult === 'anxious_achiever' ||
-      data.profileResult === 'frozen_heart'
-
-    if (isSomatic) {
-      return {
-        id: 'sejal' as const,
-        name: 'Sejal Jain',
-        role: 'Healing Facilitator · Somatic & nervous-system work · Mumbai',
-        bio: 'Sejal holds CBT-informed coaching, breathwork, and somatic practices — evidence meeting presence, never clinical coldness.',
-      }
-    }
-    return {
+  const PRACTITIONERS = {
+    archana: {
       id: 'archana' as const,
       name: 'Archana Jain',
       role: 'Vedic Practitioner · Astrology, Vastu, ritual · Jaipur',
       bio: 'Archana brings 25+ years of Vedic lineage — chart, space, and ritual as a map for how you heal in daily life.',
-    }
+    },
+    sejal: {
+      id: 'sejal' as const,
+      name: 'Sejal Jain',
+      role: 'Healing Facilitator · Somatic & nervous-system work · Mumbai',
+      bio: 'Sejal holds CBT-informed coaching, breathwork, and somatic practices — evidence meeting presence, never clinical coldness.',
+    },
   }
 
-  const therapist = getRecommendedTherapist()
+  const getRecommendedTherapistId = (): keyof typeof PRACTITIONERS => {
+    const isSomatic =
+      data.profileResult === 'wounded_warrior' ||
+      data.profileResult === 'anxious_achiever' ||
+      data.profileResult === 'frozen_heart'
+    return isSomatic ? 'sejal' : 'archana'
+  }
+
+  const recommendedId = getRecommendedTherapistId()
+  const [selectedTherapistId, setSelectedTherapistId] = useState<keyof typeof PRACTITIONERS>(recommendedId)
+  const therapist = PRACTITIONERS[selectedTherapistId]
 
   const handleRegisterClient = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -335,9 +338,10 @@ function Step8Booking({ data }: StepProps<PortalData>) {
           >
             <PortalContent maxWidth="max-w-xl">
               <TrustInvite
-                therapistName={therapist.name}
-                therapistRole={therapist.role}
-                therapistBio={therapist.bio}
+                practitioners={Object.values(PRACTITIONERS)}
+                selectedId={selectedTherapistId}
+                recommendedId={recommendedId}
+                onSelect={(id) => setSelectedTherapistId(id)}
                 onContinue={() => setSubState('booking')}
                 onBack={() => setSubState('report')}
               />
