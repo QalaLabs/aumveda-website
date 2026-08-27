@@ -324,6 +324,10 @@ model Order {
   updatedAt         DateTime  @updatedAt
 
   items             OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -336,6 +340,9 @@ model OrderItem {
   title      String
   quantity   Int
   priceCents Int
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -369,6 +376,8 @@ model Module {
   isPreview   Boolean @default(false)
 
   progress    CourseProgress[]
+
+  @@index([courseId])
 }
 
 model Enrolment {
@@ -380,6 +389,7 @@ model Enrolment {
   enrolledAt DateTime @default(now())
 
   @@unique([userId, courseId])
+  @@index([courseId])
 }
 
 model CourseProgress {
@@ -392,6 +402,7 @@ model CourseProgress {
   watchedSec  Int       @default(0)
 
   @@unique([userId, moduleId])
+  @@index([moduleId])
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -429,6 +440,8 @@ model DailyDoseOverride {
   durationDays    Int
   source          String?
   createdAt       DateTime @default(now())
+
+  @@index([userId])
 }
 
 model DailyDoseDelivery {
@@ -446,6 +459,7 @@ model DailyDoseDelivery {
   overrideSource String?
 
   @@unique([userId, date])
+  @@index([date])
 }
 
 model UserPortalData {
@@ -490,6 +504,9 @@ model Booking {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   therapySession    TherapySession?
+
+  @@index([userId])
+  @@index([status, bookingDatetime])
 }
 
 model TherapySession {
@@ -508,6 +525,8 @@ model TherapySession {
   notesSubmittedAt          DateTime?
   createdAt                 DateTime  @default(now())
   updatedAt                 DateTime  @updatedAt
+
+  @@index([userId])
 }
 
 model Package {
@@ -520,6 +539,8 @@ model Package {
   amountPaid    Decimal   @db.Decimal(10, 2)
   purchasedAt   DateTime  @default(now())
   expiresAt     DateTime?
+
+  @@index([userId])
 }
 
 model CommunityMember {
@@ -543,6 +564,8 @@ model Subscription {
   nextBillingDate        DateTime
   razorpaySubscriptionId String?
   status                 String   @default("active")
+
+  @@index([status, nextBillingDate])
 }
 
 model LiveCircle {
@@ -568,6 +591,7 @@ model LiveCircleRSVP {
   createdAt DateTime   @default(now())
 
   @@unique([userId, circleId])
+  @@index([circleId])
 }
 
 model Challenge {
@@ -593,6 +617,7 @@ model ChallengeParticipation {
   completedAt    DateTime?
 
   @@unique([userId, challengeId])
+  @@index([challengeId])
 }
 
 model ChakraReveal {
@@ -670,6 +695,8 @@ model Reel {
   publishedAt     DateTime?
   approvedBy      String?
   createdAt       DateTime  @default(now())
+
+  @@index([isPublished, publishedAt])
 }
 
 model ContentView {
@@ -680,6 +707,9 @@ model ContentView {
   contentId         String
   viewedAt          DateTime @default(now())
   completionPercent Float?
+
+  @@index([userId])
+  @@index([contentType, contentId])
 }
 
 // ─────────────────────────────────────────────────────────────
