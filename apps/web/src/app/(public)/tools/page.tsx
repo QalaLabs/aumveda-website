@@ -21,8 +21,8 @@ const TOOLS = [
     title: "MBTI Personality Test",
     desc: "Discover your psychological archetype with animated insights.",
     icon: UserCircle,
-    color: "text-indigo-500",
-    bg: "bg-indigo-50",
+    color: "text-night",
+    bg: "bg-gold/10",
     path: "/tools/mbti"
   },
   {
@@ -30,8 +30,8 @@ const TOOLS = [
     title: "Tarot Picker",
     desc: "Draw from the sacred deck for immediate guidance.",
     icon: Moon,
-    color: "text-purple-500",
-    bg: "bg-purple-50",
+    color: "text-night",
+    bg: "bg-gold/10",
     path: "/tools/tarot"
   },
   {

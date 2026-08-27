@@ -52,7 +52,7 @@ const IntegrationSection = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="aspect-square rounded-[40px] bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8 text-center animate-float">
-                  <BrainCircuit className="w-10 h-10 text-blue-400 mb-4" />
+                  <BrainCircuit className="w-10 h-10 text-gold mb-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Neural Nodes</span>
                 </div>
                 <div className="aspect-square rounded-[40px] bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8 text-center animate-float-delayed">
@@ -62,11 +62,11 @@ const IntegrationSection = () => {
               </div>
               <div className="space-y-4 pt-12">
                 <div className="aspect-square rounded-[40px] bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8 text-center animate-float-delayed">
-                  <Moon className="w-10 h-10 text-indigo-400 mb-4" />
+                  <Moon className="w-10 h-10 text-gold mb-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subconscious</span>
                 </div>
                 <div className="aspect-square rounded-[40px] bg-white/5 border border-white/10 flex flex-col items-center justify-center p-8 text-center animate-float">
-                  <Music className="w-10 h-10 text-purple-400 mb-4" />
+                  <Music className="w-10 h-10 text-gold mb-4" />
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Cellular Resonance</span>
                 </div>
               </div>

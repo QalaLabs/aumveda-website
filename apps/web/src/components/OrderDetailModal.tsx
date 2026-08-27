@@ -73,7 +73,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
       case 'COURSE':
       case 'MICRO_LEARNING':
         return (
-          <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 rounded-lg h-8 px-3 text-[10px] font-bold uppercase tracking-wider">
+          <Button asChild size="sm" className="bg-night hover:bg-night rounded-lg h-8 px-3 text-[10px] font-bold uppercase tracking-wider">
             <Link href={item.accessUrl || '#'}>
               <PlayCircle className="w-3 h-3 mr-1.5" />
               Access Content
@@ -111,24 +111,24 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
         <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto">
           {hasPhysicalItems && order.trackingNumber && (
-            <div className="p-6 bg-blue-50 rounded-2xl border border-blue-100 space-y-4">
+            <div className="p-6 bg-gold/10 rounded-2xl border border-gold/20 space-y-4">
               <div className="flex justify-between items-center">
-                <h4 className="text-xs font-bold text-blue-900 flex items-center gap-2">
+                <h4 className="text-xs font-bold text-ink flex items-center gap-2">
                   <Truck className="w-4 h-4" /> Shipment Tracking
                 </h4>
                 {order.estimatedDelivery && (
-                  <Badge className="bg-blue-600 text-white border-none text-[9px]">In Transit</Badge>
+                  <Badge className="bg-night text-white border-none text-[9px]">In Transit</Badge>
                 )}
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex-1 space-y-1">
-                  <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Tracking Number</p>
-                  <p className="text-sm font-mono font-bold text-blue-900">{order.trackingNumber}</p>
+                  <p className="text-[10px] font-bold text-gold uppercase tracking-widest">Tracking Number</p>
+                  <p className="text-sm font-mono font-bold text-ink">{order.trackingNumber}</p>
                 </div>
                 {order.estimatedDelivery && (
                   <div className="flex-1 space-y-1 text-right">
-                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Est. Delivery</p>
-                    <p className="text-sm font-bold text-blue-900">{order.estimatedDelivery}</p>
+                    <p className="text-[10px] font-bold text-gold uppercase tracking-widest">Est. Delivery</p>
+                    <p className="text-sm font-bold text-ink">{order.estimatedDelivery}</p>
                   </div>
                 )}
               </div>

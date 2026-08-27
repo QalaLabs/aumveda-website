@@ -27,7 +27,7 @@ const SecondaryMetrics: React.FC<SecondaryMetricsProps> = ({ metrics }) => {
       value: `${metrics.sleep.value}${metrics.sleep.unit}`,
       score: metrics.sleep.score,
       icon: Moon,
-      color: "text-indigo-500"
+      color: "text-night"
     },
     {
       label: "Activity",

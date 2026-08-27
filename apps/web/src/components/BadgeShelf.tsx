@@ -60,7 +60,7 @@ const BadgeShelf = () => {
   if (loading) {
     return (
       <div className="h-32 flex items-center justify-center bg-white rounded-3xl border border-slate-100">
-        <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+        <Loader2 className="w-6 h-6 text-night animate-spin" />
       </div>
     );
   }

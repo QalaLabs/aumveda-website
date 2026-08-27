@@ -28,9 +28,9 @@ const SEJAL_SERVICES = [
     whoItIsFor: "Individuals trapped in negative thought loops, chronic anxiety, or self-limiting belief systems.",
     outcome: "Cognitive clarity, emotional resilience, and a systematic shift in behavioral patterns.",
     icon: BrainCircuit,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    accent: "bg-blue-400"
+    color: "text-night",
+    bg: "bg-gold/10",
+    accent: "bg-gold"
   },
   {
     title: "Hypnosis",
@@ -39,9 +39,9 @@ const SEJAL_SERVICES = [
     whoItIsFor: "Those struggling with deep-seated habits, phobias, or trauma that conscious effort hasn't resolved.",
     outcome: "Rapid subconscious alignment and the dissolution of long-standing internal blockages.",
     icon: Moon,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
-    accent: "bg-indigo-400"
+    color: "text-night",
+    bg: "bg-gold/10",
+    accent: "bg-gold"
   },
   {
     title: "Sound Therapy",
@@ -50,9 +50,9 @@ const SEJAL_SERVICES = [
     whoItIsFor: "High-stress professionals and individuals seeking a non-verbal path to nervous system regulation.",
     outcome: "Profound nervous system harmony and a measurable reduction in cortisol levels.",
     icon: Music,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
-    accent: "bg-purple-400"
+    color: "text-night",
+    bg: "bg-gold/10",
+    accent: "bg-gold"
   },
   {
     title: "Breathwork",
@@ -119,9 +119,9 @@ const ARCHANA_SERVICES = [
     whoItIsFor: "Individuals at a crossroads needing immediate clarity or a fresh perspective on a specific situation.",
     outcome: "Actionable intuitive direction and the peace that comes from spiritual confirmation.",
     icon: Layers,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
-    accent: "bg-purple-400"
+    color: "text-night",
+    bg: "bg-gold/10",
+    accent: "bg-gold"
   },
   {
     title: "Vastu Shastra",
@@ -141,9 +141,9 @@ const ARCHANA_SERVICES = [
     whoItIsFor: "Those seeking energetic protection, amplified manifestation, or a deeper connection to Earth's frequencies.",
     outcome: "An amplified energetic state and a cleared, protected personal sanctuary.",
     icon: Gem,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    accent: "bg-blue-400"
+    color: "text-night",
+    bg: "bg-gold/10",
+    accent: "bg-gold"
   }
 ];
 
@@ -213,11 +213,11 @@ export default function ServicesPage() {
           <section className="space-y-16">
             <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-slate-100 pb-12">
               <div className="space-y-4">
-                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">The Western Pillar</h2>
+                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-night">The Western Pillar</h2>
                 <h3 className="text-4xl md:text-5xl font-serif font-bold text-slate-900">Sejal Jain</h3>
                 <p className="text-slate-500 font-medium">CBT · Hypnosis · Sound Therapy · Breathwork</p>
               </div>
-              <div className="flex items-center gap-3 text-blue-600 font-bold text-sm">
+              <div className="flex items-center gap-3 text-night font-bold text-sm">
                 <ShieldCheck className="w-5 h-5" />
                 Clinical Precision meets Spiritual Depth
               </div>

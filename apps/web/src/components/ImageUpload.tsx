@@ -60,10 +60,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
       {!preview ? (
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center gap-2 group"
+          className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-200 hover:border-gold/30 hover:bg-gold/10 transition-all flex flex-col items-center justify-center gap-2 group"
         >
           <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <Camera className="w-6 h-6 text-slate-400 group-hover:text-indigo-500" />
+            <Camera className="w-6 h-6 text-slate-400 group-hover:text-night" />
           </div>
           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Add a photo to your journal</span>
         </button>

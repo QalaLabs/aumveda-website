@@ -8,21 +8,21 @@ import LeadMagnetCTA from '@/components/LeadMagnetCTA'
 import { cn } from '@/lib/utils'
 
 const CARDS = [
-  { name: "The Fool", number: "0", element: "Air", upright: "New beginnings, spontaneity, a free spirit embarking on a journey with pure trust.", reversed: "Recklessness, risk-taking without preparation, naivety.", color: "from-yellow-900 to-amber-800" },
-  { name: "The Magician", number: "I", element: "Air & Fire", upright: "Manifestation, resourcefulness, power. You have all the tools needed to succeed.", reversed: "Manipulation, poor planning, untapped talents going to waste.", color: "from-red-900 to-rose-800" },
-  { name: "The High Priestess", number: "II", element: "Water", upright: "Intuition, sacred knowledge, divine feminine. Trust your inner voice.", reversed: "Secrets, disconnected from intuition, withdrawal.", color: "from-blue-900 to-indigo-800" },
-  { name: "The Empress", number: "III", element: "Earth", upright: "Femininity, beauty, abundance. Nature, creativity and nurturing are at the fore.", reversed: "Creative block, dependence on others, smothering.", color: "from-emerald-900 to-green-800" },
-  { name: "The Emperor", number: "IV", element: "Fire", upright: "Authority, structure, control. A stable foundation built through discipline.", reversed: "Domination, excessive control, rigidity, stubbornness.", color: "from-orange-900 to-red-800" },
-  { name: "The Hierophant", number: "V", element: "Earth", upright: "Spiritual wisdom, religious beliefs, tradition, conformity, institutions.", reversed: "Personal beliefs, freedom, challenging the status quo.", color: "from-violet-900 to-purple-800" },
-  { name: "The Lovers", number: "VI", element: "Air", upright: "Love, harmony, relationships, values alignment, choices.", reversed: "Self-love, disharmony, imbalance, misaligned values.", color: "from-pink-900 to-rose-800" },
+  { name: "The Fool", number: "0", element: "Air", upright: "New beginnings, spontaneity, a free spirit embarking on a journey with pure trust.", reversed: "Recklessness, risk-taking without preparation, naivety.", color: "from-gold/20 to-amber-800" },
+  { name: "The Magician", number: "I", element: "Air & Fire", upright: "Manifestation, resourcefulness, power. You have all the tools needed to succeed.", reversed: "Manipulation, poor planning, untapped talents going to waste.", color: "from-destructive/20 to-rose-800" },
+  { name: "The High Priestess", number: "II", element: "Water", upright: "Intuition, sacred knowledge, divine feminine. Trust your inner voice.", reversed: "Secrets, disconnected from intuition, withdrawal.", color: "from-night to-ink" },
+  { name: "The Empress", number: "III", element: "Earth", upright: "Femininity, beauty, abundance. Nature, creativity and nurturing are at the fore.", reversed: "Creative block, dependence on others, smothering.", color: "from-emerald-900 to-sage" },
+  { name: "The Emperor", number: "IV", element: "Fire", upright: "Authority, structure, control. A stable foundation built through discipline.", reversed: "Domination, excessive control, rigidity, stubbornness.", color: "from-orange-900 to-destructive/10" },
+  { name: "The Hierophant", number: "V", element: "Earth", upright: "Spiritual wisdom, religious beliefs, tradition, conformity, institutions.", reversed: "Personal beliefs, freedom, challenging the status quo.", color: "from-violet-900 to-night" },
+  { name: "The Lovers", number: "VI", element: "Air", upright: "Love, harmony, relationships, values alignment, choices.", reversed: "Self-love, disharmony, imbalance, misaligned values.", color: "from-night to-rose-800" },
   { name: "The Chariot", number: "VII", element: "Water", upright: "Control, willpower, success. Overcoming obstacles through determination.", reversed: "Self-discipline, opposition, lack of direction.", color: "from-slate-900 to-gray-800" },
-  { name: "Strength", number: "VIII", element: "Fire", upright: "Strength, courage, persuasion, influence, compassion.", reversed: "Inner strength, self-doubt, low energy, raw emotion.", color: "from-amber-900 to-yellow-800" },
+  { name: "Strength", number: "VIII", element: "Fire", upright: "Strength, courage, persuasion, influence, compassion.", reversed: "Inner strength, self-doubt, low energy, raw emotion.", color: "from-amber-900 to-gold/10" },
   { name: "The Hermit", number: "IX", element: "Earth", upright: "Soul-searching, introspection, being alone, inner guidance.", reversed: "Isolation, loneliness, withdrawal, anti-social.", color: "from-stone-900 to-slate-800" },
   { name: "Wheel of Fortune", number: "X", element: "Fire", upright: "Good luck, karma, life cycles, destiny, a turning point.", reversed: "Bad luck, resistance to change, breaking cycles.", color: "from-teal-900 to-cyan-800" },
-  { name: "Justice", number: "XI", element: "Air", upright: "Justice, fairness, truth, cause and effect, law.", reversed: "Unfairness, dishonesty, lack of accountability.", color: "from-blue-900 to-slate-800" },
-  { name: "The Star", number: "XVII", element: "Air", upright: "Hope, faith, purpose, renewal, spirituality. A time of healing.", reversed: "Lack of faith, despair, self-trust, disconnection.", color: "from-indigo-900 to-blue-800" },
-  { name: "The Moon", number: "XVIII", element: "Water", upright: "Illusion, fear, the unconscious, confusion, the subconscious.", reversed: "Release of fear, repressed emotion, inner confusion.", color: "from-purple-900 to-indigo-800" },
-  { name: "The Sun", number: "XIX", element: "Fire", upright: "Positivity, fun, warmth, success, vitality. Pure joy.", reversed: "Inner child, feeling down, overly optimistic.", color: "from-yellow-800 to-orange-700" },
+  { name: "Justice", number: "XI", element: "Air", upright: "Justice, fairness, truth, cause and effect, law.", reversed: "Unfairness, dishonesty, lack of accountability.", color: "from-night to-slate-800" },
+  { name: "The Star", number: "XVII", element: "Air", upright: "Hope, faith, purpose, renewal, spirituality. A time of healing.", reversed: "Lack of faith, despair, self-trust, disconnection.", color: "from-ink to-night" },
+  { name: "The Moon", number: "XVIII", element: "Water", upright: "Illusion, fear, the unconscious, confusion, the subconscious.", reversed: "Release of fear, repressed emotion, inner confusion.", color: "from-ink to-ink" },
+  { name: "The Sun", number: "XIX", element: "Fire", upright: "Positivity, fun, warmth, success, vitality. Pure joy.", reversed: "Inner child, feeling down, overly optimistic.", color: "from-gold/15 to-orange-700" },
   { name: "The World", number: "XXI", element: "Earth", upright: "Completion, integration, accomplishment, travel, wholeness.", reversed: "Incompleteness, no closure, lack of integration.", color: "from-emerald-900 to-teal-800" },
 ]
 
@@ -61,7 +61,7 @@ export default function TarotPage() {
         </Link>
 
         <div className="text-center space-y-4 mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-purple-300 text-xs font-black uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gold-soft text-xs font-black uppercase tracking-widest">
             <Star className="w-3 h-3" /> Sacred Tarot
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-white">Draw Your Card</h1>
@@ -76,7 +76,7 @@ export default function TarotPage() {
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
                 placeholder="What guidance do you seek from the cards today?"
-                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white placeholder-slate-600 text-sm resize-none focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white placeholder-slate-600 text-sm resize-none focus:outline-none focus:border-night/40 transition-colors"
                 rows={3}
               />
             </div>
@@ -90,7 +90,7 @@ export default function TarotPage() {
                 <>
                   <div className="grid grid-cols-5 gap-2 w-full">
                     {SYMBOLS.slice(0, 5).map((s, i) => (
-                      <div key={i} className="aspect-[2/3] bg-gradient-to-br from-purple-900 to-indigo-900 rounded-xl border border-white/10 flex items-center justify-center text-white/20 text-2xl font-black select-none">
+                      <div key={i} className="aspect-[2/3] bg-gradient-to-br from-ink to-ink rounded-xl border border-white/10 flex items-center justify-center text-white/20 text-2xl font-black select-none">
                         {s}
                       </div>
                     ))}
@@ -98,7 +98,7 @@ export default function TarotPage() {
                   <Button
                     onClick={draw}
                     disabled={isFlipping}
-                    className="h-14 px-12 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold w-full text-lg"
+                    className="h-14 px-12 rounded-2xl bg-night hover:bg-night text-white font-bold w-full text-lg"
                   >
                     {isFlipping ? <RefreshCw className="w-5 h-5 animate-spin" /> : <><Sparkles className="w-5 h-5 mr-2" /> Draw Your Card</>}
                   </Button>
@@ -136,7 +136,7 @@ export default function TarotPage() {
               )}
 
               <div className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-widest text-purple-300">
+                <h4 className="text-xs font-black uppercase tracking-widest text-gold-soft">
                   {isReversed ? 'Reversed Meaning' : 'Upright Meaning'}
                 </h4>
                 <p className="text-white leading-relaxed">{isReversed ? drawn.reversed : drawn.upright}</p>
@@ -155,7 +155,7 @@ export default function TarotPage() {
               <Button onClick={reset} variant="ghost" className="flex-1 h-12 rounded-xl text-slate-400 hover:text-white border border-white/10 font-bold">
                 <RefreshCw className="w-4 h-4 mr-2" /> Draw Again
               </Button>
-              <Button asChild className="flex-1 h-12 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold">
+              <Button asChild className="flex-1 h-12 rounded-xl bg-night hover:bg-night font-bold">
                 <Link href="/contact">Book a Reading</Link>
               </Button>
             </div>

@@ -202,7 +202,7 @@ export default function ShopPage() {
                     <Badge className={`absolute top-3 left-3 border-none text-[10px] font-black uppercase tracking-widest ${
                       p.tags[0] === 'Bestseller' ? 'bg-amber-500 text-white' :
                       p.tags[0] === 'Sale' ? 'bg-rose-500 text-white' :
-                      p.tags[0] === 'Bundle' ? 'bg-indigo-600 text-white' :
+                      p.tags[0] === 'Bundle' ? 'bg-night text-white' :
                       p.tags[0] === 'Certified' ? 'bg-emerald-600 text-white' :
                       'bg-slate-900 text-white'
                     }`}>

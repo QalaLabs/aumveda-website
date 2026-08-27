@@ -84,7 +84,7 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onViewDetails, onReorder,
                 </TableCell>
                 <TableCell className="text-right pr-8">
                   <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50" onClick={() => onViewDetails(order)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-night hover:bg-gold/10" onClick={() => onViewDetails(order)}>
                       <Eye className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" onClick={() => onDownloadInvoice(order.id)}>

@@ -42,7 +42,7 @@ const AITipsCard = () => {
   if (!tips && !loading) return null;
 
   return (
-    <Card className="border-none shadow-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white overflow-hidden">
+    <Card className="border-none shadow-xl bg-gradient-to-br from-gold to-gold text-white overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center gap-2 text-lg font-bold">
@@ -66,7 +66,7 @@ const AITipsCard = () => {
         ) : (
           <>
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-indigo-100">
+              <div className="flex items-center gap-2 text-gold-soft">
                 <BrainCircuit className="w-4 h-4" />
                 <span className="text-[10px] font-bold uppercase tracking-widest">Mindset Reframes</span>
               </div>
@@ -80,7 +80,7 @@ const AITipsCard = () => {
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-indigo-100">
+              <div className="flex items-center gap-2 text-gold-soft">
                 <Timer className="w-4 h-4" />
                 <span className="text-[10px] font-bold uppercase tracking-widest">Micro Practice</span>
               </div>
@@ -91,7 +91,7 @@ const AITipsCard = () => {
 
             <div className="pt-4 border-t border-white/10 relative">
               <Quote className="absolute -top-2 -left-1 w-8 h-8 text-white/5" />
-              <p className="text-center italic text-indigo-50 font-medium px-4">
+              <p className="text-center italic text-gold-soft font-medium px-4">
                 "{tips.seed}"
               </p>
             </div>

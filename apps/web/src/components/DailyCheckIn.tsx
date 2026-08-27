@@ -54,9 +54,9 @@ const DailyCheckIn = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <Label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <Smile className="w-4 h-4 text-blue-500" /> Mood
+              <Smile className="w-4 h-4 text-night" /> Mood
             </Label>
-            <span className="text-sm font-bold text-blue-600">{mood[0]}/10</span>
+            <span className="text-sm font-bold text-night">{mood[0]}/10</span>
           </div>
           <Slider
             value={mood}
@@ -86,9 +86,9 @@ const DailyCheckIn = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <Label className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <Moon className="w-4 h-4 text-indigo-500" /> Sleep (Hours)
+              <Moon className="w-4 h-4 text-night" /> Sleep (Hours)
             </Label>
-            <span className="text-sm font-bold text-indigo-600">{sleep[0]}h</span>
+            <span className="text-sm font-bold text-night">{sleep[0]}h</span>
           </div>
           <Slider
             value={sleep}

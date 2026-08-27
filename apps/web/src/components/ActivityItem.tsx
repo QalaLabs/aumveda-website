@@ -17,11 +17,11 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ event, onInspect }) => {
   const IconComponent = (Icons as any)[event.icon] || Icons.Circle;
 
   const getTypeStyles = (name: string) => {
-    if (name.includes('journal')) return "bg-indigo-50 text-indigo-600 border-indigo-100";
+    if (name.includes('journal')) return "bg-gold/10 text-night border-gold/20";
     if (name.includes('dose')) return "bg-emerald-50 text-emerald-600 border-emerald-100";
     if (name.includes('purchase')) return "bg-rose-50 text-rose-600 border-rose-100";
-    if (name.includes('health')) return "bg-blue-50 text-blue-600 border-blue-100";
-    if (name.includes('ai')) return "bg-purple-50 text-purple-600 border-purple-100";
+    if (name.includes('health')) return "bg-gold/10 text-night border-gold/20";
+    if (name.includes('ai')) return "bg-gold/10 text-night border-gold/20";
     if (name.includes('achievement')) return "bg-amber-50 text-amber-600 border-amber-100";
     return "bg-slate-50 text-slate-600 border-slate-100";
   };
@@ -33,7 +33,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ event, onInspect }) => {
         <Button
           variant="outline"
           size="sm"
-          className="h-8 rounded-lg text-[10px] font-bold uppercase tracking-widest border-indigo-100 text-indigo-600 hover:bg-indigo-50"
+          className="h-8 rounded-lg text-[10px] font-bold uppercase tracking-widest border-gold/20 text-night hover:bg-gold/10"
           onClick={(e) => { e.stopPropagation(); router.push('/journal'); }}
         >
           <Icons.BookOpen className="w-3 h-3 mr-1.5" /> View Journal
@@ -59,7 +59,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ event, onInspect }) => {
     <div
       role="button"
       tabIndex={0}
-      className="relative flex items-start gap-6 group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-4 rounded-2xl"
+      className="relative flex items-start gap-6 group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-4 rounded-2xl"
       onClick={() => onInspect(event)}
     >
       <div className="absolute left-5 top-10 bottom-0 w-0.5 bg-slate-100 group-last:hidden" />
@@ -74,7 +74,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ event, onInspect }) => {
       <div className="flex-1 bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm hover:shadow-md transition-all mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <h4 className="font-bold text-slate-900 text-sm group-hover:text-blue-600 transition-colors">
+            <h4 className="font-bold text-slate-900 text-sm group-hover:text-night transition-colors">
               {event.title}
             </h4>
             {event.isMilestone && (
@@ -95,9 +95,9 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ event, onInspect }) => {
         </p>
 
         {event.insight && (
-          <div className="mb-4 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50 flex gap-3">
-            <Icons.Sparkles className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-            <p className="text-[11px] text-blue-700 italic leading-relaxed">
+          <div className="mb-4 p-3 bg-gold/10 rounded-xl border border-gold/20 flex gap-3">
+            <Icons.Sparkles className="w-4 h-4 text-night shrink-0 mt-0.5" />
+            <p className="text-[11px] text-night italic leading-relaxed">
               "{event.insight}"
             </p>
           </div>

@@ -13,12 +13,12 @@ const CorporateWellness = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-night/10 border border-night/20 text-gold text-[10px] font-black uppercase tracking-widest">
               <ShieldCheck className="w-3 h-3" /> Institutional Evolution
             </div>
             <h2 className="text-4xl md:text-6xl font-serif font-bold text-white leading-tight">
               Corporate <br />
-              <span className="text-blue-400 italic">Vastu &amp; Wellness</span>
+              <span className="text-gold italic">Vastu &amp; Wellness</span>
             </h2>
             <p className="text-lg text-slate-400 leading-relaxed">
               We optimize organizational performance by aligning the physical workspace with
@@ -38,7 +38,7 @@ const CorporateWellness = () => {
               </div>
             </div>
 
-            <Button asChild className="h-16 px-10 rounded-2xl bg-blue-600 text-white hover:bg-blue-700 font-bold text-lg">
+            <Button asChild className="h-16 px-10 rounded-2xl bg-night text-white hover:bg-night font-bold text-lg">
               <Link href="/contact">Inquire for Organizations</Link>
             </Button>
           </div>
@@ -49,7 +49,7 @@ const CorporateWellness = () => {
               alt="Modern Corporate Office"
               className="w-full h-full object-cover grayscale opacity-60"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-night/20 to-transparent" />
           </div>
         </div>
       </div>
