@@ -16,7 +16,11 @@
 
 ## Navigation & UI Rules
 - **8-Step Portal**: Must ALWAYS have a prominent **"Skip to Home →"** button on every step (`/step-1` to `/step-8`) in `PortalShell.tsx` linking to `/`.
-- **Homepage Structure**: The 3D cinematic canvas serves as the initial pre-loader (`CinematicPreloader.tsx`) with a glowing ॐ monogram and "Skip Intro" action, smoothly revealing the complete classic marketing homepage below.
+- **Homepage Structure & Video Animation**:
+  - `CinematicPreloader.tsx`: Uses `/story/beat0-arrival.mp4` with pulsing ॐ medallion, frequency alignment progression (0% to 100%), and "Skip Intro" option.
+  - `MasterFilm.tsx` & `SceneCanvas.tsx`: Continuous fixed video scrub background with seek-coalescing and direct blob fallback, composited with 3D mist and lighting.
+  - `FloatingNav.tsx`: Includes top golden scroll-progress bar across window header and an interactive right-hand vertical milestone rail (`01 Hero` through `11 Insights`).
+  - Narrative Sections: Complete 11-section editorial flow (01 Hero, 02 Origin, 03 Philosophy, 04 Daily Dose, 05 Journey, 06 Healers, 07 Services, 08 Crystals, 09 Discovery, 10 Reflections, 11 Insights, and HomeFooter).
 - **Client/Server Module Isolation**: Client components must import shared types and pure helpers from `@/lib/product-types` — never from `@/lib/product-service` or `@aumveda/db` to avoid bundling native Node modules (`fs`, `net`, `tls`, `dns`).
 - **Selection State & Locking**: `SelectionProvider` accepts optional item `id` in `lock(id)` to prevent async state race conditions during immediate click-to-lock interactions.
 - **Theme & Toasts**: App defaults to parchment light aesthetic (`--av-parchment`). UI components such as Sonner Toaster must stay pinned to `theme="light"` unless a full dark token system is explicitly mounted.
