@@ -6,6 +6,7 @@ import { PortalContextProvider, type PortalContextValue } from './PortalContext'
 import { portalReducer, createInitialState, isStepAccessible, getPrevStep, getNextStep, calculateProgress, canGoNext, canGoBack } from './PortalStateMachine'
 import { StepRegistry } from './StepRegistry'
 import { sessionPersistence } from './SessionPersistence'
+import { offlineBuffer } from './OfflineBuffer'
 import { autosaveManager, type AutosaveManagerState } from './AutosaveManager'
 import { engine as validationEngine } from './ValidationEngine'
 import { usePortalAnalytics } from '../hooks/usePortalAnalytics'
@@ -70,6 +71,8 @@ export function PortalProvider({ children, onComplete }: PortalProviderProps) {
         currentStep: restored.currentStep,
         completedSteps: restored.completedSteps,
       })
+
+      offlineBuffer.flushOfflineQueue().catch(() => null)
     }
 
     init()
@@ -116,7 +119,16 @@ export function PortalProvider({ children, onComplete }: PortalProviderProps) {
       phase: nextStep as PortalState['phase'],
       direction: 'forward',
     }
-    sessionPersistence.saveToLocal(updatedState)
+
+    try {
+      sessionPersistence.saveToLocal(updatedState)
+    } catch {
+      offlineBuffer.bufferStep({
+        sessionId: state.sessionId,
+        stepNumber: state.currentStep,
+        data: state.portalData,
+      }).catch(() => null)
+    }
 
     dispatch({
       type: 'GO_TO_STEP',

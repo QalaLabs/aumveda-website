@@ -37,7 +37,7 @@ export function getStepFromRoute(path: string): PortalStep | null {
 
 export function RedirectGuard({ children }: { children: React.ReactNode }) {
   const { state, isStepAccessible, goToStep } = usePortal()
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
   const router = useRouter()
   const prevEngineStepRef = useRef(state.currentStep)
 

@@ -69,7 +69,7 @@ function ServiceSelector({ service, setService }: { service: string; setService:
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const param = searchParams.get("service")?.toLowerCase() ?? ""
+    const param = searchParams?.get("service")?.toLowerCase() ?? ""
     if (param && SERVICE_PARAM_MAP[param]) {
       setService(SERVICE_PARAM_MAP[param])
     }

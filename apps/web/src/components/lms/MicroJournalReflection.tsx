@@ -48,7 +48,7 @@ export default function MicroJournalReflection({
 
     setSaving(true)
     try {
-      const res = await fetch(`/api/v1/lms/lessons/${lessonId}/reflection`, {
+      let res = await fetch(`/api/lms/lessons/${lessonId}/reflection`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -57,13 +57,24 @@ export default function MicroJournalReflection({
         }),
       })
 
+      if (res.status === 404) {
+        res = await fetch(`/api/v1/lms/lessons/${lessonId}/reflection`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reflectionText,
+            mood,
+          }),
+        })
+      }
+
       const data = await res.json()
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Failed to save reflection')
       }
 
       setLastSavedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
-      showSuccess('Reflection saved to your Sacred Record')
+      showSuccess('Reflection saved directly to your Sacred Journal')
     } catch (err: any) {
       showError(err.message || 'Could not save reflection')
     } finally {

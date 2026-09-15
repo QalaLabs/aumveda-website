@@ -8,28 +8,33 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
   try {
+    // ── 0. PRESERVE RAW PAYLOAD FOR STRICT HMAC-SHA512 VERIFICATION ──
+    const rawBodyText = await req.text()
     let payload: Record<string, unknown> = {}
     const contentType = req.headers.get('content-type') || ''
 
     if (contentType.includes('application/x-www-form-urlencoded')) {
-      const formData = await req.formData()
-      formData.forEach((val, key) => {
-        payload[key] = val.toString()
+      const params = new URLSearchParams(rawBodyText)
+      params.forEach((val, key) => {
+        payload[key] = val
       })
     } else {
-      payload = await req.json().catch(() => ({}))
+      try {
+        payload = JSON.parse(rawBodyText)
+      } catch {
+        payload = {}
+      }
     }
 
     const txnid = (payload.txnid as string) || (payload.order_id as string) || ''
-    const easepayid = (payload.easepayid as string) || (payload.payment_id as string) || `tx_${txnid}`
+    const easepayid = (payload.easepayid as string) || (payload.payment_id as string) || (txnid ? `tx_${txnid}` : '')
     const eventId = easepayid || txnid
 
     if (!eventId) {
       return NextResponse.json({ error: 'Missing transaction identifier (txnid/easepayid)' }, { status: 400 })
     }
 
-    // ── 1. IDEMPOTENCY GUARD ──────────────────────────────────────────
-    // Check if this webhook event was already processed to prevent double fulfillment
+    // ── 1. WEBHOOK EVENT LOG IDEMPOTENCY GUARD ────────────────────────
     try {
       const existingLog = await prisma.webhookEventLog.findUnique({
         where: { eventId },
@@ -41,6 +46,8 @@ export async function POST(req: NextRequest) {
           ok: true,
           status: 'ignored_duplicate',
           message: 'Webhook already processed idempotently',
+          gatewayOrderId: txnid,
+          easebuzzTxnId: easepayid,
         })
       }
 
@@ -61,13 +68,14 @@ export async function POST(req: NextRequest) {
       console.warn('[Easebuzz Webhook] DB idempotency check warning:', dbErr)
     }
 
-    // ── 2. SIGNATURE & HASH VERIFICATION ──────────────────────────────
+    // ── 2. STRICT SIGNATURE & HMAC-SHA512 CHECKSUM VERIFICATION ──────
     const hmacHeader = req.headers.get('x-easebuzz-signature') || req.headers.get('x-webhook-signature') || undefined
     const paymentProvider = getPaymentProvider()
 
     let webhookResult
     try {
-      webhookResult = await paymentProvider.processWebhook(payload, hmacHeader)
+      // Pass rawBodyText to verify strict HMAC-SHA512 over raw request payload
+      webhookResult = await paymentProvider.processWebhook(payload, rawBodyText, hmacHeader)
     } catch (verifyErr: unknown) {
       console.error('[Easebuzz Webhook] Verification failed:', verifyErr)
       return NextResponse.json(
@@ -83,8 +91,8 @@ export async function POST(req: NextRequest) {
     const { orderId, status, gateway } = webhookResult
     console.log(`[Easebuzz Webhook] Verified event for order ${orderId}, status=${status}, gateway=${gateway}`)
 
-    // ── 3. STATE MACHINE TRANSITION ──────────────────────────────────
-    const numericOrderId = parseInt(String(orderId), 10)
+    // ── 3. TRANSACTION IDEMPOTENCY & STATE MACHINE TRANSITION ─────────
+    const numericOrderId = parseInt(String(orderId || txnid.replace(/^AUM-/, '').split('-')[0]), 10)
     let order: any = null
     try {
       order = await prisma.order.findFirst({
@@ -92,8 +100,10 @@ export async function POST(req: NextRequest) {
           OR: [
             ...(isNaN(numericOrderId) ? [] : [{ id: numericOrderId }]),
             { orderNumber: String(orderId) },
-            { easebuzzOrderId: txnid },
+            { orderNumber: txnid },
             { gatewayOrderId: txnid },
+            { easebuzzOrderId: txnid },
+            ...(easepayid ? [{ gatewayPaymentId: easepayid }, { easebuzzPaymentId: easepayid }] : []),
           ],
         },
         include: {
@@ -114,8 +124,28 @@ export async function POST(req: NextRequest) {
     }
 
     if (order) {
+      // Check transaction idempotency to prevent duplicate order processing
+      const isAlreadyPaid = order.paymentStatus === 'PAID' || order.status === 'PAID'
+      const isMatchingTxn =
+        (order.gatewayOrderId && order.gatewayOrderId === txnid) ||
+        (order.easebuzzOrderId && order.easebuzzOrderId === txnid) ||
+        (order.gatewayPaymentId && order.gatewayPaymentId === easepayid) ||
+        (order.easebuzzPaymentId && order.easebuzzPaymentId === easepayid)
+
+      if (isAlreadyPaid && isMatchingTxn) {
+        console.log(`[Easebuzz Webhook] Transaction Idempotency skip: Order ${order.id} already PAID with transaction ${txnid} / ${easepayid}`)
+        return NextResponse.json({
+          ok: true,
+          status: 'ignored_duplicate_order',
+          message: 'Order already fulfilled and paid idempotently',
+          orderId: order.id,
+          gatewayOrderId: txnid,
+          easebuzzTxnId: easepayid,
+        })
+      }
+
       if (status === 'SUCCESS') {
-        // Update Order to PAID
+        // Update Order to PAID with transaction identifiers
         await prisma.order.update({
           where: { id: order.id },
           data: {
@@ -124,6 +154,8 @@ export async function POST(req: NextRequest) {
             paidAt: new Date(),
             easebuzzPaymentId: easepayid,
             gatewayPaymentId: easepayid,
+            gatewayOrderId: txnid,
+            easebuzzOrderId: txnid,
             paymentGateway: gateway.includes('SECONDARY') ? 'EASEBUZZ_SECONDARY' : 'EASEBUZZ_PRIMARY',
             gateway,
             activationGuideSent: true,
@@ -150,6 +182,19 @@ export async function POST(req: NextRequest) {
               : practitionerName === 'Sejal Jain'
                 ? 'SOMATIC_SEJAL'
                 : 'DUAL_SYNERGY'
+
+            // Check if serviceBooking already created for this order & practitioner
+            const existingBooking = await prisma.serviceBooking.findFirst({
+              where: {
+                orderId: String(order.id),
+                practitionerName,
+              },
+            })
+
+            if (existingBooking) {
+              console.log(`[Easebuzz Webhook] ServiceBooking for order ${order.id} (${practitionerName}) already exists. Skipping duplicate.`)
+              continue
+            }
 
             // Schedule session
             const startTime = new Date(Date.now() + 24 * 3600_000) // Default or client specified

@@ -21,7 +21,7 @@ const NAV_ITEMS = [
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (

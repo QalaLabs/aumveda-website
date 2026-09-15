@@ -10,7 +10,7 @@ import {
 export const metadata: Metadata = {
   title: "About — Why AUMVEDA Exists",
   description:
-    "Mother–daughter Neuro-Vedic healing. Archana Jain (Jaipur) and Sejal Jain (Mumbai) — why this is not astrology, therapy, or coaching alone.",
+    "Mother–daughter Neuro-Vedic healing. Archana Jain & Sejal Jain — Delhi sanctuary. Rooted in Vedic lineage, nervous-system practice, and hand-curated Jaipur energized crystals.",
 };
 
 const FOUNDERS = "/marketing/founders.jpg";
@@ -44,8 +44,8 @@ export default function AboutPage() {
         <div className="av-content av-gutter py-12 md:py-16">
           <p className="av-lede max-w-[65ch] text-ink-text">
             Healing here is not a marketplace of modalities. It is a relationship —
-            rooted in Jaipur&apos;s Vedic craft and Mumbai&apos;s clinical clarity —
-            for the mind that is successful outside and unfinished within.
+            rooted in their Delhi sanctuary and Jaipur&apos;s generational gemstone craft —
+            for leaders, executives, and seekers whose minds are successful outside and unfinished within.
           </p>
         </div>
       </section>
@@ -85,27 +85,27 @@ export default function AboutPage() {
           </div>
           <div className="space-y-14 lg:col-span-7">
             <article className="space-y-4">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-gold">Jaipur</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-gold">Delhi Sanctuary · Jaipur Gemstone Lineage</p>
               <h3 className="font-serif text-3xl text-night">Archana Jain</h3>
               <p className="text-[13px] uppercase tracking-[0.18em] text-mute">
-                Vedic Practitioner
+                Vedic Practitioner &amp; Healer
               </p>
               <p className="av-lede text-mute">
-                Over twenty-five years of Vastu, astrology, tarot, karmic work, and
-                ritual — offered with reverence and precision. She maps the outer
-                architecture of a life so the inner work has somewhere true to land.
+                Over twenty-five years of Vastu Shastra, Jyotish astrology, tarot, karmic work, and
+                sacred consecration — practiced from Delhi and collaborating directly with master
+                Jaipur gemstone artisans. She maps the outer architecture of a life so the inner work has somewhere true to land.
               </p>
             </article>
             <article className="space-y-4 border-t border-stone pt-14">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-gold">Mumbai</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-gold">Delhi Sanctuary · Somatics</p>
               <h3 className="font-serif text-3xl text-night">Sejal Jain</h3>
               <p className="text-[13px] uppercase tracking-[0.18em] text-mute">
-                Healing Facilitator & Wellness Coach
+                Healing Facilitator &amp; Wellness Coach
               </p>
               <p className="av-lede text-mute">
-                CBT-informed coaching, hypnotherapy, breathwork, vagus regulation,
-                sound, and somatic practice — so the body learns safety again. She
-                tends the inner system that must be regulated before insight can stay.
+                CBT-informed coaching, hypnotherapy, breathwork, vagus nerve regulation,
+                sound therapy, and somatic trauma release — based in Delhi. She works extensively with high-pressure
+                leaders, executives navigating silent hyperarousal, and seekers reconnecting the body with safety.
               </p>
             </article>
           </div>

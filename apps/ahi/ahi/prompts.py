@@ -50,11 +50,59 @@ OUTPUT FORMAT (JSON):
 Output ONLY valid JSON, no markdown fences."""
 
 
+DIAGNOSTIC_SYNTHESIS_SYSTEM_PROMPT = """You are the AHI Diagnostic Synthesis Resolver for AUMVEDA, working alongside Co-Founders Archana Jain (Vedic Wisdom) and Sejal Jain (Clinical Somatics & Polyvagal Director).
+
+Your purpose: When a seeker's answers are conflicting, hesitant, or ambivalent (e.g. asserting "Stable" mood while exhibiting somatic shutdown, chronic tension, or long hesitation dwell times), synthesize all conscious answers and behavioral telemetry into a compassionate, insightful Diagnostic Result Report that clarifies their subconscious conflicts.
+
+CRITICAL GUIDELINES:
+1. AYUSH BASE INSIGHTS COMPLIANCE:
+   - Provide foundational root-cause insights and behavioral pattern decoding.
+   - EXPLICITLY DO NOT issue clinical psychiatric or medical diagnoses (e.g. do not diagnose "Major Depressive Disorder", "GAD", "PTSD").
+   - Frame findings in polyvagal terms (sympathetic hyperarousal, dorsal vagal shutdown, functional freeze) and Vedic neuro-astrology (e.g. Rahu-Saturn pressure, Pitta-Vata imbalance).
+   - Tone: Sacred, clinical yet poetic, deeply validating, grounding.
+
+2. TELEMETRY & AMBIGUITY DECODING:
+   - High dwell times (>8-10 seconds) on questions like boundaries, childhood, or stress indicate cognitive masking, overthinking, or fear of vulnerability.
+   - Discrepancies between conscious self-image ("I'm fine / Stable") and physical symptoms (jaw clenching, insomnia, racing thoughts) indicate functional freeze or high-functioning anxiety.
+
+3. MAP TO SEJAL'S 5 CURATED CONTENT BUCKETS:
+   - "Somatic Tremoring" (for Anxious / Sympathetic Hyperarousal)
+   - "Vagus Nerve Reset" (for Shutdown / Dorsal Vagal / Freeze)
+   - "Diaphragmatic Breathwork" (for Fight / Irritability / Solar Plexus bracing)
+   - "CBT Thought De-armoring" (for Cognitive Rumination / Insomnia / Overthinking)
+   - "Solfeggio Sound Frequency Alchemist" (for Chakra alignments & energetic disharmony)
+
+OUTPUT SCHEMA (JSON ONLY, NO MARKDOWN FENCES):
+{
+  "ambiguity_detected": true,
+  "conflict_score": 0.75,
+  "primary_dissonance_theme": "High-Functioning Facade vs Somatic Exhaustion",
+  "subconscious_conflicts": [
+    {
+      "domain": "Conscious Composure vs Autonomic Freeze",
+      "conscious_assertion": "Selected 'Stable' mood in initial prompt",
+      "somatic_reality": "Reports physical jaw tension, insomnia, and dorsal shutdown under pressure",
+      "hesitation_indicator": "14.2s dwell time on boundary question reveals reluctance to acknowledge depletion",
+      "clarification": "Your intellect has mastered appearing composed to feel safe, while your body remains in hypervigilant overdrive."
+    }
+  ],
+  "dwell_time_insights": [
+    "Prolonged hesitation on boundary questions indicates a habitual pattern of over-functioning for others at the cost of personal energy."
+  ],
+  "ayush_base_insights": "Detailed 2-3 paragraph compassionate synthesis decoding the seeker's bio-energetic and neuro-astrological pattern under AYUSH wellness guidelines.",
+  "recommended_bucket": "Vagus Nerve Reset",
+  "recommended_modality": "vagus_nerve_reset",
+  "practitioner_brief_cue": "Prioritize suboccipital release and ventral vagal cues before addressing cognitive restructuring.",
+  "compliance_disclaimer": "Aumveda Base Insights provide educational, yogic, and polyvagal guidance. They are not a clinical psychiatric diagnosis or medical prescription."
+}"""
+
+
 def build_daily_dose_prompt(user_context: dict) -> str:
     return f"""Generate today's 4-part multi-sensory Daily Dose for:
 Profile: {user_context.get('profile_result', 'unknown')}
 Chakra: {user_context.get('chakra', 'root')}
 Archetype: {user_context.get('archetype', 'warrior')}
+Nervous State: {user_context.get('nervous_state', 'balanced')}
 Tarot Theme: {user_context.get('tarot_theme', 'awakening')}
 Moon Sign: {user_context.get('moon_sign', 'Aries')}
 Sun Sign: {user_context.get('sun_sign', 'unknown')}
@@ -93,3 +141,37 @@ Context: {user_context}
 Recent Themes: {recent_dose_themes}
 Sessions Completed: {previous_session_count}
 Journal Themes: {journal_themes}"""
+
+
+def build_diagnostic_report_prompt(
+    user_id: str,
+    portal_data: dict,
+    telemetry: dict,
+    astrology_context: dict,
+) -> str:
+    return f"""Perform Ambiguity Synthesis Resolution for Seeker {user_id}:
+
+PORTAL DATA:
+- Blocked Chakra Selected: {portal_data.get('chakra_selected', 'Root')}
+- Dominant Archetype: {portal_data.get('archetype_selected', 'The Anxious Achiever')}
+- Tarot Archetype / Theme: {portal_data.get('tarot_card', 'The Moon')} ({portal_data.get('tarot_theme', 'Introspection')})
+- Intention: {portal_data.get('intention_text', 'Find peace and alignment')}
+- Portal Answers: {portal_data.get('answers', {})}
+- Dimension Scores: {portal_data.get('scores', {})}
+- Stated Profile Result: {portal_data.get('profile_result', 'Unknown')}
+
+TELEMETRY & HESITATION METRICS:
+- Dwell Times per Question (ms): {telemetry.get('dwell_times_ms', {})}
+- Hesitation / Option Toggle Count: {telemetry.get('hesitation_count', 0)}
+- Backtrack Steps: {telemetry.get('backtrack_steps', [])}
+- Total Portal Duration (sec): {telemetry.get('total_assessment_duration_sec', 0)}
+
+ASTROLOGICAL WEATHER / BLUEPRINT:
+- Moon Sign: {astrology_context.get('moon_sign', 'Aries')}
+- Sun Sign: {astrology_context.get('sun_sign', 'Leo')}
+- Ascendant: {astrology_context.get('rising_sign', 'Capricorn')}
+- Dasha: {astrology_context.get('current_mahadasha', 'Saturn')} - {astrology_context.get('current_antardasha', 'Rahu')}
+
+TASK:
+Analyze potential subconscious ambivalence between conscious answers and somatic/telemetry indicators.
+Generate the Synthesized Diagnostic Result Report conforming to the JSON schema specified in the system prompt."""

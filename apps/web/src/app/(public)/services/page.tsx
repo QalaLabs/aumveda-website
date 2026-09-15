@@ -54,8 +54,8 @@ const SEJAL_SERVICES = [
     title: "Somatic Breathwork & Trauma Release",
     shortDesc: "Nervous System Reset",
     whatItIs: "Active meditation through controlled breathing patterns to release stored somatic tension and oxygenate the cellular body.",
-    whoItIsFor: "Anyone experiencing burnout, emotional stagnation, or a disconnected mind-body state.",
-    outcome: "Immediate physiological calm and a renewed sense of vital energy flow.",
+    whoItIsFor: "High-pressure professionals experiencing executive burnout, silent hyperarousal, or somatic dissociation.",
+    outcome: "Immediate physiological calm, vagal re-regulation, and a renewed sense of grounded clarity.",
     icon: Wind,
   }
 ];
@@ -105,6 +105,16 @@ const SIGNATURE_PACKAGES = [
     priceCents: 450000,
     desc: "Polyvagal regulation, trauma release, breathwork prescription, and custom somatic audio memo.",
     tag: "Clinical Focus",
+  },
+  {
+    id: "pkg-4",
+    title: "Executive Nervous System & Burnout Reset",
+    practitioner: "Sejal Jain",
+    duration: "75 Minutes",
+    price: 5500,
+    priceCents: 550000,
+    desc: "Targeted somatic protocol for high-pressure executives and leaders navigating silent hyperarousal, sympathetic overload, and career dissociation.",
+    tag: "Executive Track",
   },
   {
     id: "pkg-2",
@@ -281,7 +291,7 @@ export default function ServicesPage() {
             <span className="italic text-gold">1:1 Consultations</span>
           </h1>
           <p className="av-lede text-mute max-w-[65ch]">
-            Direct 1:1 sessions with Archana Jain (Vedic Astrologer & Vastu Master, Jaipur) and Sejal Jain (Somatic Healing Facilitator & Coach, Mumbai). Every session includes an automated pre-session diagnostic brief and calendar synchronization.
+            Direct 1:1 sessions with Archana Jain (Vedic Astrologer &amp; Vastu Master, Delhi) and Sejal Jain (Somatic Healing Facilitator &amp; Coach, Delhi). Combining deep metaphysical insight, hand-energized Jaipur gemstone craft, and clinical nervous-system regulation. Every session includes an automated pre-session diagnostic brief and calendar synchronization.
           </p>
         </div>
 
@@ -290,11 +300,11 @@ export default function ServicesPage() {
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 border-b border-stone pb-4">
             <h2 className="av-title text-night text-2xl md:text-3xl">1:1 Signature Consultation Tracks</h2>
             <span className="text-xs font-body tracking-wider text-mute uppercase">
-              Instant Google Meet & Calendar Sync
+              Instant Google Meet &amp; Calendar Sync
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {SIGNATURE_PACKAGES.map(pkg => (
               <div
                 key={pkg.id}
@@ -337,11 +347,29 @@ export default function ServicesPage() {
                     onClick={() => setSelectedService(pkg)}
                     className="w-full h-11 rounded-full bg-night hover:bg-ink text-gold-soft font-body text-xs tracking-wider uppercase border border-[hsl(var(--av-gold)/0.3)] shadow-xs transition-transform active:scale-[0.98] flex items-center justify-center gap-2"
                   >
-                    <Calendar className="w-3.5 h-3.5" /> Select Date & Book
+                    <Calendar className="w-3.5 h-3.5" /> Select Date &amp; Book
                   </Button>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* High-Pressure Careers & Male Demographic Somatic Focus */}
+        <div className="rounded-3xl border border-[hsl(var(--av-gold)/0.3)] bg-night text-parchment p-8 md:p-12 shadow-2xl relative overflow-hidden">
+          <div className="max-w-3xl space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[hsl(var(--av-gold)/0.15)] text-gold-soft text-[10px] font-body uppercase tracking-[0.24em] border border-[hsl(var(--av-gold)/0.3)]">
+              Executive Health &amp; Somatic De-escalation
+            </div>
+            <h2 className="font-serif text-2xl md:text-3xl text-parchment leading-snug">
+              For High-Pressure Leaders, Executives &amp; Men in Silent Hyperarousal
+            </h2>
+            <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.75)] leading-relaxed">
+              In demanding leadership, finance, tech, and entrepreneurial roles, stress rarely manifests as panic. It manifests as silent hyperarousal: shallow upper-chest breathing, chronic jaw or shoulder bracing, hyper-rational detachment, and somatic dissociation from fatigue. You deliver at the highest level outside while feeling internally hollowed.
+            </p>
+            <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.75)] leading-relaxed">
+              Our executive somatic protocol provides clinical, down-regulatory vagus nerve retraining with Sejal Jain, paired with strategic karmic and directional clarity with Archana Jain. Grounded, non-performative, and strictly private — designed to reset your autonomic baseline so performance ceases to come at the expense of your life.
+            </p>
           </div>
         </div>
 

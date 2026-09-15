@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -19,7 +20,9 @@ import {
   Moon,
   Sun,
   Layers,
-  HeartHandshake
+  HeartHandshake,
+  CheckCircle2,
+  Zap,
 } from 'lucide-react'
 import { showSuccess, showError } from '@/utils/toast'
 import { useCart } from '@/lib/cart'
@@ -27,6 +30,63 @@ import { useCartDrawer } from '@/components/cart/CartDrawer'
 import type { ProductView } from '@/lib/product-types'
 import { getBundleInfo } from '@/lib/product-types'
 import CrystalCanvas3D from '@/components/crystals/CrystalCanvas3D'
+
+const CROSS_SELL_BUNDLES = [
+  {
+    id: 90001,
+    slug: 'bundle-pyrite-somatic-reset',
+    title: 'Pyrite Abundance + Executive Somatic Reset',
+    subtitle: 'Mineral Grounding × Polyvagal Nervous System De-escalation',
+    tag: 'Executive Reset',
+    priceCents: 699900,
+    priceInr: 6999,
+    compareAtPriceCents: 899900,
+    compareAtPriceInr: 8999,
+    discountPercent: 22,
+    serviceType: 'SOMATIC_SEJAL',
+    sessionLabel: '60-Min Executive Somatic Reset with Sejal Jain',
+    imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800',
+    crystalDescription: 'Natural Raw Pyrite Cluster hand-cut by Jaipur artisans & energized in Delhi for solar plexus grounded authority.',
+    sessionDescription: '1:1 60-Minute Somatic & Nervous System Reset with Sejal Jain, resolving executive burnout, silent hyperarousal & fatigue.',
+    chakra: 'Solar Plexus (Manipura)',
+  },
+  {
+    id: 90002,
+    slug: 'bundle-tourmaline-dual-synergy',
+    title: 'Tourmaline Talisman + Dual Synergy Sanctuary',
+    subtitle: 'Bio-Field Protection × Mother-Daughter Co-Facilitation',
+    tag: 'Master Sanctuary',
+    priceCents: 1099900,
+    priceInr: 10999,
+    compareAtPriceCents: 1399900,
+    compareAtPriceInr: 13999,
+    discountPercent: 21,
+    serviceType: 'DUAL_SYNERGY',
+    sessionLabel: '90-Min Dual Synergy Master Session (Archana & Sejal)',
+    imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800',
+    crystalDescription: 'Consecrated Raw Black Tourmaline & Smoky Quartz from Jaipur masters for dense autonomic stabilization.',
+    sessionDescription: '90-Minute co-facilitated session bridging Archana’s Jyotish Mahadasha timing with Sejal’s somatic vagal anchoring.',
+    chakra: 'Root (Muladhara)',
+  },
+  {
+    id: 90003,
+    slug: 'bundle-amethyst-jyotish-blueprint',
+    title: 'Amethyst Intuition + Vedic Natal Blueprint',
+    subtitle: 'Third Eye Vision × Karmic Architecture Mapping',
+    tag: 'Sacred Lineage',
+    priceCents: 699900,
+    priceInr: 6999,
+    compareAtPriceCents: 899900,
+    compareAtPriceInr: 8999,
+    discountPercent: 22,
+    serviceType: 'ASTROLOGY_ARCHANA',
+    sessionLabel: '60-Min Vedic Natal Blueprint with Archana Jain',
+    imageUrl: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&q=80&w=800',
+    crystalDescription: 'High-vibration deep purple Amethyst geode cluster energized on Archana’s Delhi Vedic altar.',
+    sessionDescription: '1:1 60-Minute comprehensive Jyotish astrological reading, directional Vastu review, and karmic timing synthesis.',
+    chakra: 'Third Eye (Ajna)',
+  },
+]
 
 const CHAKRA_FILTERS = [
   'All',
@@ -49,6 +109,7 @@ const INTENTION_FILTERS = [
 ]
 
 export default function ShopPage() {
+  const router = useRouter()
   const [products, setProducts] = useState<ProductView[]>([])
   const [userChakra, setUserChakra] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -59,6 +120,45 @@ export default function ShopPage() {
 
   const { addItem, totalItems } = useCart()
   const { openCart } = useCartDrawer()
+
+  const handleAddBundle = (bundle: typeof CROSS_SELL_BUNDLES[0]) => {
+    addItem({
+      productId: bundle.id,
+      slug: bundle.slug,
+      title: bundle.title,
+      priceCents: bundle.priceCents,
+      compareAtPriceCents: bundle.compareAtPriceCents,
+      imageUrl: bundle.imageUrl,
+      inventoryCount: 10,
+      productType: 'bundle',
+      bundle: {
+        serviceType: bundle.serviceType,
+        sessionLabel: bundle.sessionLabel,
+        bundlePriceCents: bundle.priceCents,
+      },
+    })
+    showSuccess(`${bundle.title} added to sacred cart!`)
+    openCart()
+  }
+
+  const handleDirectCheckout = (bundle: typeof CROSS_SELL_BUNDLES[0]) => {
+    addItem({
+      productId: bundle.id,
+      slug: bundle.slug,
+      title: bundle.title,
+      priceCents: bundle.priceCents,
+      compareAtPriceCents: bundle.compareAtPriceCents,
+      imageUrl: bundle.imageUrl,
+      inventoryCount: 10,
+      productType: 'bundle',
+      bundle: {
+        serviceType: bundle.serviceType,
+        sessionLabel: bundle.sessionLabel,
+        bundlePriceCents: bundle.priceCents,
+      },
+    })
+    router.push('/checkout')
+  }
 
   useEffect(() => {
     Promise.all([
@@ -198,7 +298,7 @@ export default function ShopPage() {
               <span className="text-amber-600 italic">Vibrational Sacred Tools</span>
             </h1>
             <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
-              Every mineral in the Aumveda Sanctuary is ethically sourced, lab-certified, and individually energized by Archana Jain on the Jaipur Vedic altar with Surya-Chandra mantras.
+              Every mineral in the Aumveda Sanctuary is ethically sourced from generational Jaipur gemstone artisans, lab-certified, and individually energized by Archana Jain on her consecrated altar with sacred Vedic mantras.
             </p>
           </div>
 
@@ -244,6 +344,115 @@ export default function ShopPage() {
             </Button>
           </div>
         )}
+
+        {/* Crystal + Somatic Healing Session Cross-Sell Bundles */}
+        <div className="space-y-6 pt-2">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-stone-200 pb-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 text-amber-800 text-[10px] font-black uppercase tracking-[0.2em] border border-amber-500/30">
+                <HeartHandshake className="w-3.5 h-3.5 text-amber-600" /> Sacred Synergy Bundles
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-slate-900">
+                Crystal + Somatic Healing Session Bundles
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
+                Consecrated gemstone tools hand-curated with generational Jaipur artisans, paired directly with 1:1 clinical somatic de-escalation and Vedic consultations in Delhi.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-amber-800 bg-amber-50 px-3.5 py-1.5 rounded-full border border-amber-200 self-start md:self-auto">
+              Up to 22% Synergy Savings
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {CROSS_SELL_BUNDLES.map(b => (
+              <div
+                key={b.id}
+                className="bg-white rounded-3xl border border-amber-200/80 p-6 shadow-xs hover:shadow-xl hover:border-amber-400 transition-all duration-300 flex flex-col justify-between relative group"
+              >
+                <div className="space-y-4">
+                  {/* Top Badge & Chakra */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 bg-amber-100/90 px-2.5 py-1 rounded-full border border-amber-300">
+                      {b.tag}
+                    </span>
+                    <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-[10px] font-bold">
+                      {b.discountPercent}% OFF BUNDLE
+                    </Badge>
+                  </div>
+
+                  {/* Image */}
+                  <div className="relative aspect-16/9 rounded-2xl overflow-hidden bg-slate-950">
+                    <img
+                      src={b.imageUrl}
+                      alt={b.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                    <div className="absolute bottom-2.5 left-3 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                      {b.chakra}
+                    </div>
+                  </div>
+
+                  {/* Title & Subtitle */}
+                  <div>
+                    <h3 className="font-serif text-lg font-bold text-slate-900 leading-snug group-hover:text-amber-700 transition-colors">
+                      {b.title}
+                    </h3>
+                    <p className="text-[11px] font-medium text-amber-800 tracking-wide mt-0.5">
+                      {b.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Inclusions List */}
+                  <div className="space-y-2 py-2 border-y border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{b.crystalDescription}</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>{b.sessionDescription}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pricing & Checkout Actions */}
+                <div className="pt-4 space-y-3 mt-4">
+                  <div className="flex items-baseline justify-between">
+                    <div>
+                      <span className="text-2xl font-black text-slate-900">
+                        ₹{b.priceInr.toLocaleString('en-IN')}
+                      </span>
+                      <span className="text-xs text-slate-400 line-through ml-2">
+                        ₹{b.compareAtPriceInr.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-emerald-700">
+                      Saves ₹{(b.compareAtPriceInr - b.priceInr).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      onClick={() => handleAddBundle(b)}
+                      variant="outline"
+                      className="w-full text-xs font-bold border-slate-300 hover:border-slate-900 rounded-xl h-11"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5 mr-1.5" /> Add to Cart
+                    </Button>
+                    <Button
+                      onClick={() => handleDirectCheckout(b)}
+                      className="w-full text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-xl h-11 shadow-xs flex items-center justify-center gap-1"
+                    >
+                      <Zap className="w-3.5 h-3.5" /> Checkout &rarr;
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Chakra Filter Pills */}
         <div className="space-y-3">

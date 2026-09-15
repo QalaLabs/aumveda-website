@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import LMSVideoPlayer from '@/components/lms/LMSVideoPlayer'
+import SecureVideoPlayer from '@/components/lms/SecureVideoPlayer'
 import DynamicForensicWatermark from '@/components/lms/DynamicForensicWatermark'
 import MicroJournalReflection from '@/components/lms/MicroJournalReflection'
 import ModuleQuizCard from '@/components/lms/ModuleQuizCard'
@@ -229,7 +229,7 @@ export default function InteractiveLessonPlayerPage() {
             <>
               {/* Tokenized Video Player Area */}
               <section className="space-y-4">
-                <LMSVideoPlayer
+                <SecureVideoPlayer
                   lessonId={currentLesson.id}
                   courseSlug={course.slug}
                   onAutoComplete={handleAutoComplete}

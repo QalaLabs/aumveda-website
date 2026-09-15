@@ -72,7 +72,8 @@ function Hero() {
               style={{ animationDelay: "900ms" }}
             >
               Eastern wisdom and Western nervous-system practice, held by mother and
-              daughter — Archana in Jaipur, Sejal in Mumbai. A return to yourself, one
+              daughter — Archana Jain &amp; Sejal Jain — Delhi. Healing crystals hand-curated
+              and energized from Jaipur gemstone artisans. A return to yourself, one
               quiet dose at a time.
             </p>
 
@@ -95,7 +96,7 @@ function Hero() {
           <div>
             <span className="text-[hsl(var(--av-parchment))]">01 </span>— AUMVEDA
           </div>
-          <div className="hidden md:block">Jaipur · Mumbai · Online</div>
+          <div className="hidden md:block">Delhi · Jaipur Artisans · Online</div>
           <div>Scroll</div>
         </div>
       </div>
@@ -143,16 +144,17 @@ function FounderStory() {
             className="mt-12 max-w-[560px] space-y-8 text-[15px] leading-[1.95] text-[hsl(var(--av-parchment)/0.65)]"
           >
             <p>
-              AUMVEDA is a mother–daughter practice. Archana Jain, Vedic Practitioner in
-              Jaipur, brings over twenty-five years of Vastu, astrology, tarot, karmic
-              work, and ritual. Sejal Jain, Healing Facilitator & Wellness Coach in Mumbai,
-              holds the Western lens — CBT-informed coaching, hypnotherapy, sound, vagus,
-              breathwork, and somatic practice.
+              AUMVEDA is a mother–daughter practice founded in Delhi. Archana Jain brings
+              over twenty-five years of Vastu, Jyotish astrology, tarot, and karmic ritual,
+              sourcing and energizing raw crystals directly with generational Jaipur gemstone
+              artisans. Sejal Jain, Healing Facilitator &amp; Wellness Coach in Delhi, holds
+              the Western lens — CBT-informed coaching, hypnotherapy, sound, vagal nerve
+              regulation, breathwork, and somatic trauma release.
             </p>
             <p>
-              Eastern and Western are not blended into one method. They are held together —
-              so the person is met where they are, not where a single tradition insists
-              they should be.
+              Eastern and Western are not blended into a generic compromise. They are held together —
+              giving leaders, executives, and seekers trapped in silent hyperarousal or career
+              dissociation a grounded path where the body and spirit recover in tandem.
             </p>
           </Reveal>
           <Reveal
@@ -161,7 +163,7 @@ function FounderStory() {
           >
             {[
               { k: "25+", u: "Years of Archana's practice" },
-              { k: "2", u: "Cities. One lineage." },
+              { k: "Delhi", u: "Sanctuary · Jaipur Artisans" },
               { k: "01", u: "Daily Dose of Healing" },
             ].map((s) => (
               <div key={s.u}>
@@ -185,12 +187,12 @@ function Philosophy() {
     {
       n: "i.",
       t: "Eastern Wisdom",
-      d: "Vastu, astrology, tarot, karmic insight, and ritual — the lived lineage Archana carries from Jaipur, offered with reverence and precision.",
+      d: "Vastu, Jyotish astrology, karmic insight, and sacred ritual — Archana's Delhi practice, using authentic crystals hand-energized alongside master Jaipur gemstone artisans.",
     },
     {
       n: "ii.",
-      t: "Nervous System & Western Practice",
-      d: "Breathwork, somatic work, vagus regulation, hypnotherapy, and CBT-informed coaching — Sejal's Mumbai practice, where the body learns safety again.",
+      t: "Nervous System & Somatics",
+      d: "Vagus regulation, breathwork, and somatic release — Sejal's Delhi practice, specifically calibrated to down-regulate executive burnout, silent hyperarousal, and somatic numbness.",
     },
     {
       n: "iii.",
@@ -386,8 +388,15 @@ function Services() {
       k: "1:1",
       s: "With Sejal or Archana",
       p: "Private",
-      d: "One-to-one sessions with Sejal (Healing Facilitator & Wellness Coach, Mumbai) or Archana (Vedic Practitioner, Jaipur) — held online or in person.",
+      d: "One-to-one sessions with Sejal or Archana — held online or at our Delhi sanctuary.",
       img: MEDITATION,
+    },
+    {
+      k: "Executive",
+      s: "Somatic De-escalation",
+      p: "Leadership Reset",
+      d: "Targeted protocol for executive burnout, silent hyperarousal, and somatic dissociation in high-pressure careers.",
+      img: RITUAL,
     },
     {
       k: "Circles",
@@ -398,9 +407,9 @@ function Services() {
     },
     {
       k: "Crystal",
-      s: "Shop · Jaipur",
+      s: "Shop · Jaipur Artisans",
       p: "Curated",
-      d: "A curated crystal shop rooted in Jaipur — pieces chosen with care for practice and presence.",
+      d: "Sacred crystals hand-curated from Jaipur gemstone artisans and energized through Archana's Delhi altar.",
       img: HERBS,
     },
   ];
@@ -540,7 +549,7 @@ function Discovery() {
           delay={480}
           className="mt-10 text-[10px] uppercase tracking-[0.32em] text-[hsl(var(--av-parchment)/0.35)]"
         >
-          Jaipur · Mumbai · Online
+          Delhi · Jaipur Artisans · Online
         </Reveal>
       </div>
     </section>
@@ -550,6 +559,11 @@ function Discovery() {
 function Testimonials() {
   const quotes = [
     {
+      q: "Years in leadership had locked my body into silent hyperarousal — functional outside, completely dissociated inside. Sejal's somatic work and Archana's directional mapping gave me my ground back.",
+      a: "Vikram S.",
+      r: "Delhi NCR · Executive Somatic Track",
+    },
+    {
       q: "I did not know how loud my body had become until the Daily Dose taught me to listen. A few weeks in, I sleep like I have not in years.",
       a: "Priya M.",
       r: "Mumbai · Daily Dose",
@@ -557,12 +571,7 @@ function Testimonials() {
     {
       q: "Archana and Sejal hold something rare — East and West without forcing either. I return to the practice the way one returns to weather.",
       a: "Kavya R.",
-      r: "Bangalore · 1:1",
-    },
-    {
-      q: "There is a stillness here I have not found in years of trying. Quiet. Personal. It is changing how I move through my days.",
-      a: "Sneha K.",
-      r: "Delhi · Discovery",
+      r: "Bangalore · 1:1 Sanctuary",
     },
   ];
 
@@ -691,7 +700,7 @@ function HomeFooter() {
           <div>
             <div className="av-eyebrow">Presence</div>
             <p className="mt-4 font-serif text-lg leading-relaxed text-[hsl(var(--av-parchment))]">
-              Jaipur · Mumbai
+              Delhi · Jaipur Artisans
               <br />
               Online
             </p>
@@ -744,7 +753,7 @@ function HomeFooter() {
         </div>
 
         <div className="mt-20 flex flex-col items-start justify-between gap-4 border-t border-[hsl(var(--av-parchment)/0.1)] pt-8 text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--av-parchment)/0.35)] md:flex-row md:items-center">
-          <div>© {new Date().getFullYear()} AUMVEDA · Jaipur · Mumbai</div>
+          <div>© {new Date().getFullYear()} AUMVEDA · Delhi · Jaipur Artisans</div>
           <div className="flex gap-8">
             <Link href="/privacy-policy" className="transition-colors hover:text-[hsl(var(--av-parchment))]">
               Privacy

@@ -29,6 +29,8 @@ export function registerStep8() {
 type SubState =
   | 'decoding'
   | 'report'
+  | 'report_detail'
+  | 'community'
   | 'invite'
   | 'booking'
   | 'register'
@@ -252,44 +254,44 @@ function Step8Booking({ data }: StepProps<PortalData>) {
             exit="exit"
             className="px-4 py-12"
           >
-            <PortalContent maxWidth="max-w-xl">
-              <div className="space-y-10 text-center">
-                <div className="space-y-3">
+            <PortalContent maxWidth="max-w-3xl">
+              <div className="space-y-8 text-center">
+                <div className="space-y-2">
                   <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
-                    Your blueprint
+                    Your Blueprint Synthesis
                   </p>
                   <h1 className="font-serif text-3xl text-[hsl(var(--av-parchment))] text-balance">
                     We see where you are
                   </h1>
                 </div>
 
-                <div className="text-left space-y-6 border-y border-[hsl(var(--av-parchment)/0.1)] py-8">
-                  <div className="space-y-2">
+                <div className="text-left space-y-5 border-y border-[hsl(var(--av-parchment)/0.1)] py-6">
+                  <div className="space-y-1">
                     <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-gold))]">
-                      Energy
+                      Energy Focus
                     </p>
-                    <p className="font-body text-base text-[hsl(var(--av-parchment)/0.75)] leading-relaxed capitalize">
+                    <p className="font-body text-base text-[hsl(var(--av-parchment)/0.8)] leading-relaxed capitalize">
                       {data.chakraSelected?.replace(/_/g, ' ')} — {getChakraAnalysis()}
                     </p>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-gold))]">
-                      Pattern
+                      Dominant Pattern
                     </p>
-                    <p className="font-body text-base text-[hsl(var(--av-parchment)/0.75)] leading-relaxed">
+                    <p className="font-body text-base text-[hsl(var(--av-parchment)/0.8)] leading-relaxed">
                       {getProfileDescription()}
                     </p>
                   </div>
                   {(data.sunSign || data.tarotCard) && (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <p className="font-body text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--av-gold))]">
-                        Context
+                        Cosmic Blueprint
                       </p>
-                      <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.55)]">
+                      <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.6)]">
                         {[
-                          data.sunSign && `Sun ${data.sunSign}`,
-                          data.moonSign && `Moon ${data.moonSign}`,
-                          data.tarotCard && data.tarotCard.replace(/_/g, ' '),
+                          data.sunSign && `Sun in ${data.sunSign}`,
+                          data.moonSign && `Moon in ${data.moonSign}`,
+                          data.tarotCard && `Archetype Card: ${data.tarotCard.replace(/_/g, ' ')}`,
                         ]
                           .filter(Boolean)
                           .join(' · ')}
@@ -298,13 +300,296 @@ function Step8Booking({ data }: StepProps<PortalData>) {
                   )}
                 </div>
 
+                {/* Triple-Pathway Decision Hub */}
+                <div className="space-y-4 pt-2">
+                  <div className="text-center space-y-1">
+                    <p className="font-body text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--av-gold))]">
+                      Decision Hub
+                    </p>
+                    <h2 className="font-serif text-2xl text-[hsl(var(--av-parchment))]">
+                      Choose Your Healing Pathway
+                    </h2>
+                    <p className="text-xs text-[hsl(var(--av-parchment)/0.6)] max-w-md mx-auto">
+                      Select how you wish to integrate your diagnostic findings into your nervous system and life.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left pt-3">
+                    {/* Pathway 1: Community & Events */}
+                    <div className="flex flex-col justify-between rounded-2xl border border-[hsl(var(--av-parchment)/0.15)] bg-white/[0.02] p-5 hover:border-[#C9A84C]/50 hover:bg-white/[0.04] transition-all group">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl">👥</span>
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[hsl(var(--av-gold))] bg-[hsl(var(--av-gold)/0.1)] px-2.5 py-0.5 rounded-full">
+                            Circles
+                          </span>
+                        </div>
+                        <h3 className="font-serif text-lg text-[hsl(var(--av-parchment))] group-hover:text-[#F0D58C] transition-colors">
+                          Community &amp; Events
+                        </h3>
+                        <p className="text-xs text-[hsl(var(--av-parchment)/0.65)] leading-relaxed">
+                          Live Sunday healing circles, interactive webinars, and daily micro-practices with our practitioner community.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSubState('community')}
+                        className="mt-6 w-full py-2.5 rounded-xl border border-[hsl(var(--av-gold)/0.4)] text-xs font-mono font-medium text-[#F0D58C] hover:bg-[hsl(var(--av-gold))] hover:text-[#1A0F3C] transition-all"
+                      >
+                        Explore Circles →
+                      </button>
+                    </div>
+
+                    {/* Pathway 2: Individual 1:1 Plans */}
+                    <div className="relative flex flex-col justify-between rounded-2xl border-2 border-[#C9A84C] bg-[hsl(var(--av-gold)/0.05)] p-5 shadow-lg shadow-[rgba(201,168,76,0.15)] transition-all">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl">✨</span>
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#1A0F3C] bg-[#C9A84C] px-2.5 py-0.5 rounded-full font-bold">
+                            Recommended
+                          </span>
+                        </div>
+                        <h3 className="font-serif text-lg text-[hsl(var(--av-parchment))] text-[#F0D58C]">
+                          Individual 1:1 Plans
+                        </h3>
+                        <p className="text-xs text-[hsl(var(--av-parchment)/0.75)] leading-relaxed">
+                          Personalized Vedic astrology &amp; somatic healing mentorship with Archana or Sejal. Begins with a complimentary 15-min discovery call.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSubState('invite')}
+                        className="mt-6 w-full py-2.5 rounded-xl bg-[hsl(var(--av-gold))] text-[#1A0F3C] text-xs font-mono font-bold hover:bg-[#d4b85a] transition-all shadow-md"
+                      >
+                        Book Free 1:1 Call →
+                      </button>
+                    </div>
+
+                    {/* Pathway 3: Instant Diagnostic Result Report */}
+                    <div className="flex flex-col justify-between rounded-2xl border border-[hsl(var(--av-parchment)/0.15)] bg-white/[0.02] p-5 hover:border-[#C9A84C]/50 hover:bg-white/[0.04] transition-all group">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl">📜</span>
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[hsl(var(--av-gold))] bg-[hsl(var(--av-gold)/0.1)] px-2.5 py-0.5 rounded-full">
+                            Instant
+                          </span>
+                        </div>
+                        <h3 className="font-serif text-lg text-[hsl(var(--av-parchment))] group-hover:text-[#F0D58C] transition-colors">
+                          Instant Diagnostic Report
+                        </h3>
+                        <p className="text-xs text-[hsl(var(--av-parchment)/0.65)] leading-relaxed">
+                          Immediate on-screen synthesis report detailing your nervous system regulation score, shadow archetypes, and daily prescriptions.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSubState('report_detail')}
+                        className="mt-6 w-full py-2.5 rounded-xl border border-[hsl(var(--av-gold)/0.4)] text-xs font-mono font-medium text-[#F0D58C] hover:bg-[hsl(var(--av-gold))] hover:text-[#1A0F3C] transition-all"
+                      >
+                        View Full Report →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </PortalContent>
+          </motion.div>
+        )}
+
+        {/* Instant Diagnostic Result Report Detailed View */}
+        {subState === 'report_detail' && (
+          <motion.div
+            key="report_detail"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-3xl">
+              <div className="space-y-8">
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <button
+                    type="button"
+                    onClick={() => setSubState('report')}
+                    className="text-xs font-mono uppercase tracking-wider text-[#C9A84C] hover:underline"
+                  >
+                    ← Back to Decision Hub
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="text-xs font-mono uppercase tracking-wider text-white/50 hover:text-white border border-white/10 px-3 py-1 rounded-lg"
+                  >
+                    Print / Save Report 🖨️
+                  </button>
+                </div>
+
+                <div className="text-center space-y-2">
+                  <p className="text-xs font-mono uppercase tracking-[0.25em] text-[#C9A84C]">
+                    AHI Diagnostic Result Report
+                  </p>
+                  <h1 className="font-serif text-3xl text-white">Comprehensive Diagnostic Synthesis</h1>
+                  <p className="text-xs text-white/50">Personalized profile compiled for {data.email || 'Client'}</p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Somatic & Nervous System Dimension */}
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-serif text-lg text-[#F0D58C]">1. Nervous System State &amp; Regulation</h3>
+                      <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-[#C9A84C]/20 text-[#F0D58C]">
+                        {data.nervousSystemScore || 'Moderate Charge'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-white/70 leading-relaxed">
+                      {getProfileDescription()} Your physiological markers indicate somatic bracing that responds best to gentle vagal tone activation and paced somatic orienting.
+                    </p>
+                  </div>
+
+                  {/* Energy & Archetype Dimension */}
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-serif text-lg text-[#F0D58C]">2. Energy Centre &amp; Archetype</h3>
+                      <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-white/10 text-white/80 capitalize">
+                        {data.archetypeSelected || 'Primary Archetype'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-white/70 leading-relaxed">
+                      Active centre: <strong className="text-white capitalize">{data.chakraSelected || 'Primary Chakra'}</strong>. {getChakraAnalysis()}
+                      {data.archetypeGift && (
+                        <span className="block mt-2 text-xs text-white/60">
+                          <strong>Gift:</strong> {data.archetypeGift} &bull; <strong>Shadow to integrate:</strong> {data.archetypeShadow}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Ephemeris & Karmic Context */}
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 space-y-3">
+                    <h3 className="font-serif text-lg text-[#F0D58C]">3. Cosmic Architecture &amp; Dasha Window</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                        <span className="text-white/40 block">Sun Placed In</span>
+                        <strong className="text-white text-sm">{data.sunSign || 'Recorded in 1:1'}</strong>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                        <span className="text-white/40 block">Moon Placed In</span>
+                        <strong className="text-white text-sm">{data.moonSign || 'Recorded in 1:1'}</strong>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                        <span className="text-white/40 block">Tarot Theme</span>
+                        <strong className="text-white text-sm capitalize">{data.tarotCard?.replace(/_/g, ' ') || 'Inner Work'}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Daily Micro-Prescription */}
+                  <div className="rounded-2xl border border-[#C9A84C]/30 bg-[#C9A84C]/5 p-6 space-y-3">
+                    <h3 className="font-serif text-lg text-[#F0D58C]">4. Recommended Daily Micro-Prescription</h3>
+                    <ul className="text-sm text-white/70 space-y-2 list-disc list-inside">
+                      <li>Morning: 4-7-8 Somatic Vagal Grounding practice (5 minutes)</li>
+                      <li>Midday: Boundary audit &amp; physiological sigh on transition</li>
+                      <li>Evening: Reflective journaling on your archetype&apos;s blind spot</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setSubState('invite')}
+                    className="w-full sm:w-auto px-8 py-3 rounded-full bg-[hsl(var(--av-gold))] text-[#1A0F3C] font-semibold hover:bg-[#d4b85a] transition-colors"
+                  >
+                    Deepen with 1:1 Guidance →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSubState('community')}
+                    className="w-full sm:w-auto px-8 py-3 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-colors"
+                  >
+                    Join Healing Community →
+                  </button>
+                </div>
+              </div>
+            </PortalContent>
+          </motion.div>
+        )}
+
+        {/* Community & Events Pathway View */}
+        {subState === 'community' && (
+          <motion.div
+            key="community"
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="px-4 py-12"
+          >
+            <PortalContent maxWidth="max-w-2xl">
+              <div className="space-y-8 text-center">
                 <button
                   type="button"
-                  onClick={() => setSubState('invite')}
-                  className="min-h-[52px] px-10 rounded-full bg-[hsl(var(--av-gold))] text-[hsl(var(--av-ink))] font-body font-medium transition-opacity hover:opacity-90 shadow-lg shadow-[rgba(201,168,76,0.2)]"
+                  onClick={() => setSubState('report')}
+                  className="text-xs font-mono uppercase tracking-wider text-[#C9A84C] hover:underline block text-left"
                 >
-                  Choose your practitioner
+                  ← Back to Decision Hub
                 </button>
+
+                <div className="space-y-2">
+                  <span className="text-3xl">👥</span>
+                  <p className="text-xs font-mono uppercase tracking-[0.25em] text-[#C9A84C]">
+                    Sacred Circles &amp; Cohorts
+                  </p>
+                  <h1 className="font-serif text-3xl text-white">Join the Aumveda Sangha</h1>
+                  <p className="text-sm text-white/60 max-w-md mx-auto">
+                    You do not have to heal in isolation. Connect with fellow seekers and practitioners in safe, paced live containers.
+                  </p>
+                </div>
+
+                <div className="text-left space-y-4">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-mono text-[#F0D58C] uppercase tracking-wider">Next Live Circle</span>
+                      <h4 className="font-serif text-lg text-white mt-0.5">Sunday Somatic &amp; Astrological Release Circle</h4>
+                      <p className="text-xs text-white/50 mt-1">Hosted by Sejal &amp; Archana &bull; Live on Zoom (75 mins)</p>
+                    </div>
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#C9A84C]/20 text-[#F0D58C]">
+                      Free for Community
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-mono text-[#F0D58C] uppercase tracking-wider">Daily Connection</span>
+                      <h4 className="font-serif text-lg text-white mt-0.5">Daily Dose WhatsApp Audio Broadcast</h4>
+                      <p className="text-xs text-white/50 mt-1">3-minute morning audio medicine delivered directly at 05:45 AM IST</p>
+                    </div>
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#C9A84C]/20 text-[#F0D58C]">
+                      WhatsApp
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex flex-col items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await completePortal()
+                      router.push('/community')
+                    }}
+                    className="w-full sm:w-auto px-10 py-3.5 rounded-full bg-[hsl(var(--av-gold))] text-[#1A0F3C] font-semibold hover:bg-[#d4b85a] transition-colors"
+                  >
+                    Enter Community Portal →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSubState('invite')}
+                    className="text-xs uppercase tracking-widest text-white/40 hover:text-[#C9A84C] underline underline-offset-4 transition-colors"
+                  >
+                    Or book a 1:1 consultation instead →
+                  </button>
+                </div>
               </div>
             </PortalContent>
           </motion.div>

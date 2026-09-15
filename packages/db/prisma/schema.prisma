@@ -190,6 +190,7 @@ model User {
   circleMemberships       CircleMember[]
   circlePosts             CirclePost[]
   circleComments          CircleComment[]
+  interactionTelemetries  InteractionTelemetry[]
 
   @@map("users")
 }
@@ -807,11 +808,32 @@ model UserPortalData {
   childhoodScore     String?
   financialScore     String?
   profileResult      String?
+  isOfflineSync      Boolean   @default(false)
+  clientRecordedAt   DateTime?
   portalCompletedAt  DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
   @@map("user_portal_data")
+}
+
+model InteractionTelemetry {
+  id                String   @id @default(cuid())
+  userId            String?
+  sessionId         String
+  stepNumber        Int      // 1 to 8
+  rageClicksCount   Int      @default(0)
+  deadClicksCount   Int      @default(0)
+  hesitationDwellMs Int      @default(0)
+  cursorVelocityAvg Float?
+  inferredState     String?  // HYPERAROUSAL, SHUTDOWN, REGULATED
+  payload           Json?
+  createdAt         DateTime @default(now())
+
+  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId, stepNumber])
+  @@map("interaction_telemetry")
 }
 
 model Booking {
@@ -1221,5 +1243,60 @@ model PreSessionBrief {
   @@index([userId])
   @@index([practitionerName])
   @@map("pre_session_briefs")
+}
+
+// ─────────────────────────────────────────────────────────────
+// SEJAL'S CURATED CONTENT BUCKETS & HEALING TAXONOMY
+// ─────────────────────────────────────────────────────────────
+
+model ContentBucket {
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  name         String
+  modality     String
+  nervousState String
+  description  String?      @db.Text
+  targetState  String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  items        BucketItem[]
+
+  @@map("content_buckets")
+}
+
+model BucketItem {
+  id                    String        @id @default(cuid())
+  bucketId              String
+  title                 String
+  slug                  String?       @unique
+  modality              String?
+  nervousState          String?
+  chakra                String?
+  archetype             String?
+  moonSign              String?
+  durationMinutes       Int           @default(3)
+  durationSec           Int           @default(180)
+  frequencyHz           Int?
+  frequencyName         String?
+  audioUrl              String?
+  audioKey              String?
+  instruction           String        @db.Text
+  affirmation           String?       @db.Text
+  cbtReframe            String?       @db.Text
+  microHabit            String?       @db.Text
+  contraindications     String?       @db.Text
+  ayushComplianceNotice String?       @db.Text
+  metadata              Json?
+  isActive              Boolean       @default(true)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  bucket                ContentBucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+
+  @@index([bucketId, isActive])
+  @@index([chakra, archetype, nervousState])
+  @@map("bucket_items")
 }
 

@@ -48,7 +48,7 @@ export default function AdminAppointmentDetailPage() {
   const [updating, setUpdating] = useState(false)
 
   const load = useCallback(async () => {
-    const id = params.id
+    const id = params?.id
     if (!id) return
     setLoading(true)
     try {
@@ -62,7 +62,7 @@ export default function AdminAppointmentDetailPage() {
     } finally {
       setLoading(false)
     }
-  }, [params.id])
+  }, [params?.id])
 
   useEffect(() => { load() }, [load])
 

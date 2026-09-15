@@ -17,7 +17,7 @@ const TAB_ITEMS = [
 ]
 
 export default function MobileNav() {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
 
   return (
     <nav

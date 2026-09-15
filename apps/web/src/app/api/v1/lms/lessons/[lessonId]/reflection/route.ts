@@ -38,7 +38,14 @@ export async function POST(
       )
     }
 
-    await saveLessonReflection(userId, params.lessonId, reflectionText, mood)
+    await saveLessonReflection(
+      userId,
+      params.lessonId,
+      reflectionText,
+      mood,
+      lessonInfo.lesson.title,
+      lessonInfo.course.title,
+    )
 
     return NextResponse.json({
       success: true,

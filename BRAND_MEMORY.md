@@ -3,13 +3,15 @@
 **Source of truth for this UI.** Ingested Jul 24 2026. Updated Aug 2026.
 
 ## Non-negotiable corrections
-- Founders: **Archana Jain** (mother, Jaipur) + **Sejal Jain** (daughter, Mumbai)
+- Founders: **Archana Jain** (mother, Delhi) + **Sejal Jain** (daughter, Delhi) — gemstones sourced from Jaipur
+- Founders Location: Both Archana Jain & Sejal Jain are based in **Delhi** (gemstones ethically sourced from Jaipur, Rajasthan)
 - Sejal is **NOT** a doctor — never "Dr. Sejal"
 - Sejal roles: Healing Facilitator & Wellness Coach (CBT-informed, hypnotherapy, sound, vagus, breathwork, somatic) — not "Clinical Psychologist" / not Oxford neuroscientist fiction
 - Archana: Vedic Practitioner & Healer (Vastu, Astrology, Tarot, karmic work, ritual)
-- Locations: **Jaipur · Mumbai · Online** — not Kerala sanctuary / London HQ
+- Locations: **Delhi · Online** (Jaipur gemstone atelier) — not Kerala sanctuary / London HQ
 - Tagline: **Your Daily Dose of Healing**
 - Positioning: Mother–Daughter Neuro-Vedic Healing / Eastern + Western held together
+- Expanded Demographic: Active male executive burnout, nervous system regulation, and somatic de-armoring focus alongside holistic wellness seekers
 - Primary CTA: **Begin Your Journey** → Discovery / portal
 - Product reality: Portal (8 steps) → AHI Daily Dose (5–15 min) → Discovery Call → 1:1 / Community / Shop
 - Ban: fake founder names, invented Kerala Panchakarma programs (Anantam/Nidra/Prakriti), "no app" framing for Daily Dose, Dr. prefix, galaxy/cosmic clutter
@@ -43,9 +45,15 @@
   - Client journals are indexed by `(userId, isDeleted, createdAt)`.
   - Serverless background computations (achievements, progress scores) in route handlers must be awaited via `Promise.allSettled`.
 
+## Onboarding Standard (PRD v4.1)
+- **Step 6 Mandatory Email OTP Gate**: Transition from Step 6 (Constellation) to Step 7 (Daily Dose preview) requires mandatory email verification via a 6-digit cryptographic OTP (`/api/auth/otp/verify`).
+- **Step 1 Behavioral Telemetry**: Captures client micro-interactions during the breathwork calibration (completion rate, pacing drift, cycle dropouts) via `/api/telemetry` to refine the archetype synthesis.
+- **Offline-First IndexedDB Buffer**: `OfflineBuffer.ts` captures client onboarding progress and interactions locally in IndexedDB if network drops, auto-syncing via `/api/portal/sync-offline` upon network restoration.
+
 ## Infrastructure & Hosting
-- **Runtime DB Adapter**: `@prisma/adapter-pg` over SSL port `5432` (`DIRECT_URL`) for Hostinger shared/cloud hosting compatibility (avoids Linux kernel `timer_create` panic).
-- **Process Manager**: PM2 cluster mode via `ecosystem.config.js` or hPanel Node.js Application Manager with startup file `server.js`.
+- **Infrastructure Baseline**: Google Cloud Run + Google Cloud SQL PostgreSQL (asia-south1, Mumbai) + Easebuzz Payment Gateway.
+- **Runtime DB Adapter**: `@prisma/adapter-pg` over SSL port `5432` (`DIRECT_URL`) for containerized & serverless environments (avoids Linux kernel `timer_create` panic).
+- **Process Manager**: PM2 cluster mode via `ecosystem.config.js` or Google Cloud Run containerized service.
 - **Git Repositories**:
   - Primary: `https://github.com/QalaLabs/aumveda-website.git`
   - SHA2: `https://github.com/QalaLabs/SHA2.git` (synchronized on `main` and `master`)

@@ -48,7 +48,7 @@ export default function ProductDetailPage() {
   const { openCart } = useCartDrawer()
 
   useEffect(() => {
-    const slug = params.slug
+    const slug = params?.slug
     if (!slug) return
     fetch(`/api/products/${slug}`)
       .then(async res => {
@@ -58,7 +58,7 @@ export default function ProductDetailPage() {
       })
       .catch(() => router.push('/shop'))
       .finally(() => setLoading(false))
-  }, [params.slug, router])
+  }, [params?.slug, router])
 
   useEffect(() => {
     fetch('/api/user/chakra')

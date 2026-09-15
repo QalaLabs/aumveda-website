@@ -34,7 +34,7 @@ export default function AdminUserDetailPage() {
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const id = params.id
+    const id = params?.id
     if (!id) return
     setLoading(true)
     try {
@@ -48,7 +48,7 @@ export default function AdminUserDetailPage() {
     } finally {
       setLoading(false)
     }
-  }, [params.id])
+  }, [params?.id])
 
   useEffect(() => { load() }, [load])
 

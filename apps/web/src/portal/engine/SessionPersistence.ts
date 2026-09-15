@@ -1,5 +1,6 @@
 import type { PortalState } from './types'
 import { createInitialState } from './PortalStateMachine'
+import { offlineBuffer } from './OfflineBuffer'
 
 /**
  * Client-side portal persistence.
@@ -9,6 +10,7 @@ import { createInitialState } from './PortalStateMachine'
  * Server (from Step 6 onward): sync via `POST /api/portal`. Anonymous pre-Step-6 writes
  * are localStorage-only by design — the PRD gates server-side identity on the Step-6
  * email capture, so we never invent a phantom user just to hold session bytes.
+ * If server write fails or network is offline, step is buffered in IndexedDB with isOfflineSync: true.
  */
 
 const SESSION_KEY_PREFIX = 'aumveda_portal_session_'
@@ -138,7 +140,16 @@ export class SessionPersistence {
         signal: AbortSignal.timeout(8000),
       })
 
-      if (!res.ok) return false
+      if (!res.ok) {
+        // Buffer offline on server error
+        await offlineBuffer.bufferStep({
+          sessionId: state.sessionId,
+          stepNumber: state.currentStep,
+          data: state.portalData,
+        })
+        return false
+      }
+
       const json = await res.json()
 
       // Server returns the userId it minted on email capture — cache it so subsequent
@@ -148,7 +159,12 @@ export class SessionPersistence {
       }
       return json?.ok === true
     } catch {
-      // Network / timeout / server failure — retry logic lives in AutosaveManager.
+      // Network / timeout / offline — buffer locally with isOfflineSync: true
+      await offlineBuffer.bufferStep({
+        sessionId: state.sessionId,
+        stepNumber: state.currentStep,
+        data: state.portalData,
+      })
       return false
     }
   }

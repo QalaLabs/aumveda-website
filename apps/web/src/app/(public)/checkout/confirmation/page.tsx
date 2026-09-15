@@ -21,8 +21,8 @@ import {
 
 function ConfirmationContent() {
   const searchParams = useSearchParams()
-  const orderId = searchParams.get('orderId')
-  const simulated = searchParams.get('simulated') === 'true'
+  const orderId = searchParams?.get('orderId')
+  const simulated = searchParams?.get('simulated') === 'true'
 
   return (
     <div className="min-h-screen bg-stone-50/40 pt-32 pb-24">

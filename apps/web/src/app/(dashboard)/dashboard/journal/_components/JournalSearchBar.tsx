@@ -7,7 +7,7 @@ import { Search, Loader2 } from 'lucide-react'
 export default function JournalSearchBar() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [query, setQuery] = useState(searchParams.get('search') || '')
+  const [query, setQuery] = useState(searchParams?.get('search') || '')
   const [isPending, startTransition] = useTransition()
 
   function handleSearch(e: React.FormEvent) {

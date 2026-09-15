@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const Navigation = () => {
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },

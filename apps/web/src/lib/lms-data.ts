@@ -773,13 +773,15 @@ export async function updateLessonProgress(
 }
 
 /**
- * Save in-lesson micro-journal reflection
+ * Save in-lesson micro-journal reflection directly into the user's Journal table and LessonReflection
  */
 export async function saveLessonReflection(
   userId: string,
   lessonId: string,
   reflectionText: string,
   mood?: number,
+  lessonTitle?: string,
+  courseTitle?: string,
 ): Promise<boolean> {
   const key = `${userId}:${lessonId}`
   memoryReflectionStore.set(key, {
@@ -789,6 +791,7 @@ export async function saveLessonReflection(
   })
 
   try {
+    // 1. Persist in LessonReflection table
     await (prisma as any).lessonReflection?.upsert?.({
       where: { userId_lessonId: { userId, lessonId } },
       create: {
@@ -802,8 +805,21 @@ export async function saveLessonReflection(
         mood: mood ?? null,
       },
     })
+
+    // 2. Persist directly into the user's Journal table
+    await (prisma as any).journal?.create?.({
+      data: {
+        userId,
+        title: lessonTitle ? `LMS Reflection: ${lessonTitle}` : 'LMS Micro-Journal Reflection',
+        body: reflectionText,
+        mood: mood ?? null,
+        tags: ['lms', 'reflection', ...(courseTitle ? [courseTitle] : [])],
+        practitionerVisible: true,
+      },
+    })
   } catch (err) {
     // Graceful fallback to memory store
+    console.warn('[LMS Reflection DB Save Warning]:', (err as any)?.message)
   }
 
   return true

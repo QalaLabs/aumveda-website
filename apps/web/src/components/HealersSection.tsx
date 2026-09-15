@@ -36,7 +36,7 @@ const HealersSection = () => {
           </h2>
           <p className="font-body text-base text-[hsl(var(--av-mute))] leading-relaxed max-w-[55ch]">
             Not co-founders on a slide — a lineage. Eastern roots meet Western nervous-system work,
-            held by the same family across Jaipur and Mumbai.
+            held by mother and daughter at their Delhi sanctuary, with energized crystals from Jaipur gemstone artisans.
           </p>
         </div>
 
@@ -45,7 +45,7 @@ const HealersSection = () => {
             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl outline outline-1 outline-black/5 -outline-offset-1">
               <Image
                 src={SEJAL}
-                alt="Sejal Jain, Healing Facilitator and Wellness Coach, Mumbai"
+                alt="Sejal Jain, Healing Facilitator and Wellness Coach, Delhi"
                 fill
                 sizes="(min-width: 768px) 40vw, 100vw"
                 placeholder="blur"
@@ -56,7 +56,7 @@ const HealersSection = () => {
             <div className="space-y-1">
               <h3 className="font-serif text-2xl text-[hsl(var(--av-night))]">Sejal Jain</h3>
               <p className="font-body text-sm text-[hsl(var(--av-mute))]">
-                Healing Facilitator · Somatic & nervous-system work · Mumbai
+                Healing Facilitator · Somatic &amp; nervous-system work · Delhi
               </p>
             </div>
           </article>
@@ -65,7 +65,7 @@ const HealersSection = () => {
             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl outline outline-1 outline-black/5 -outline-offset-1">
               <Image
                 src={ARCHANA}
-                alt="Archana Jain, Vedic Practitioner and Healer, Jaipur"
+                alt="Archana Jain, Vedic Practitioner and Healer, Delhi"
                 fill
                 sizes="(min-width: 768px) 40vw, 100vw"
                 placeholder="blur"
@@ -76,7 +76,7 @@ const HealersSection = () => {
             <div className="space-y-1">
               <h3 className="font-serif text-2xl text-[hsl(var(--av-night))]">Archana Jain</h3>
               <p className="font-body text-sm text-[hsl(var(--av-mute))]">
-                Vedic Practitioner · Astrology, Vastu, ritual · Jaipur
+                Vedic Practitioner · Astrology, Vastu, ritual · Delhi (Jaipur Gemstone Lineage)
               </p>
             </div>
           </article>

@@ -10,6 +10,8 @@ import { BreathingText } from './BreathingText'
 import { AmbientAudio } from './AmbientAudio'
 import { STAR_COUNT, COMPLETION_TEXT, CTA_TEXT } from './constants'
 import { STEP1_ENTER, STEP1_EXIT } from './animations'
+import { useInteractionTelemetry } from './useInteractionTelemetry'
+import { usePortal } from '../../engine/PortalContext'
 
 function useReducedMotion(): boolean {
   const [prefersReduced, setPrefersReduced] = useState(false)
@@ -67,6 +69,21 @@ export function Step1Breath(_props: StepProps) {
   const [orbVisible, setOrbVisible] = useState(false)
   const [showCompletion, setShowCompletion] = useState(false)
 
+  // Retrieve session ID safely from portal context
+  let sessionId = 'anonymous_session'
+  try {
+    const portalCtx = usePortal()
+    if (portalCtx?.state?.sessionId) sessionId = portalCtx.state.sessionId
+  } catch {
+    // If rendered standalone without PortalProvider
+  }
+
+  const { flushTelemetry } = useInteractionTelemetry({
+    sessionId,
+    stepNumber: 1,
+    enabled: true,
+  })
+
   useEffect(() => {
     const t = setTimeout(() => setOrbVisible(true), 400)
     return () => clearTimeout(t)
@@ -81,9 +98,10 @@ export function Step1Breath(_props: StepProps) {
 
   const handleCTA = useCallback(() => {
     if (isComplete) {
+      flushTelemetry({ trigger: 'step1_completed' })
       onNext()
     }
-  }, [isComplete, onNext])
+  }, [isComplete, onNext, flushTelemetry])
 
   return (
     <div className="fixed inset-0 bg-[#0B0720] flex flex-col items-center justify-center overflow-hidden select-none">

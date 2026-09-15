@@ -23,7 +23,7 @@ const NAV = [
 const PublicNavigation = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
   const isHome = pathname === "/";
   const { totalItems } = useCart();
   const { openCart } = useCartDrawer();

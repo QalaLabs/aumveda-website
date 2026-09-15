@@ -45,3 +45,9 @@ tmp/
 .vercel
 .env*
 !.env*.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+

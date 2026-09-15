@@ -27,7 +27,7 @@ export default function NotesPage() {
 function NotesForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const preselectedUserId = searchParams.get('userId') || ''
+  const preselectedUserId = searchParams?.get('userId') || ''
 
   const [userId, setUserId] = useState(preselectedUserId)
   const [practitioner, setPractitioner] = useState('sejal')

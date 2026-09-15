@@ -32,8 +32,8 @@ function ConfirmResetPageInner() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const t = searchParams.get('token') || ''
-    const e = searchParams.get('email') || ''
+    const t = searchParams?.get('token') || ''
+    const e = searchParams?.get('email') || ''
     setToken(t)
     setEmail(e)
     if (!t || !e) {

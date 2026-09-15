@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { StepRegistry } from '../../engine/StepRegistry'
 import { BackgroundEngine } from '../../background/BackgroundEngine'
@@ -22,7 +22,7 @@ export function registerStep6() {
   })
 }
 
-type Phase = 'form' | 'loading' | 'error' | 'email_gate' | 'revealing' | 'revealed'
+type Phase = 'form' | 'loading' | 'error' | 'email_gate' | 'otp_modal' | 'revealing' | 'revealed'
 
 interface ChartPlanet {
   name: string
@@ -56,6 +56,15 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
   const [dashaTimeline, setDashaTimeline] = useState<DashaPeriod[]>([])
   const [nakshatraInfo, setNakshatraInfo] = useState<{ nakshatra: string; lord: string; pada: number } | null>(null)
 
+  // OTP Verification State
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', ''])
+  const [otpSubmitting, setOtpSubmitting] = useState(false)
+  const [otpSending, setOtpSending] = useState(false)
+  const [otpError, setOtpError] = useState<string | null>(null)
+  const [resendTimer, setResendTimer] = useState(60)
+  const [otpAttempts, setOtpAttempts] = useState(0)
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([])
+
   const placeInputRef = useRef<HTMLInputElement>(null)
 
   const { available: placesAvailable } = usePlacesAutocomplete(placeInputRef, (result) => {
@@ -64,6 +73,16 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
   })
 
   const canSubmit = Boolean(dob && place && (tobUnknown || tob))
+
+  const isLocked = otpAttempts >= 3
+
+  useEffect(() => {
+    if (phase !== 'otp_modal' || resendTimer <= 0) return
+    const interval = setInterval(() => {
+      setResendTimer((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [phase, resendTimer])
 
   const requestChart = useCallback(async () => {
     setPhase('loading')
@@ -118,6 +137,125 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
     setPhase('revealing')
     setTimeout(() => setPhase('revealed'), 1200)
   }, [email, onDataChange])
+
+  const handleDigitChange = useCallback(
+    (index: number, value: string) => {
+      if (isLocked) return
+      const cleanVal = value.replace(/\D/g, '')
+      if (!cleanVal) {
+        setOtpDigits((prev) => {
+          const next = [...prev]
+          next[index] = ''
+          return next
+        })
+        return
+      }
+
+      if (cleanVal.length > 1) {
+        const chars = cleanVal.slice(0, 6).split('')
+        setOtpDigits((prev) => {
+          const next = [...prev]
+          chars.forEach((c, i) => {
+            if (index + i < 6) next[index + i] = c
+          })
+          return next
+        })
+        const nextFocus = Math.min(index + chars.length, 5)
+        otpInputRefs.current[nextFocus]?.focus()
+        return
+      }
+
+      setOtpDigits((prev) => {
+        const next = [...prev]
+        next[index] = cleanVal
+        return next
+      })
+
+      if (index < 5) {
+        otpInputRefs.current[index + 1]?.focus()
+      }
+    },
+    [isLocked],
+  )
+
+  const handleKeyDown = useCallback(
+    (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+        otpInputRefs.current[index - 1]?.focus()
+      }
+    },
+    [otpDigits],
+  )
+
+  const handleSendOtp = useCallback(async () => {
+    if (!email || !email.includes('@')) {
+      setErrorMsg('Please enter a valid email address')
+      return
+    }
+    setOtpSending(true)
+    setOtpError(null)
+    try {
+      const res = await fetch('/api/auth/otp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to send verification code')
+
+      setOtpDigits(['', '', '', '', '', ''])
+      setOtpAttempts(0)
+      setResendTimer(60)
+      setPhase('otp_modal')
+      setTimeout(() => otpInputRefs.current[0]?.focus(), 150)
+    } catch (err: any) {
+      setOtpError(err.message || 'Failed to send verification email')
+    } finally {
+      setOtpSending(false)
+    }
+  }, [email])
+
+  const handleVerifyOtp = useCallback(async () => {
+    if (isLocked) return
+    const code = otpDigits.join('')
+    if (code.length !== 6) {
+      setOtpError('Please enter the full 6-digit code')
+      return
+    }
+
+    setOtpSubmitting(true)
+    setOtpError(null)
+
+    try {
+      const res = await fetch('/api/auth/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          otpCode: code,
+        }),
+      })
+
+      const json = await res.json()
+      if (!res.ok) {
+        const nextAttempts = otpAttempts + 1
+        setOtpAttempts(nextAttempts)
+        if (nextAttempts >= 3) {
+          throw new Error('Maximum attempts reached (3/3). This code has been locked. Please request a new code.')
+        } else {
+          throw new Error(`${json.error || 'Invalid code'} (${3 - nextAttempts} attempts remaining)`)
+        }
+      }
+
+      onDataChange({ email: email.trim().toLowerCase() })
+      setPhase('revealing')
+      setTimeout(() => setPhase('revealed'), 1200)
+    } catch (err: any) {
+      setOtpError(err.message || 'Verification failed')
+    } finally {
+      setOtpSubmitting(false)
+    }
+  }, [email, otpDigits, otpAttempts, isLocked, onDataChange])
 
   const currentDasha = dashaTimeline.find((d) => d.isCurrent) ?? dashaTimeline[0]
 
@@ -269,7 +407,7 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
                 Your Vedic Chart &amp; Dasha Timeline Are Ready
               </motion.h2>
               <motion.p variants={staggerItem} className="text-sm text-white/50 max-w-sm mx-auto">
-                Enter your email to unlock your planetary placements, Moon sign, and healing cycle.
+                Enter your email to receive a secure 6-digit verification code and unlock your planetary placements.
               </motion.p>
               <PortalCard variant="glass" padding="lg">
                 <input
@@ -280,11 +418,136 @@ function Step6Constellation({ data, onNext, onDataChange }: StepProps<PortalData
                   className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-center text-white placeholder:text-white/20 focus:border-[#C9A84C]/60 focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/20"
                 />
               </PortalCard>
+
+              {otpError && (
+                <motion.div
+                  role="alert"
+                  className="rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200"
+                >
+                  {otpError}
+                </motion.div>
+              )}
+
               <div className="flex flex-col items-center gap-3">
                 <PortalContinueButton
-                  onClick={handleEmailSubmit}
-                  disabled={!email.includes('@')}
-                  label="Reveal My Cosmic Blueprint"
+                  onClick={handleSendOtp}
+                  disabled={!email.includes('@') || otpSending}
+                  label={otpSending ? 'Sending Verification Code...' : 'Send Verification Code'}
+                />
+                <button
+                  type="button"
+                  onClick={onNext}
+                  className="mt-1 text-xs uppercase tracking-widest text-white/40 hover:text-[#C9A84C] underline underline-offset-4 transition-colors"
+                >
+                  Skip for now →
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {phase === 'otp_modal' && (
+            <motion.div
+              key="otp-modal"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-6 text-center"
+            >
+              <motion.div
+                variants={staggerItem}
+                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#C9A84C]/20 text-2xl"
+              >
+                🔐
+              </motion.div>
+              <motion.h2 variants={staggerItem} className="text-2xl font-display text-[#F0D58C]">
+                Verify Your Email
+              </motion.h2>
+              <motion.div variants={staggerItem} className="text-sm text-white/60 max-w-sm mx-auto space-y-1">
+                <p>We sent a 6-digit verification code to</p>
+                <div className="flex items-center justify-center gap-2 font-mono text-[#F0D58C]">
+                  <span>{email}</span>
+                  <button
+                    type="button"
+                    onClick={() => setPhase('email_gate')}
+                    className="text-xs text-white/40 underline hover:text-white transition-colors"
+                  >
+                    (change)
+                  </button>
+                </div>
+              </motion.div>
+
+              <PortalCard variant="glass" padding="lg">
+                <div className="space-y-4">
+                  {/* 6-Digit OTP Box Grid */}
+                  <div className="flex justify-center gap-2 sm:gap-3">
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => {
+                          otpInputRefs.current[index] = el
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={1}
+                        value={digit}
+                        disabled={isLocked || otpSubmitting}
+                        onChange={(e) => handleDigitChange(index, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(index, e)}
+                        className={`h-12 w-10 sm:h-14 sm:w-12 rounded-xl border text-center text-xl font-mono font-bold transition-all focus:outline-none ${
+                          digit
+                            ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#F0D58C]'
+                            : 'border-white/15 bg-white/[0.03] text-white focus:border-[#C9A84C]/60 focus:ring-2 focus:ring-[#C9A84C]/20'
+                        } ${isLocked ? 'opacity-40 cursor-not-allowed border-red-500/30' : ''}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Resend & Lock Status */}
+                  <div className="flex flex-col items-center gap-1 text-xs font-mono pt-2">
+                    {isLocked ? (
+                      <p className="text-red-400 font-sans">
+                        Maximum attempts reached (3/3). Please request a new code to unlock.
+                      </p>
+                    ) : (
+                      <p className="text-white/40">
+                        {3 - otpAttempts} {3 - otpAttempts === 1 ? 'attempt' : 'attempts'} remaining
+                      </p>
+                    )}
+
+                    <div className="mt-1">
+                      {resendTimer > 0 ? (
+                        <span className="text-white/40">Resend code in {resendTimer}s</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          disabled={otpSending}
+                          className="text-[#C9A84C] hover:underline font-medium"
+                        >
+                          {otpSending ? 'Resending...' : 'Resend Code'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </PortalCard>
+
+              {otpError && (
+                <motion.div
+                  role="alert"
+                  className="rounded-xl border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200"
+                >
+                  {otpError}
+                </motion.div>
+              )}
+
+              <div className="flex flex-col items-center gap-3">
+                <PortalContinueButton
+                  onClick={handleVerifyOtp}
+                  disabled={otpDigits.join('').length !== 6 || isLocked || otpSubmitting}
+                  label={otpSubmitting ? 'Verifying Code...' : 'Unlock My Birth Sky'}
                 />
                 <button
                   type="button"

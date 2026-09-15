@@ -19,7 +19,7 @@ const NAV_ITEMS = [
 ]
 
 export default function Sidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
   const { data: session } = useSession()
 
   return (

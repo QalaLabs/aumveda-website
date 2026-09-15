@@ -11,8 +11,8 @@ function VerifyPageInner() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
-  const email = searchParams.get('email')
-  const token = searchParams.get('token')
+  const email = searchParams?.get('email')
+  const token = searchParams?.get('token')
 
   useEffect(() => {
     if (!email || !token) return

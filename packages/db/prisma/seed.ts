@@ -1,4 +1,5 @@
 import { PrismaClient, CourseLevel, EnrollmentStatus, ServiceType } from '@prisma/client'
+import { seedContentBuckets } from './seeds/content-buckets'
 
 const prisma = new PrismaClient()
 
@@ -985,7 +986,12 @@ async function main() {
     await prisma.patternProfile.upsert({ where: { profileName: p.profileName }, update: p, create: p })
   }
 
-  console.log('✅ Seeding complete: All 5 LMS courses, 15 SKUs, practitioner profiles, and reference data populated!')
+  // ─────────────────────────────────────────────────────────────
+  // 6. SEJAL'S CURATED CONTENT BUCKETS
+  // ─────────────────────────────────────────────────────────────
+  await seedContentBuckets()
+
+  console.log('✅ Seeding complete: All 5 LMS courses, 15 SKUs, practitioner profiles, reference data, and Sejal content buckets populated!')
 }
 
 main()

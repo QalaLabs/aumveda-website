@@ -23,19 +23,38 @@ export class EasebuzzDualGateway implements PaymentProvider {
   private secondaryCreds: EasebuzzCredentials | null = null
   private env: 'test' | 'prod'
 
-  constructor() {
+  constructor(config?: {
+    primary?: { key: string; salt: string; env?: 'test' | 'prod' }
+    secondary?: { key: string; salt: string; env?: 'test' | 'prod' }
+  }) {
     this.env = (process.env.EASEBUZZ_ENV === 'prod' || process.env.NODE_ENV === 'production') ? 'prod' : 'test'
 
-    const primaryKey = process.env.EASEBUZZ_KEY_PRIMARY || process.env.EAZEBUS_MERCHANT_ID || process.env.EAZEBUS_KEY || ''
-    const primarySalt = process.env.EASEBUZZ_SALT_PRIMARY || process.env.EAZEBUS_API_KEY || process.env.EAZEBUS_SALT || ''
-    if (primaryKey && primarySalt) {
-      this.primaryCreds = { key: primaryKey, salt: primarySalt, env: this.env }
+    if (config?.primary?.key && config?.primary?.salt) {
+      this.primaryCreds = {
+        key: config.primary.key,
+        salt: config.primary.salt,
+        env: config.primary.env || this.env,
+      }
+    } else {
+      const primaryKey = process.env.EASEBUZZ_KEY_PRIMARY || process.env.EAZEBUS_MERCHANT_ID || process.env.EAZEBUS_KEY || process.env.EASEBUZZ_KEY || ''
+      const primarySalt = process.env.EASEBUZZ_SALT_PRIMARY || process.env.EAZEBUS_API_KEY || process.env.EAZEBUS_SALT || process.env.EASEBUZZ_SALT || ''
+      if (primaryKey && primarySalt) {
+        this.primaryCreds = { key: primaryKey, salt: primarySalt, env: this.env }
+      }
     }
 
-    const secondaryKey = process.env.EASEBUZZ_KEY_SECONDARY || ''
-    const secondarySalt = process.env.EASEBUZZ_SALT_SECONDARY || ''
-    if (secondaryKey && secondarySalt) {
-      this.secondaryCreds = { key: secondaryKey, salt: secondarySalt, env: this.env }
+    if (config?.secondary?.key && config?.secondary?.salt) {
+      this.secondaryCreds = {
+        key: config.secondary.key,
+        salt: config.secondary.salt,
+        env: config.secondary.env || this.env,
+      }
+    } else {
+      const secondaryKey = process.env.EASEBUZZ_KEY_SECONDARY || ''
+      const secondarySalt = process.env.EASEBUZZ_SALT_SECONDARY || ''
+      if (secondaryKey && secondarySalt) {
+        this.secondaryCreds = { key: secondaryKey, salt: secondarySalt, env: this.env }
+      }
     }
   }
 
@@ -119,6 +138,34 @@ export class EasebuzzDualGateway implements PaymentProvider {
       const computed = crypto.createHmac('sha256', secret).update(rawBody).digest('hex')
       if (computed.length !== signature.length) return false
       return crypto.timingSafeEqual(Buffer.from(computed, 'hex'), Buffer.from(signature, 'hex'))
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Verifies an HMAC-SHA512 signature using constant-time string comparison over raw request payload
+   */
+  public verifyHmacSha512(rawBody: string | Buffer, signature: string, secret: string): boolean {
+    try {
+      const cleanSig = signature.trim().toLowerCase()
+      const computed = crypto.createHmac('sha512', secret).update(rawBody).digest('hex').toLowerCase()
+      if (computed.length !== cleanSig.length) return false
+      return crypto.timingSafeEqual(Buffer.from(computed, 'utf-8'), Buffer.from(cleanSig, 'utf-8'))
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Verifies reverse SHA-512 hash using constant-time comparison
+   */
+  public verifyReverseHashSha512(expectedHash: string, receivedHash: string): boolean {
+    try {
+      const normExpected = expectedHash.trim().toLowerCase()
+      const normReceived = receivedHash.trim().toLowerCase()
+      if (normExpected.length !== normReceived.length) return false
+      return crypto.timingSafeEqual(Buffer.from(normExpected, 'utf-8'), Buffer.from(normReceived, 'utf-8'))
     } catch {
       return false
     }
@@ -299,12 +346,13 @@ export class EasebuzzDualGateway implements PaymentProvider {
   }
 
   /**
-   * Process and verify Easebuzz webhook callback with SHA-512 / HMAC validation
+   * Process and verify Easebuzz webhook callback with strict SHA-512 / HMAC-SHA512 validation
    */
   async processWebhook(
     payload: Record<string, unknown>,
-    hmacSignature?: string
-  ): Promise<{ orderId: string; status: PaymentVerification['status']; gateway: string; easepayid?: string } | null> {
+    rawBodyOrSignature?: string | Buffer,
+    hmacSignatureHeader?: string
+  ): Promise<{ orderId: string; status: PaymentVerification['status']; gateway: string; easepayid?: string; txnid?: string } | null> {
     const raw = payload as unknown as EasebuzzWebhookPayload
     const key = raw.key || ''
     const receivedHash = raw.hash || ''
@@ -334,6 +382,7 @@ export class EasebuzzDualGateway implements PaymentProvider {
           status: status === 'success' ? 'SUCCESS' : 'FAILED',
           gateway: 'SIMULATED',
           easepayid: raw.easepayid as string || `sim_${txnid}`,
+          txnid,
         }
       }
       throw new Error('Easebuzz gateway credentials not found for webhook key')
@@ -357,12 +406,32 @@ export class EasebuzzDualGateway implements PaymentProvider {
       key
     )
 
-    const hashMatch = expectedReverseHash.toLowerCase() === receivedHash.toLowerCase()
+    const hashMatch = receivedHash ? this.verifyReverseHashSha512(expectedReverseHash, receivedHash) : false
 
-    // 2. Check HMAC signature if provided in headers
-    let hmacMatch = true
-    if (hmacSignature) {
-      hmacMatch = this.verifyHmacSha256(JSON.stringify(payload), hmacSignature, creds.salt)
+    // 2. Disambiguate arguments & check HMAC signature if provided
+    let rawBodyStr = ''
+    let signature = hmacSignatureHeader
+
+    if (rawBodyOrSignature && !hmacSignatureHeader && typeof rawBodyOrSignature === 'string' && (rawBodyOrSignature.length === 64 || rawBodyOrSignature.length === 128)) {
+      signature = rawBodyOrSignature
+      rawBodyStr = JSON.stringify(payload)
+    } else if (rawBodyOrSignature) {
+      rawBodyStr = typeof rawBodyOrSignature === 'string' ? rawBodyOrSignature : rawBodyOrSignature.toString('utf-8')
+    } else {
+      rawBodyStr = JSON.stringify(payload)
+    }
+
+    let hmacMatch = false
+    if (signature) {
+      const webhookSecret = process.env.EASEBUZZ_WEBHOOK_SECRET || creds.salt
+      hmacMatch = this.verifyHmacSha512(rawBodyStr, signature, webhookSecret) ||
+                  this.verifyHmacSha512(rawBodyStr, signature, creds.salt) ||
+                  this.verifyHmacSha256(rawBodyStr, signature, creds.salt)
+
+      if (!hmacMatch) {
+        console.error('[Easebuzz Webhook] HMAC signature validation failed!', { signature })
+        throw new Error('Invalid Easebuzz webhook HMAC signature')
+      }
     }
 
     if (!hashMatch && !hmacMatch) {
@@ -382,6 +451,7 @@ export class EasebuzzDualGateway implements PaymentProvider {
       status: internalStatus,
       gateway: gatewayName,
       easepayid: raw.easepayid,
+      txnid,
     }
   }
 

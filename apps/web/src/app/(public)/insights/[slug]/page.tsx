@@ -22,6 +22,12 @@ export function generateMetadata({ params }: Params) {
   };
 }
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://aumveda.com";
+
+function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
 export default function InsightArticlePage({ params }: Params) {
   const post = BLOG_POSTS.find((p) => p.slug === params.slug);
   if (!post) notFound();
@@ -32,8 +38,42 @@ export default function InsightArticlePage({ params }: Params) {
       (p.category === post.category || p.author === post.author),
   ).slice(0, 3);
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${BASE_URL}/insights/${post.slug}#article`,
+    headline: post.title,
+    description: post.excerpt,
+    image: [post.image],
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Person",
+      name: post.author,
+      jobTitle: post.authorRole,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "AUMVEDA",
+      url: BASE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/images/logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${BASE_URL}/insights/${post.slug}`,
+    },
+    articleSection: post.category,
+  };
+
   return (
     <EditorialPage>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }}
+      />
       <article>
         <header className="border-b border-stone">
           <div className="av-content av-gutter pt-28 pb-12 md:pt-36 md:pb-16">

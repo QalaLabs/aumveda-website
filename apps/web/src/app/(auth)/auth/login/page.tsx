@@ -22,13 +22,13 @@ function LoginForm() {
   const searchParams = useSearchParams()
 
   const initialPortal =
-    searchParams.get('portal') === 'coach' ||
-    searchParams.get('role') === 'coach' ||
-    searchParams.get('role') === 'practitioner'
+    searchParams?.get('portal') === 'coach' ||
+    searchParams?.get('role') === 'coach' ||
+    searchParams?.get('role') === 'practitioner'
       ? 'coach'
       : 'client'
 
-  const callbackUrl = searchParams.get('callbackUrl')
+  const callbackUrl = searchParams?.get('callbackUrl')
 
   const [portal, setPortal] = useState<'client' | 'coach'>(initialPortal)
   const [email, setEmail] = useState('')
@@ -44,7 +44,7 @@ function LoginForm() {
 
   // Sync state if URL query parameter changes
   useEffect(() => {
-    const p = searchParams.get('portal') || searchParams.get('role')
+    const p = searchParams?.get('portal') || searchParams?.get('role')
     if (p === 'coach' || p === 'practitioner') {
       setPortal('coach')
     } else if (p === 'client' || p === 'user') {

@@ -4,7 +4,7 @@ import HomePage from "@/components/homepage/HomePage";
 export const metadata: Metadata = {
   title: "AUMVEDA — Mother–Daughter Neuro-Vedic Healing",
   description:
-    "Your Daily Dose of Healing. Mother–daughter Neuro-Vedic practice — Archana Jain (Jaipur) & Sejal Jain (Mumbai).",
+    "Your Daily Dose of Healing. Mother–daughter Neuro-Vedic practice — Archana Jain & Sejal Jain — Delhi. Hand-curated and energized crystals from Jaipur gemstone artisans.",
   openGraph: {
     title: "AUMVEDA — Your Daily Dose of Healing",
     description:

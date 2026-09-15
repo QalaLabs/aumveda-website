@@ -15,7 +15,7 @@ export default function AdminProductEditPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const id = params.id
+    const id = params?.id
     if (!id) return
 
     fetch(`/api/admin/products/${id}`)
@@ -26,7 +26,7 @@ export default function AdminProductEditPage() {
       })
       .catch((err: any) => setError(err.message ?? 'Failed to load product'))
       .finally(() => setLoading(false))
-  }, [params.id])
+  }, [params?.id])
 
   if (loading) {
     return (
