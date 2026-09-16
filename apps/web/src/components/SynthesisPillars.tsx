@@ -9,8 +9,8 @@ const PILLARS = [
     title: "Neuro-Reprogramming",
     desc: "Integrating clinical CBT with deep-state hypnosis to rewrite subconscious patterns.",
     icon: BrainCircuit,
-    color: "text-blue-500",
-    bg: "bg-blue-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   },
   {
     title: "Celestial Mapping",
@@ -30,15 +30,15 @@ const PILLARS = [
     title: "Vibrational Medicine",
     desc: "Solfeggio sound healing and bioresonance to restore cellular harmony.",
     icon: Music,
-    color: "text-purple-500",
-    bg: "bg-purple-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   },
   {
     title: "AI Personalization",
     desc: "Proprietary algorithms that synthesize your data into daily wellness insights.",
     icon: Database,
-    color: "text-indigo-500",
-    bg: "bg-indigo-50"
+    color: "text-night",
+    bg: "bg-gold/10"
   },
   {
     title: "Ritual Architecture",

@@ -78,7 +78,7 @@ export const ShareAchievementModal: React.FC<ShareModalProps> = ({ achievement, 
       <DialogContent className="sm:max-w-[425px] rounded-[32px] border-none shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Share2 className="w-6 h-6 text-blue-500" />
+            <Share2 className="w-6 h-6 text-night" />
             Share Achievement
           </DialogTitle>
         </DialogHeader>
@@ -92,7 +92,7 @@ export const ShareAchievementModal: React.FC<ShareModalProps> = ({ achievement, 
 
           {!shareLink ? (
             <div className="space-y-4">
-              <div className="flex items-start space-x-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <div className="flex items-start space-x-3 p-4 bg-gold/10 rounded-xl border border-gold/20">
                 <Checkbox 
                   id="consent" 
                   checked={isConsented} 
@@ -100,10 +100,10 @@ export const ShareAchievementModal: React.FC<ShareModalProps> = ({ achievement, 
                   className="mt-1"
                 />
                 <div className="grid gap-1.5 leading-none">
-                  <Label htmlFor="consent" className="text-xs font-bold text-blue-900 cursor-pointer">
+                  <Label htmlFor="consent" className="text-xs font-bold text-ink cursor-pointer">
                     Allow public sharing of this achievement
                   </Label>
-                  <p className="text-[10px] text-blue-700">
+                  <p className="text-[10px] text-night">
                     By checking this, you agree to generate a temporary public link that displays your achievement and display name.
                   </p>
                 </div>

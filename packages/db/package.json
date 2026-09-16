@@ -10,7 +10,10 @@
     "migrate": "prisma migrate dev",
     "push": "prisma db push",
     "studio": "prisma studio",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts && tsx prisma/seed-products.ts && tsx prisma/seed-courses.ts",
+    "seed:reference": "tsx prisma/seed.ts",
+    "seed:products": "tsx prisma/seed-products.ts",
+    "seed:courses": "tsx prisma/seed-courses.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

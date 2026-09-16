@@ -157,14 +157,14 @@ export function ProductForm({ mode, product, apiBasePath = '/api/admin/products'
               <Label htmlFor="title">Title *</Label>
               <Input id="title" {...form.register('title' as any)} placeholder="Product name" />
               {form.formState.errors.title && (
-                <p className="text-xs text-red-500">{(form.formState.errors.title as any).message}</p>
+                <p className="text-xs text-destructive">{(form.formState.errors.title as any).message}</p>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="sku">SKU *</Label>
               <Input id="sku" {...form.register('sku' as any)} placeholder="e.g. BRAC-001" />
               {form.formState.errors.sku && (
-                <p className="text-xs text-red-500">{(form.formState.errors.sku as any).message}</p>
+                <p className="text-xs text-destructive">{(form.formState.errors.sku as any).message}</p>
               )}
             </div>
           </div>
@@ -184,7 +184,7 @@ export function ProductForm({ mode, product, apiBasePath = '/api/admin/products'
               </Button>
             </div>
             {form.formState.errors.slug && (
-              <p className="text-xs text-red-500">{(form.formState.errors.slug as any).message}</p>
+              <p className="text-xs text-destructive">{(form.formState.errors.slug as any).message}</p>
             )}
           </div>
 
@@ -197,7 +197,7 @@ export function ProductForm({ mode, product, apiBasePath = '/api/admin/products'
             <Label htmlFor="description">Description *</Label>
             <Textarea id="description" {...form.register('description' as any)} rows={4} placeholder="Full product description" />
             {form.formState.errors.description && (
-              <p className="text-xs text-red-500">{(form.formState.errors.description as any).message}</p>
+              <p className="text-xs text-destructive">{(form.formState.errors.description as any).message}</p>
             )}
           </div>
         </CardContent>
@@ -213,7 +213,7 @@ export function ProductForm({ mode, product, apiBasePath = '/api/admin/products'
               <Label>Price (paise) *</Label>
               <Input type="number" {...form.register('priceCents' as any, { valueAsNumber: true })} placeholder="79900" />
               {form.formState.errors.priceCents && (
-                <p className="text-xs text-red-500">{(form.formState.errors.priceCents as any).message}</p>
+                <p className="text-xs text-destructive">{(form.formState.errors.priceCents as any).message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -286,7 +286,7 @@ export function ProductForm({ mode, product, apiBasePath = '/api/admin/products'
                 {tags.map((tag: string) => (
                   <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 rounded-full text-xs font-medium text-slate-700">
                     {tag}
-                    <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-500">
+                    <button type="button" onClick={() => removeTag(tag)} className="hover:text-destructive">
                       <X className="w-3 h-3" />
                     </button>
                   </span>

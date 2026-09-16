@@ -46,9 +46,9 @@ export default function LeadMagnetCTA({ tool, result, title, subtitle, theme = '
     return (
       <div className={cn(
         "p-8 rounded-[32px] text-center space-y-3",
-        isDark ? "bg-white/10 border border-white/20" : isAmber ? "bg-amber-800/40 border border-amber-600/40" : "bg-indigo-50 border border-indigo-100"
+        isDark ? "bg-white/10 border border-white/20" : isAmber ? "bg-amber-800/40 border border-amber-600/40" : "bg-gold/10 border border-gold/20"
       )}>
-        <CheckCircle2 className={cn("w-10 h-10 mx-auto", isDark ? "text-green-400" : isAmber ? "text-amber-300" : "text-indigo-500")} />
+        <CheckCircle2 className={cn("w-10 h-10 mx-auto", isDark ? "text-sage" : isAmber ? "text-amber-300" : "text-night")} />
         <p className={cn("font-serif font-bold text-xl", isDark ? "text-white" : isAmber ? "text-amber-50" : "text-slate-900")}>
           Your full report is on its way!
         </p>
@@ -62,12 +62,12 @@ export default function LeadMagnetCTA({ tool, result, title, subtitle, theme = '
   return (
     <div className={cn(
       "p-8 rounded-[32px] space-y-5",
-      isDark ? "bg-white/5 border border-white/10" : isAmber ? "bg-amber-800/40 border border-amber-600/40" : "bg-indigo-50 border border-indigo-100"
+      isDark ? "bg-white/5 border border-white/10" : isAmber ? "bg-amber-800/40 border border-amber-600/40" : "bg-gold/10 border border-gold/20"
     )}>
       <div className="space-y-2">
         <div className={cn(
           "inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
-          isDark ? "text-purple-300" : isAmber ? "text-amber-300" : "text-indigo-600"
+          isDark ? "text-gold-soft" : isAmber ? "text-amber-300" : "text-night"
         )}>
           <Sparkles className="w-3 h-3" />
           {title ?? 'Get Your Full Report — Free'}
@@ -86,7 +86,7 @@ export default function LeadMagnetCTA({ tool, result, title, subtitle, theme = '
           placeholder="Your name"
           className={cn(
             "w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors",
-            isDark ? "bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-purple-400" : isAmber ? "bg-amber-900/40 border border-amber-600/40 text-amber-50 placeholder-amber-500 focus:border-amber-400" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-indigo-400"
+            isDark ? "bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-gold/40" : isAmber ? "bg-amber-900/40 border border-amber-600/40 text-amber-50 placeholder-amber-500 focus:border-amber-400" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-gold/40"
           )}
         />
         <input
@@ -97,16 +97,16 @@ export default function LeadMagnetCTA({ tool, result, title, subtitle, theme = '
           placeholder="Email address"
           className={cn(
             "w-full px-4 py-3 rounded-xl text-sm outline-none transition-colors",
-            isDark ? "bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-purple-400" : isAmber ? "bg-amber-900/40 border border-amber-600/40 text-amber-50 placeholder-amber-500 focus:border-amber-400" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-indigo-400"
+            isDark ? "bg-white/10 border border-white/20 text-white placeholder-white/40 focus:border-gold/40" : isAmber ? "bg-amber-900/40 border border-amber-600/40 text-amber-50 placeholder-amber-500 focus:border-amber-400" : "bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-gold/40"
           )}
         />
-        {error && <p className="text-red-400 text-xs">{error}</p>}
+        {error && <p className="text-destructive text-xs">{error}</p>}
         <Button
           type="submit"
           disabled={loading}
           className={cn(
             "w-full h-12 rounded-xl font-bold text-sm",
-            isDark ? "bg-purple-600 hover:bg-purple-500 text-white" : isAmber ? "bg-amber-500 hover:bg-amber-400 text-white" : "bg-indigo-600 hover:bg-indigo-500 text-white"
+            isDark ? "bg-night hover:bg-night text-white" : isAmber ? "bg-amber-500 hover:bg-amber-400 text-white" : "bg-night hover:bg-night text-white"
           )}
         >
           {loading ? 'Sending…' : <><ArrowRight className="w-4 h-4 mr-2" /> Get My Full Report</>}

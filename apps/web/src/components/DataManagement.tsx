@@ -81,8 +81,8 @@ const DataManagement = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm space-y-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-            <Download className="w-5 h-5 text-blue-500" />
+          <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+            <Download className="w-5 h-5 text-night" />
           </div>
           <div>
             <h4 className="font-bold text-slate-900">Export My Data</h4>
@@ -94,7 +94,7 @@ const DataManagement = () => {
             onClick={handleExport}
             disabled={isExporting}
             variant="outline"
-            className="w-full rounded-xl h-11 font-bold border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100"
+            className="w-full rounded-xl h-11 font-bold border-slate-200 hover:bg-gold/10 hover:text-night hover:border-gold/20"
           >
             {isExporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
             Request Export

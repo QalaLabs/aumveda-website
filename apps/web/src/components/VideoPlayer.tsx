@@ -170,7 +170,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ courseId, moduleId, userId, u
     <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl group border border-slate-800">
       {loading && (
         <div className="absolute inset-0 z-10 bg-slate-900 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+          <Loader2 className="w-10 h-10 text-night animate-spin" />
           <p className="text-slate-400 text-sm font-medium animate-pulse">Verifying Entitlements...</p>
         </div>
       )}

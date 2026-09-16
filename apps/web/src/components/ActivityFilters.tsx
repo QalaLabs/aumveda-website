@@ -35,7 +35,7 @@ const ActivityFilters: React.FC<ActivityFiltersProps> = ({
           placeholder="Search activity logs..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-blue-500 bg-white text-sm"
+          className="w-full pl-11 pr-4 py-3 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-gold/60 bg-white text-sm"
         />
         {searchQuery && (
           <button
@@ -60,7 +60,7 @@ const ActivityFilters: React.FC<ActivityFiltersProps> = ({
               className={cn(
                 "w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all",
                 activeType === type.id
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-100"
+                  ? "bg-night text-white shadow-lg shadow-blue-100"
                   : "text-slate-500 hover:bg-white hover:text-slate-900"
               )}
             >
@@ -71,7 +71,7 @@ const ActivityFilters: React.FC<ActivityFiltersProps> = ({
       </div>
 
       <div className="p-6 bg-slate-900 rounded-3xl text-white">
-        <h4 className="text-xs font-bold uppercase tracking-widest mb-2 text-blue-400">Audit Log</h4>
+        <h4 className="text-xs font-bold uppercase tracking-widest mb-2 text-gold">Audit Log</h4>
         <p className="text-[10px] text-slate-400 leading-relaxed">
           This timeline is an append-only record of your interactions. Events cannot be modified or deleted to ensure data integrity for your wellness journey.
         </p>

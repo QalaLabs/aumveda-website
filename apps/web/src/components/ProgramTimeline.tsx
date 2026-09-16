@@ -44,12 +44,12 @@ const ProgramTimeline: React.FC<ProgramTimelineProps> = ({ steps, color }) => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100/50">
+              <div className="p-4 rounded-2xl bg-gold/10 border border-gold/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <BrainCircuit className="w-3 h-3 text-blue-500" />
-                  <span className="text-[9px] font-black uppercase tracking-widest text-blue-600">Neurological Shift</span>
+                  <BrainCircuit className="w-3 h-3 text-night" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-night">Neurological Shift</span>
                 </div>
-                <p className="text-xs text-blue-800/70 leading-relaxed">{step.neurological}</p>
+                <p className="text-xs text-night/70 leading-relaxed">{step.neurological}</p>
               </div>
               <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-100/50">
                 <div className="flex items-center gap-2 mb-2">

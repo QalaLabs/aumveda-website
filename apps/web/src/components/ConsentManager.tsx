@@ -81,7 +81,7 @@ const ConsentManager = () => {
           <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:shadow-md group">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-blue-500" />
+                <Activity className="w-4 h-4 text-night" />
                 <Label className="text-sm font-bold text-slate-800 cursor-pointer">Activity Tracking</Label>
               </div>
               <p className="text-[10px] text-slate-500 leading-relaxed">Personalize your journey insights. PII is redacted if disabled.</p>
@@ -111,7 +111,7 @@ const ConsentManager = () => {
           <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 transition-all hover:bg-white hover:shadow-md group">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <BrainCircuit className="w-4 h-4 text-purple-500" />
+                <BrainCircuit className="w-4 h-4 text-night" />
                 <Label className="text-sm font-bold text-slate-800 cursor-pointer">AI Personalization</Label>
               </div>
               <p className="text-[10px] text-slate-500 leading-relaxed">Allow AI to analyze your journals for tailored wellness tips.</p>
@@ -139,9 +139,9 @@ const ConsentManager = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-blue-50 border border-blue-100 flex gap-3">
-          <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-          <p className="text-[10px] text-blue-700 leading-relaxed">
+        <div className="p-4 rounded-xl bg-gold/10 border border-gold/20 flex gap-3">
+          <Info className="w-4 h-4 text-night shrink-0 mt-0.5" />
+          <p className="text-[10px] text-night leading-relaxed">
             We use forensic watermarking and PII redaction to ensure your data remains secure.
             Disabling tracking will immediately stop PII forwarding to external analytics.
           </p>
