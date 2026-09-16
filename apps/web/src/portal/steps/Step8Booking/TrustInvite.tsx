@@ -208,47 +208,6 @@ export function TrustInvite({
           <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.7)] leading-relaxed max-w-[50ch] mx-auto">
             Eastern Vedic wisdom and modern somatic regulation held in one sanctuary. Whichever practitioner you choose, your answers are held with absolute privacy.
           </p>
-          <div className="grid sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Choose your practitioner">
-            {practitioners.map((p) => {
-              const isSelected = selectedId === p.id
-              const isRecommended = recommendedId === p.id
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={isSelected}
-                  onClick={() => onSelect(p.id)}
-                  className={`text-left rounded-xl border p-4 space-y-3 transition-colors duration-150 ${
-                    isSelected
-                      ? 'bg-[hsl(var(--av-gold)/0.12)] border-[hsl(var(--av-gold))]'
-                      : 'border-[hsl(var(--av-parchment)/0.15)] hover:border-[hsl(var(--av-parchment)/0.3)]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-12 h-12 shrink-0 rounded-full bg-[hsl(var(--av-gold)/0.15)] border border-[hsl(var(--av-gold)/0.4)] flex items-center justify-center font-serif text-lg text-[hsl(var(--av-gold-soft))]"
-                      aria-hidden
-                    >
-                      {p.name.charAt(0)}
-                    </div>
-                    <div>
-                      <h3 className="font-serif text-lg text-[hsl(var(--av-parchment))]">{p.name}</h3>
-                      {isRecommended && (
-                        <p className="font-body text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--av-gold))]">
-                          Recommended for you
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <p className="font-body text-xs text-[hsl(var(--av-gold))]">{p.role}</p>
-                  <p className="font-body text-sm text-[hsl(var(--av-parchment)/0.7)] leading-relaxed">
-                    {p.bio}
-                  </p>
-                </button>
-              )
-            })}
-          </div>
         </div>
       </div>
 
