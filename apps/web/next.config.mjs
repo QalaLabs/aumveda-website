@@ -6,9 +6,16 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const require = createRequire(import.meta.url)
 
+// Cloud Run / Hostinger (self-hosted) use the custom server + standalone output.
+// Vercel must NOT build standalone — it conflicts with its serverless routing and
+// middleware, causing broken/missing routes. Vercel sets VERCEL=1 at build time.
+const isVercel = process.env.VERCEL === '1'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // Standalone output is only for self-hosted deployments (Cloud Run / Hostinger
+  // via server.js). On Vercel we skip it and use the native serverless build.
+  ...(isVercel ? {} : { output: 'standalone' }),
   reactStrictMode: true,
   experimental: {
     // Prevent Next.js from bundling Prisma / pg — Node.js requires them at runtime.
@@ -23,11 +30,12 @@ const nextConfig = {
     workerThreads: false,
     cpus: 1,
     outputFileTracingRoot: path.join(__dirname, '../../'),
-    // pnpm's symlinked layout hides Prisma query engines from Next.js file
-    // tracing — explicitly include them so serverless functions can load the
-    // rhel-openssl-3.0.x engine on Vercel.
+    // pnpm's symlinked layout hides Prisma query engines from Next.js file tracing.
+    // Copy the generated `.prisma/client` (incl. the query-engine binaries) into the
+    // traced server bundles for BOTH the self-hosted standalone output and the Vercel
+    // serverless runtime, which otherwise fail with "could not locate the Query Engine".
     outputFileTracingIncludes: {
-      '/api/**': [
+      '/**': [
         '../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/**',
       ],
     },
