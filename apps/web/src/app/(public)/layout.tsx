@@ -9,7 +9,7 @@ const PublicNavigation = dynamic(() => import("@/components/PublicNavigation"), 
   ssr: false,
 });
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://aumveda.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://aumveda.co";
 
 const publicJsonLd = {
   "@context": "https://schema.org",

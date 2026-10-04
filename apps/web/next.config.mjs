@@ -26,24 +26,27 @@ const nextConfig = {
       'pg',
       'pg-connection-string',
     ],
-    // Limit worker processes — prevents EAGAIN on shared hosting
-    workerThreads: false,
-    cpus: 1,
-    outputFileTracingRoot: path.join(__dirname, '../../'),
-    // pnpm's symlinked layout hides Prisma query engines from Next.js file tracing.
-    // Copy the generated `.prisma/client` (incl. the query-engine binaries) into the
-    // traced server bundles for BOTH the self-hosted standalone output and the Vercel
-    // serverless runtime, which otherwise fail with "could not locate the Query Engine".
-    outputFileTracingIncludes: {
-      '/**': [
-        '../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/**',
-      ],
-    },
+    // Limit worker processes — prevents EAGAIN on shared hosting (Hostinger).
+    // On Vercel, worker threads are standard and avoiding workerThreads: false prevents jest-worker child process errors.
+    ...(isVercel ? {} : { workerThreads: false, cpus: 1 }),
+    ...(isVercel ? {} : { outputFileTracingRoot: path.join(__dirname, '../../') }),
+    // Standalone-only: pnpm's symlinked layout hides Prisma query engines from Next.js file tracing.
+    // Not needed on Vercel (native serverless build handles Prisma engines itself), only for self-hosted standalone build.
+    ...(isVercel
+      ? {}
+      : {
+          outputFileTracingIncludes: {
+            '/**': [
+              '../../node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client/**',
+            ],
+          },
+        }),
   },
 
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**.r2.cloudflarestorage.com' },
+      { protocol: 'https', hostname: 'assets.aumveda.co' },
       { protocol: 'https', hostname: 'assets.aumveda.com' },
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
@@ -69,14 +72,14 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googletagmanager.com *.google-analytics.com maps.googleapis.com *.gstatic.com assets.calendly.com",
               "style-src 'self' 'unsafe-inline' fonts.googleapis.com assets.calendly.com",
               "font-src 'self' fonts.gstatic.com assets.calendly.com",
-              "img-src 'self' data: blob: *.r2.cloudflarestorage.com assets.aumveda.com lh3.googleusercontent.com images.unsplash.com *.unsplash.com *.googleusercontent.com maps.gstatic.com *.gstatic.com",
+              "img-src 'self' data: blob: *.r2.cloudflarestorage.com assets.aumveda.co assets.aumveda.com lh3.googleusercontent.com images.unsplash.com *.unsplash.com *.googleusercontent.com maps.gstatic.com *.gstatic.com",
               // blob: — the homepage's master film (MasterFilm.tsx) is fetched and
               // played from a same-origin-created object URL for reliable scroll-seeking.
-              "media-src 'self' blob: *.r2.cloudflarestorage.com assets.aumveda.com",
+              "media-src 'self' blob: *.r2.cloudflarestorage.com assets.aumveda.co assets.aumveda.com",
               // Calendly booking embed lives in an iframe from calendly.com.
               "frame-src 'self' *.youtube.com *.youtube-nocookie.com calendly.com *.calendly.com",
               // Places autocomplete uses fetch to maps.googleapis.com; Calendly widget posts to calendly.com.
-              "connect-src 'self' *.aumveda.com *.google-analytics.com *.supabase.co wss://*.supabase.co maps.googleapis.com *.googleapis.com calendly.com *.calendly.com",
+              "connect-src 'self' *.aumveda.co *.aumveda.com *.google-analytics.com *.supabase.co wss://*.supabase.co maps.googleapis.com *.googleapis.com calendly.com *.calendly.com",
             ].join('; '),
           },
         ],
@@ -88,8 +91,20 @@ const nextConfig = {
     return [
       {
         source: '/:path*',
+        has: [{ type: 'host', value: 'www.aumveda.co' }],
+        destination: 'https://aumveda.co/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
         has: [{ type: 'host', value: 'www.aumveda.com' }],
-        destination: 'https://app.aumveda.com/:path*',
+        destination: 'https://aumveda.co/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'aumveda.com' }],
+        destination: 'https://aumveda.co/:path*',
         permanent: true,
       },
     ]

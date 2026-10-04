@@ -50,7 +50,7 @@ gcloud run deploy $ServiceName `
     --concurrency 80 `
     --cpu-boost `
     @SqlArgs `
-    --set-env-vars "NODE_ENV=production,HOSTNAME=0.0.0.0,GTM_SERVER_URL=$GtmServerUrl" `
+    --set-env-vars "NODE_ENV=production,HOSTNAME=0.0.0.0,NEXT_PUBLIC_APP_URL=https://aumveda.co,NEXTAUTH_URL=https://aumveda.co,GTM_SERVER_URL=$GtmServerUrl" `
     --set-secrets "DATABASE_URL=DATABASE_URL:latest,DIRECT_URL=DIRECT_URL:latest,NEXTAUTH_SECRET=NEXTAUTH_SECRET:latest,SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest,N8N_WEBHOOK_SECRET=N8N_WEBHOOK_SECRET:latest,META_CAPI_ACCESS_TOKEN=META_CAPI_ACCESS_TOKEN:latest,GA4_API_SECRET=GA4_API_SECRET:latest"
 
 # 4. Retrieve service URL

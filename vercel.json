@@ -3,7 +3,7 @@
   "framework": "nextjs",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm turbo run build --filter=@aumveda/web",
-  "ignoreCommand": "npx turbo-ignore @aumveda/web",
+  "outputDirectory": "apps/web/.next",
   "crons": [
     {
       "path": "/api/cron/booking-comms",

@@ -22,7 +22,7 @@ export function generateMetadata({ params }: Params) {
   };
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://aumveda.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://aumveda.co";
 
 function safeJsonLd(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");

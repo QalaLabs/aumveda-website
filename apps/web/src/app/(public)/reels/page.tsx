@@ -9,7 +9,7 @@ import {
 } from "@/lib/reels";
 import ReelsFeed from "@/components/reels/ReelsFeed";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://app.aumveda.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "https://aumveda.co";
 
 export const metadata: Metadata = {
   title: "Reels — Bite-Sized Healing Wisdom",
